@@ -1,3 +1,8 @@
+/* ===========================================================================
+   Wicked Workshops prototype stylesheet (uit components/WickedApp.jsx)
+   =========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 /*
   Reset en paginabodem. De volledige stylesheet van het prototype is hier
   ondergebracht (zie de sectie hieronder) nadat components/WickedApp.jsx
@@ -19,11 +24,6 @@ body {
 }
 
 img, svg, video { display: block; max-width: 100%; }
-
-/* ===========================================================================
-   Wicked Workshops prototype stylesheet (uit components/WickedApp.jsx)
-   =========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 .ww { --brand:#6C2BD9; --brand-deep:#5620B0; --coral:#FF5C6E; --coral-deep:#E8394C;
   --ink:#1B1630; --slate:#6E6A85; --cloud:#F1EAFB; --mist:#FBFAFE; --line:#E9E3F3;
