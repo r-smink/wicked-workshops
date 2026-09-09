@@ -1,0 +1,23 @@
+/*
+  Alleen een reset en de paginabodem. De volledige stylesheet van het prototype
+  zit in components/WickedApp.jsx, zodat dat bestand zelfstandig blijft werken.
+
+  Bij het opsplitsen naar losse pagina's verhuist die stylesheet hierheen of
+  naar Tailwind, met de tokens uit de brand guide als bron.
+*/
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #FBFAFE;
+  color: #1B1630;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+img, svg, video { display: block; max-width: 100%; }
