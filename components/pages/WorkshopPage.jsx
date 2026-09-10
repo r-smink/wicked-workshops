@@ -7,6 +7,7 @@ import { FEATURED, SESSIONS, REVIEWS, FAQ, LISTING } from "@/lib/mock-data";
 import { Icon, Star, Button, Chip, Badge, Rating, Photo, Avatar } from "@/components/ui";
 import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
+import Map from "@/components/Map";
 
 function BookingCard({ workshop, sessions = SESSIONS }) {
   const [session, setSession] = useState(sessions[0].id);
@@ -171,13 +172,17 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
               <p className="ww-meta">
                 Exact adres na boeking · 5 min lopen van Utrecht CS · gratis fietsenstalling
               </p>
-              <div style={{ marginTop: 16, height: 200, borderRadius: 18, border: `1px solid ${tokens.color.line}`,
-                background: "repeating-linear-gradient(0deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px), repeating-linear-gradient(90deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px)",
-                position: "relative" }}>
-                <span className="ww-map-pin" data-on="true" style={{ left: "50%", top: "50%" }}>
-                  <Icon name="pin" size={14} />
-                </span>
-              </div>
+              <Map
+                markers={[{
+                  slug: w.slug, title: w.title, price: w.price,
+                  lat: w.lat, lng: w.lng,
+                }]}
+                style={{
+                  marginTop: 16, height: 200, borderRadius: 18,
+                  border: `1px solid ${tokens.color.line}`, position: "relative",
+                  background: "repeating-linear-gradient(0deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px), repeating-linear-gradient(90deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px)",
+                }}
+              />
             </section>
 
             <section className="ww-block">

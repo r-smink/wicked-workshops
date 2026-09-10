@@ -7,6 +7,7 @@ import { CATEGORIES, LISTING, FILTER_GROUPS } from "@/lib/mock-data";
 import { Icon, Button, Chip, Star, Photo } from "@/components/ui";
 import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
+import Map from "@/components/Map";
 
 function FilterDrawer({ open, onClose, active, setActive, price, setPrice, count }) {
   useEffect(() => {
@@ -84,6 +85,11 @@ export default function ListingPage({ category, listing = LISTING, filterGroups 
   const cat = category || CATEGORIES[0];
   const activeCount = Object.values(active).reduce((a, v) => a + v.length, 0) + (price < 120 ? 1 : 0);
   const results = listing.filter((w) => w.price <= price);
+  const markers = results.map((w) => ({
+    slug: w.slug, title: w.title, price: w.price,
+    lat: w.lat, lng: w.lng, x: w.x, y: w.y,
+  }));
+  const mapKey = markers.map((m) => m.slug).join(",");
 
   const quick = ["Vandaag", "Kleine groep", "Topbeoordeeld", "Gratis annuleren", "Direct boekbaar"];
 
@@ -163,17 +169,13 @@ export default function ListingPage({ category, listing = LISTING, filterGroups 
             )}
           </div>
 
-          <div className="ww-map" aria-hidden="true">
-            {listing.map((w) => (
-              <span key={w.slug} className="ww-map-pin" data-on={hover === w.slug ? "true" : "false"}
-                style={{ left: `${w.x}%`, top: `${w.y}%` }}>
-                {"\u20AC"}{w.price}
-              </span>
-            ))}
-            <span style={{ position: "absolute", left: 16, bottom: 16, background: "#fff", borderRadius: 12, padding: "8px 14px", fontSize: 13, fontWeight: 700, boxShadow: tokens.shadow.card }}>
-              Kaart van Utrecht
-            </span>
-          </div>
+          <Map
+            key={mapKey}
+            markers={markers}
+            activeSlug={hover}
+            onSelect={(slug) => setHover(slug)}
+            className="ww-map"
+          />
         </div>
 
         <section className="ww-seo-text">
@@ -218,12 +220,13 @@ export default function ListingPage({ category, listing = LISTING, filterGroups 
               Lijst
             </Button>
           </div>
-          {results.map((w) => (
-            <button key={w.slug} className="ww-map-pin" data-on={hover === w.slug ? "true" : "false"}
-              style={{ left: `${w.x}%`, top: `${w.y}%` }} onClick={() => setHover(w.slug)}>
-              {"\u20AC"}{w.price}
-            </button>
-          ))}
+          <Map
+            key={mapKey}
+            markers={markers}
+            activeSlug={hover}
+            onSelect={(slug) => setHover(slug)}
+            style={{ position: "absolute", inset: 0 }}
+          />
           <div className="ww-mapfs-cards">
             {results.map((w) => (
               <button className="ww-mcard" key={w.slug} onClick={() => go({ name: "workshop", workshop: w })}>
