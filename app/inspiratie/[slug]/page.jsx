@@ -6,14 +6,10 @@ export const revalidate = 60;
 
 export default async function Page({ params }) {
   const { slug } = await params;
-  const [article, sections, faq] = await Promise.all([
-    getArticle(slug),
-    getArticleSections(),
-    getArticleFaq(),
-  ]);
+  const article = await getArticle(slug);
   return (
     <PublicLayout>
-      <ArticlePage sections={sections} faq={faq} />
+      <ArticlePage article={article} />
     </PublicLayout>
   );
 }
