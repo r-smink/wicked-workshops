@@ -9,20 +9,30 @@ import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
 import Map from "@/components/Map";
 
+function formatPrice(n) {
+  if (n == null || isNaN(n)) return "0";
+  return String(n).replace(".", ",");
+}
+
+function formatLangs(langs) {
+  if (!langs || !langs.length) return "Nederlands";
+  return langs.join(", ");
+}
+
 function BookingCard({ workshop, sessions = SESSIONS }) {
-  const [session, setSession] = useState(sessions[0].id);
+  const [session, setSession] = useState(sessions[0]?.id);
   const [people, setPeople] = useState(2);
-  const price = workshop.price;
-  const chosen = sessions.find((s) => s.id === session);
-  const max = Math.min(12, chosen.seats);
+  const price = workshop.price ?? 0;
+  const chosen = sessions.find((s) => s.id === session) || sessions[0];
+  const max = Math.min(12, chosen?.seats ?? 12);
 
   useEffect(() => { if (people > max) setPeople(max); }, [session, max, people]);
 
   return (
     <div className="ww-booking">
       <div className="ww-book-price">
-        <span><b>{"\u20AC"}{price}</b> <span>per persoon</span></span>
-        <Rating value={workshop.rating} count={workshop.count} />
+        <span><b>{"\u20AC"}{formatPrice(price)}</b> <span>per persoon</span></span>
+        <Rating value={workshop.rating} count={workshop.count ? `${workshop.count} reviews` : null} />
       </div>
 
       <h3 style={{ fontSize: 16, margin: "18px 0 11px" }}>Kies een datum</h3>
@@ -43,7 +53,7 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
 
       <h3 style={{ fontSize: 16, margin: "18px 0 4px" }}>Aantal personen</h3>
       <div className="ww-stepper">
-        <span style={{ fontSize: 14, color: tokens.color.slate }}>{"\u20AC"}{price} per persoon</span>
+        <span style={{ fontSize: 14, color: tokens.color.slate }}>{"\u20AC"}{formatPrice(price)} per persoon</span>
         <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button className="ww-stepper-btn" onClick={() => setPeople(Math.max(1, people - 1))}
             disabled={people <= 1} aria-label="Minder personen">-</button>
@@ -53,14 +63,17 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
         </span>
       </div>
 
-      <Button variant="primary" size="lg" block>Boek voor {"\u20AC"}{price * people}</Button>
+      <Button variant="primary" size="lg" block>Boek voor {"\u20AC"}{formatPrice(price * people)}</Button>
       <p style={{ fontSize: 12.5, color: tokens.color.slate, textAlign: "center", marginTop: 10 }}>
         Je betaalt nog niets, eerst bevestigen
       </p>
 
       <ul className="ww-trust">
-        {[["shield", "Gratis annuleren tot 48 uur vooraf"], ["check", "Veilig betalen via Wicked"], ["chat", "Direct contact met Marco"]].map(([i, t]) => (
-          <li key={t}><Icon name={i} size={17} />{t}</li>
+        {["shield", "check", "chat"].map((i, idx) => (
+          <li key={i}><Icon name={i} size={17} />
+            {idx === 0 ? (workshop.cancellation?.includes("48") ? "Gratis annuleren tot 48 uur vooraf" : "Gratis annuleren tot 48 uur vooraf")
+              : idx === 1 ? "Veilig betalen via Wicked" : `Direct contact met ${workshop.provider?.display_name?.split(" ")[0] || "aanbieder"}`}
+          </li>
         ))}
       </ul>
     </div>
@@ -72,26 +85,42 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
   const w = workshop || FEATURED[0];
   const [openFaq, setOpenFaq] = useState(0);
 
+  const facts = [
+    ["clock", w.duration || "Variabel", "Duur"],
+    ["users", `${w.min_participants ?? 4} tot ${w.max_participants ?? 12} personen`, "Groepsgrootte"],
+    ["gauge", w.level ? w.level.charAt(0).toUpperCase() + w.level.slice(1) : "Alle niveaus", "Niveau"],
+    ["globe", formatLangs(w.languages), "Taal"],
+  ];
+
+  const cityLabel = w.city ? (w.area ? `${w.city}, ${w.area}` : w.city) : "Utrecht";
+  const prov = w.provider || {};
+  const provLocation = w.location_name || (w.location_inherits_provider ? prov.location_name : null) || w.location_name;
+  const provAddress = w.address || (w.location_inherits_provider ? prov.address : null) || w.address;
+  const locationTitle = provLocation || w.location_name || `${w.area || ""}, ${w.city || ""}`;
+
+  const hasReviews = Array.isArray(reviews) && reviews.length > 0;
+  const hasFaq = Array.isArray(faq) && faq.length > 0;
+
   return (
     <>
       <div className="ww-wrap">
         <nav className="ww-crumbs" aria-label="Kruimelpad">
           <a onClick={() => go({ name: "home" })}>Home</a><span>/</span>
-          <a onClick={() => go({ name: "listing" })}>Koken & bakken</a><span>/</span>
-          <a onClick={() => go({ name: "listing" })}>Utrecht</a><span>/</span>
+          <a onClick={() => go({ name: "listing" })}>{w.category}</a><span>/</span>
+          <a onClick={() => go({ name: "listing" })}>{w.city}</a><span>/</span>
           <span style={{ color: tokens.color.ink }}>{w.title}</span>
         </nav>
 
         <header style={{ paddingTop: 18 }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <Badge kind="top_rated" />
-            <span className="ww-chip ww-chip--soft" style={{ pointerEvents: "none" }}>Koken & bakken</span>
+            {w.badge && <Badge kind={w.badge} />}
+            <span className="ww-chip ww-chip--soft" style={{ pointerEvents: "none" }}>{w.category}</span>
           </div>
           <h1 style={{ fontSize: "clamp(28px,4.4vw,44px)" }}>{w.title}</h1>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 14 }}>
-            <Rating value={w.rating} count={`${w.count} reviews`} size={16} />
-            <span className="ww-meta">Utrecht, Wittevrouwen</span>
-            <span className="ww-meta">540 deelnemers gingen je voor</span>
+            <Rating value={w.rating} count={`${w.count || 0} reviews`} size={16} />
+            <span className="ww-meta">{cityLabel}</span>
+            <span className="ww-meta">{w.participants_count ? `${w.participants_count} deelnemers gingen je voor` : (prov.participants_count ? `${prov.participants_count} deelnemers gingen je voor` : "Nog geen deelnemers")}</span>
             <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
               <Chip><Icon name="share" size={15} /> Delen</Chip>
               <Chip><Icon name="heart" size={15} /> Bewaren</Chip>
@@ -112,8 +141,7 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
         <div className="ww-detail">
           <div>
             <div className="ww-facts">
-              {[["clock", "3 uur", "Duur"], ["users", "4 tot 12 personen", "Groepsgrootte"],
-                ["gauge", "Beginner", "Niveau"], ["globe", "Nederlands", "Taal"]].map(([i, v, l]) => (
+              {facts.map(([i, v, l]) => (
                 <div className="ww-fact" key={l}>
                   <span className="ww-fact-ico"><Icon name={i} size={19} /></span>
                   <span><strong>{v}</strong><span>{l}</span></span>
@@ -121,152 +149,194 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
               ))}
             </div>
 
-            <section className="ww-block">
-              <h2>Over deze workshop</h2>
-              <ReadMore>
-              <p>
-                Leer in drie uur de basis van de Italiaanse keuken. Je maakt verse pasta vanaf nul,
-                een klassieke ragu en tiramisu zoals de nonna van Marco die maakt.
-              </p>
-              <p>
-                Je werkt in tweetallen, alle ingredienten zijn inbegrepen en na afloop eet je samen aan
-                de lange tafel. Ideaal als date, met vrienden of als teamuitje tot twaalf personen.
-              </p>
-              </ReadMore>
-              <blockquote className="ww-pull">
-                <Star size={15} /> De pasta was heerlijk en Marco maakt er echt een feestje van.
-                Perfect voor een date. <strong style={{ color: tokens.color.ink }}>Sanne, juli 2026</strong>
-              </blockquote>
-            </section>
+            {w.intro && (
+              <p className="ww-meta" style={{ fontSize: 17, marginBottom: 14 }}>{w.intro}</p>
+            )}
 
             <section className="ww-block">
-              <h2>Wat is inbegrepen</h2>
-              <ul className="ww-inc">
-                {["Alle ingredienten en materialen", "Welkomstdrankje en hapjes",
-                  "Samen eten na afloop", "Recepten mee naar huis"].map((t) => (
-                  <li key={t}><span className="ww-inc-ico"><Icon name="check" size={19} /></span>{t}</li>
-                ))}
-              </ul>
+              <h2>Over deze workshop</h2>
+              {w.description ? (
+                <ReadMore>
+                  <div className="ww-prose" dangerouslySetInnerHTML={{ __html: w.description }} />
+                </ReadMore>
+              ) : (
+                <p className="ww-meta">Geen beschrijving beschikbaar.</p>
+              )}
+              {hasReviews && (
+                <blockquote className="ww-pull">
+                  <Star size={15} /> {reviews[0].body}{" "}
+                  <strong style={{ color: tokens.color.ink }}>{reviews[0].name}, {reviews[0].when}</strong>
+                </blockquote>
+              )}
             </section>
+
+            {w.inclusions && w.inclusions.length > 0 && (
+              <section className="ww-block">
+                <h2>Wat is inbegrepen</h2>
+                <ul className="ww-inc">
+                  {w.inclusions.map((t) => (
+                    <li key={t}><span className="ww-inc-ico"><Icon name="check" size={19} /></span>{t}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <section className="ww-block">
               <h2>Je workshopgever</h2>
               <div className="ww-provider">
-                <Avatar name="Marco Rossi" size={56} />
+                <Avatar name={prov.display_name || "Workshopgever"} size={56} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <strong style={{ fontSize: 17 }}>Marco Rossi</strong>
-                    <Badge kind="verified" />
+                    <strong style={{ fontSize: 17 }}>{prov.display_name || "Workshopgever"}</strong>
+                    {prov.verified && <Badge kind="verified" />}
                   </div>
                   <p className="ww-meta" style={{ margin: "6px 0 14px" }}>
-                    Geeft workshops sinds 2019 · 540 deelnemers · reageert binnen 2 uur
+                    {prov.profession ? `${prov.profession} · ` : ""}
+                    {prov.participants_count ? `${prov.participants_count} deelnemers` : ""}
+                    {prov.response_time_minutes ? ` · reageert binnen ${prov.response_time_minutes} min` : ""}
                   </p>
-                  <Button variant="outline" onClick={() => go({ name: "provider" })}>Bekijk profiel</Button>
+                  <Button variant="outline" onClick={() => prov.slug && go({ name: "provider", slug: prov.slug })}>Bekijk profiel</Button>
                 </div>
               </div>
             </section>
 
             <section className="ww-block">
               <h2>Locatie</h2>
-              <p style={{ fontWeight: 700, marginBottom: 4 }}>Kookstudio De Pan, Wittevrouwen, Utrecht</p>
+              <p style={{ fontWeight: 700, marginBottom: 4 }}>{locationTitle}</p>
               <p className="ww-meta">
-                Exact adres na boeking · 5 min lopen van Utrecht CS · gratis fietsenstalling
+                {provAddress || "Exact adres na boeking"}
+                {w.address_visibility === "after_booking" && !provAddress && " · exact adres na boeking"}
               </p>
-              <Map
-                markers={[{
-                  slug: w.slug, title: w.title, price: w.price,
-                  lat: w.lat, lng: w.lng,
-                }]}
-                style={{
-                  marginTop: 16, height: 200, borderRadius: 18,
-                  border: `1px solid ${tokens.color.line}`, position: "relative",
-                  background: "repeating-linear-gradient(0deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px), repeating-linear-gradient(90deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px)",
-                }}
-              />
+              {w.lat != null && w.lng != null ? (
+                <Map
+                  markers={[{
+                    slug: w.slug, title: w.title, price: w.price,
+                    lat: w.lat, lng: w.lng,
+                  }]}
+                  style={{
+                    marginTop: 16, height: 200, borderRadius: 18,
+                    border: `1px solid ${tokens.color.line}`, position: "relative",
+                    background: "repeating-linear-gradient(0deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px), repeating-linear-gradient(90deg,#fff,#fff 30px,#F4F1FA 30px,#F4F1FA 31px)",
+                  }}
+                />
+              ) : (
+                <p className="ww-meta" style={{ marginTop: 12 }}>Kaart kon niet geladen worden.</p>
+              )}
             </section>
 
             <section className="ww-block">
               <h2>Beoordelingen</h2>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-                <span style={{ fontFamily: tokens.font.display, fontSize: 34, fontWeight: 800 }}>4,9</span>
-                <span className="ww-meta">op basis van 312 reviews</span>
-              </div>
-              <div className="ww-scores">
-                {[["Sfeer", 4.9], ["Uitleg", 4.8], ["Waarde", 4.7]].map(([l, v]) => (
-                  <div className="ww-score" key={l}>
-                    <span>{l}</span>
-                    <span className="ww-bar"><i style={{ width: `${(v / 5) * 100}%` }} /></span>
-                    <span>{String(v).replace(".", ",")}</span>
+              {w.rating != null ? (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+                    <span style={{ fontFamily: tokens.font.display, fontSize: 34, fontWeight: 800 }}>{String(w.rating).replace(".", ",")}</span>
+                    <span className="ww-meta">op basis van {w.count || 0} reviews</span>
                   </div>
-                ))}
-              </div>
-              <div className="ww-reviews ww-snap ww-snap--wide">
-                {reviews.map((r) => (
-                  <article className="ww-review" key={r.name}>
-                    <span aria-label="5 sterren">{[0, 1, 2, 3, 4].map((i) => <Star key={i} size={13} />)}</span>
-                    <p>{r.body}</p>
-                    <div className="ww-who">
-                      <Avatar name={r.name} />
-                      <span><strong>{r.name}</strong><span>{r.when}</span></span>
+                  {w.rating_atmosphere != null && w.rating_explanation != null && w.rating_value != null && (
+                    <div className="ww-scores">
+                      {[["Sfeer", w.rating_atmosphere], ["Uitleg", w.rating_explanation], ["Waarde", w.rating_value]].map(([l, v]) => (
+                        <div className="ww-score" key={l}>
+                          <span>{l}</span>
+                          <span className="ww-bar"><i style={{ width: `${(Number(v) / 5) * 100}%` }} /></span>
+                          <span>{String(v).replace(".", ",")}</span>
+                        </div>
+                      ))}
                     </div>
-                  </article>
-                ))}
-              </div>
-              <div style={{ marginTop: 18 }}>
-                <Button variant="outline">Bekijk alle 312 reviews</Button>
-              </div>
+                  )}
+                </>
+              ) : (
+                <p className="ww-meta">Nog geen reviews</p>
+              )}
+              {hasReviews && (
+                <div className="ww-reviews ww-snap ww-snap--wide">
+                  {reviews.map((r) => (
+                    <article className="ww-review" key={r.name + r.when}>
+                      <span aria-label="5 sterren">{[0, 1, 2, 3, 4].map((i) => <Star key={i} size={13} />)}</span>
+                      <p>{r.body}</p>
+                      <div className="ww-who">
+                        <Avatar name={r.name} />
+                        <span><strong>{r.name}</strong><span>{r.when}</span></span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+              {w.count > 0 && (
+                <div style={{ marginTop: 18 }}>
+                  <Button variant="outline">Bekijk alle {w.count} reviews</Button>
+                </div>
+              )}
             </section>
 
             <section className="ww-block">
               <h2>Praktisch</h2>
               <div className="ww-practical">
-                {[["gift", "Als cadeau te geven", "Direct als cadeaubon te versturen, ontvanger kiest zelf de datum"],
-                  ["fork", "Dieetwensen", "Vegetarisch mogelijk, geef het door bij je boeking"],
-                  ["users", "Toegankelijkheid", "Studio is rolstoeltoegankelijk"]].map(([i, t, d]) => (
-                  <div className="ww-prac" key={t}>
-                    <span style={{ color: tokens.color.brand }}><Icon name={i} size={22} /></span>
-                    <strong>{t}</strong><p>{d}</p>
+                {w.giftcard_eligible && (
+                  <div className="ww-prac">
+                    <span style={{ color: tokens.color.brand }}><Icon name="gift" size={22} /></span>
+                    <strong>Als cadeau te geven</strong>
+                    <p>Direct als cadeaubon te versturen, ontvanger kiest zelf de datum</p>
                   </div>
-                ))}
+                )}
+                {w.cancellation_policy && (
+                  <div className="ww-prac">
+                    <span style={{ color: tokens.color.brand }}><Icon name="shield" size={22} /></span>
+                    <strong>Annuleren</strong>
+                    <p>{w.cancellation_policy === "flexible_48h" ? "Gratis tot 48 uur vooraf" : w.cancellation_policy === "moderate_7d" ? "Gratis tot 7 dagen vooraf" : "Geen annulering mogelijk"}</p>
+                  </div>
+                )}
+                {w.instant_bookable !== undefined && (
+                  <div className="ww-prac">
+                    <span style={{ color: tokens.color.brand }}><Icon name="check" size={22} /></span>
+                    <strong>Boeken</strong>
+                    <p>{w.instant_bookable ? "Direct boekbaar, geen wachten op goedkeuring" : "Je boeking wordt eerst door de aanbieder bevestigd"}</p>
+                  </div>
+                )}
               </div>
             </section>
 
-            <section className="ww-block" style={{ borderBottom: 0 }}>
-              <h2>Veelgestelde vragen</h2>
-              {faq.map(([q, a], i) => (
-                <div className="ww-faq-item" key={q}>
-                  <button className="ww-faq-q" aria-expanded={openFaq === i}
-                    onClick={() => setOpenFaq(openFaq === i ? -1 : i)}>
-                    {q}
-                    <Icon name="down" size={19} style={{ transform: openFaq === i ? "rotate(180deg)" : "none", transition: "transform .15s ease", flex: "none" }} />
-                  </button>
-                  {openFaq === i && <p className="ww-faq-a">{a}</p>}
-                </div>
-              ))}
-            </section>
+            {hasFaq && (
+              <section className="ww-block" style={{ borderBottom: 0 }}>
+                <h2>Veelgestelde vragen</h2>
+                {faq.map(([q, a], i) => (
+                  <div className="ww-faq-item" key={q}>
+                    <button className="ww-faq-q" aria-expanded={openFaq === i}
+                      onClick={() => setOpenFaq(openFaq === i ? -1 : i)}>
+                      {q}
+                      <Icon name="down" size={19} style={{ transform: openFaq === i ? "rotate(180deg)" : "none", transition: "transform .15s ease", flex: "none" }} />
+                    </button>
+                    {openFaq === i && <p className="ww-faq-a">{a}</p>}
+                  </div>
+                ))}
+              </section>
+            )}
           </div>
 
           <aside>
             <BookingCard workshop={w} sessions={sessions} />
 
-            <div className="ww-sidecard">
-              <h3>Met je team komen?</h3>
-              <p>Vanaf 10 personen regelen we een groepsofferte met factuur, voorstel binnen 1 werkdag.</p>
-              <Button variant="outline" block>Vraag groepsofferte</Button>
-            </div>
+            {w.group_quote_from && (
+              <div className="ww-sidecard">
+                <h3>Met je team komen?</h3>
+                <p>Vanaf {w.group_quote_from} personen regelen we een groepsofferte met factuur, voorstel binnen 1 werkdag.</p>
+                <Button variant="outline" block>Vraag groepsofferte</Button>
+              </div>
+            )}
 
-            <div className="ww-sidecard" style={{ background: tokens.color.softCoral, border: 0 }}>
-              <h3>Geef deze workshop cadeau</h3>
-              <p style={{ color: tokens.color.ink, opacity: .7 }}>Ontvanger kiest zelf de datum.</p>
-              <Button variant="coral" block icon="gift">Naar de cadeaubon</Button>
-            </div>
+            {w.giftcard_eligible && (
+              <div className="ww-sidecard" style={{ background: tokens.color.softCoral, border: 0 }}>
+                <h3>Geef deze workshop cadeau</h3>
+                <p style={{ color: tokens.color.ink, opacity: .7 }}>Ontvanger kiest zelf de datum.</p>
+                <Button variant="coral" block icon="gift">Naar de cadeaubon</Button>
+              </div>
+            )}
           </aside>
         </div>
 
         <section className="ww-section">
           <div className="ww-shead">
             <h2>Ook leuk voor jou</h2>
-            <a onClick={() => go({ name: "listing" })}>Meer in Utrecht <Icon name="right" size={14} /></a>
+            <a onClick={() => go({ name: "listing" })}>Meer in {w.city} <Icon name="right" size={14} /></a>
           </div>
           <div className="ww-grid ww-grid--4 ww-snap">
             {listing.slice(1, 5).map((x) => <WorkshopCard key={x.slug} w={x} go={go} showKm />)}
@@ -276,7 +346,7 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
 
       <div className="ww-mobbar">
         <span className="ww-price">
-          <b>{"\u20AC"}{w.price}</b><span>per persoon</span>
+          <b>{"\u20AC"}{formatPrice(w.price)}</b><span>per persoon</span>
         </span>
         <Button variant="primary" style={{ flex: 1 }}>Kies een datum</Button>
       </div>
