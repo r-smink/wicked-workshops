@@ -80,10 +80,15 @@ export const Badge = ({ kind, children }) => {
   );
 };
 
-export const Rating = ({ value, count, size = 15 }) => (
-  <span className="ww-rating"><Star size={size} />{String(value).replace(".", ",")}
-    {count != null && <span className="ww-count">({count})</span>}</span>
-);
+export const Rating = ({ value, count, size = 15 }) => {
+  if (value == null) {
+    return <span className="ww-rating"><span className="ww-count">Nog geen reviews</span></span>;
+  }
+  return (
+    <span className="ww-rating"><Star size={size} />{String(value).replace(".", ",")}
+      {count != null && <span className="ww-count">({count})</span>}</span>
+  );
+};
 
 export const Photo = ({ icon = "spark", tone, ratio, size = 30, style, children }) => (
   <div className="ww-ph" data-tone={tone} style={{ aspectRatio: ratio, ...style }}>
