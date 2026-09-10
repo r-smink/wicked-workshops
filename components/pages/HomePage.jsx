@@ -114,7 +114,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
               ["Iris Bakker", "BBQ workshop, Rotterdam", "Nog nooit zo gelachen met de vriendinnen. Absolute aanrader voor een dagje uit."],
             ].map(([name, ctx, body]) => (
               <figure className="ww-quote" key={name}>
-                <span aria-label="5 sterren">{[0, 1, 2, 3, 4].map((i) => <Star key={i} size={14} />)}</span>
+                <span className="ww-stars" aria-label="5 sterren">{[0, 1, 2, 3, 4].map((i) => <Star key={i} size={14} />)}</span>
                 <p>{body}</p>
                 <figcaption className="ww-who">
                   <Avatar name={name} />
