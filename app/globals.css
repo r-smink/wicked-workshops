@@ -489,10 +489,16 @@ img, svg, video { display: block; max-width: 100%; }
 .ww-answer p { font-size:16.5px; font-weight:500; }
 .ww-prose p { font-size:16.5px; margin-bottom:18px; }
 .ww-prose h2 { font-size:26px; margin:34px 0 14px; scroll-margin-top:100px; }
+.ww-prose h3 { font-size:21px; font-weight:800; margin:28px 0 12px; scroll-margin-top:100px; }
+.ww-prose strong { font-weight:800; }
+.ww-prose em { font-style:italic; }
 .ww-prose a { color:var(--brand); font-weight:700; text-decoration:underline; text-underline-offset:3px; }
 .ww-prose ul { margin:0 0 18px; display:grid; gap:10px; }
-.ww-prose ul li { display:flex; gap:11px; font-size:16px; }
+.ww-prose ul li { display:block; gap:11px; font-size:16px; }
+.ww-prose ul li p { margin:0; }
 .ww-prose ul svg { color:var(--brand); flex:none; margin-top:3px; }
+.ww-art-hero { margin:22px 0 30px; border-radius:20px; overflow:hidden; }
+.ww-art-hero img { width:100%; height:auto; display:block; aspect-ratio:16/9; object-fit:cover; }
 .ww-tip { border-left:3px solid var(--coral); background:var(--soft-coral); border-radius:0 16px 16px 0;
   padding:16px 20px; margin:0 0 20px; font-size:15.5px; }
 .ww-toc { position:sticky; top:96px; background:#fff; border:1px solid var(--line);

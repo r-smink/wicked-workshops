@@ -37,6 +37,12 @@ export default function ArticlePage({
             <button className="ww-chip" style={{ marginLeft: "auto" }}><Icon name="share" size={15} /> Delen</button>
           </div>
 
+          {article.hero && (
+            <div className="ww-art-hero">
+              <img src={article.hero} alt={article.title} />
+            </div>
+          )}
+
           {article.short_answer && (
             <section className="ww-answer">
               <h2>Het korte antwoord</h2>
@@ -129,7 +135,7 @@ export default function ArticlePage({
         </aside>
       </div>
 
-      {faq.length > 0 && (
+      {faq && faq.length > 0 && (
         <section className="ww-section" style={{ paddingTop: 0 }}>
           <h2 style={{ marginBottom: 18 }}>Veelgestelde vragen</h2>
           <div className="ww-faq-list">
