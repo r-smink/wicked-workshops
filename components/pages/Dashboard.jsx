@@ -12,10 +12,10 @@ import WorkshopWizard from "@/components/pages/WorkshopWizard";
 
 function Stat({ label, value, sub, accent }) {
   return (
-    <div className={`ww-dstat${accent ? " ww-dstat--accent" : ""}`}>
-      <span className="ww-dstat-l">{label}</span>
+    <div className={`ww-kpi${accent ? " ww-kpi--accent" : ""}`}>
+      <span>{label}</span>
       <b>{value}</b>
-      {sub && <span className="ww-dstat-s">{sub}</span>}
+      {sub && <em>{sub}</em>}
     </div>
   );
 }
@@ -58,10 +58,10 @@ export default function Dashboard({
         </div>
         <nav className="ww-dash-nav">
           {nav.map((n) => (
-            <button key={n.key} data-on={view === n.key ? "true" : "false"}
+            <button key={n.key} className="ww-dnav" data-on={view === n.key ? "true" : "false"}
               onClick={() => { setView(n.key); setMenuOpen(false); }}>
               <Icon name={n.icon} size={19} />{n.label}
-              {n.dot && <span className="ww-dot">{n.dot}</span>}
+              {n.dot && <span className="ww-dnav-dot">{n.dot}</span>}
             </button>
           ))}
         </nav>
@@ -76,7 +76,7 @@ export default function Dashboard({
       </aside>
 
       <main className="ww-dash-main">
-        <div className="ww-dash-top">
+        <div className="ww-dash-head">
           <button className="ww-iconbtn ww-dash-burger" aria-label="Menu openen" onClick={() => setMenuOpen(true)}>
             <Icon name="menu" />
           </button>
@@ -91,65 +91,75 @@ export default function Dashboard({
 
         {view === "overview" && (
           <>
-            <div className="ww-dstats">
+            <div className="ww-kpis">
               <Stat label="Deze maand" value="€ 1.245" sub="8 boekingen" accent />
               <Stat label="Deelnemers" value="34" sub="6 komende sessies" />
               <Stat label="Beoordeling" value="4,9" sub="412 reviews" />
               <Stat label="Wachtrij" value="2" sub="wacht op antwoord" />
             </div>
 
-            <section className="ww-dcard">
-              <div className="ww-dcard-head">
+            <section className="ww-panel">
+              <div className="ww-panel-head">
                 <h2>Komende sessies</h2>
                 <button className="ww-chip" onClick={() => setView("agenda")}>Alle datums</button>
               </div>
-              <div className="ww-dtable">
-                {sessions.slice(0, 4).map((s, i) => (
-                  <div className="ww-drow" key={i}>
-                    <span className="ww-drow-date">{s.date}<span>{s.time}</span></span>
-                    <span className="ww-drow-ws">{s.ws}</span>
-                    <span className="ww-drow-people">
-                      <Icon name="users" size={15} /> {s.booked}/{s.cap}
-                    </span>
-                    <span className="ww-drow-bar">
-                      <i style={{ width: `${(s.booked / s.cap) * 100}%` }} />
-                    </span>
-                  </div>
-                ))}
+              <div className="ww-tablewrap">
+                <table className="ww-table">
+                  <thead>
+                    <tr><th>Datum</th><th>Workshop</th><th>Bezetting</th><th style={{width:100}}></th></tr>
+                  </thead>
+                  <tbody>
+                    {sessions.slice(0, 4).map((s, i) => (
+                      <tr key={i}>
+                        <td><strong>{s.date}</strong><span className="ww-meta" style={{display:"block",fontSize:12.5}}>{s.time}</span></td>
+                        <td>{s.ws}</td>
+                        <td><span className="ww-cap"><Icon name="users" size={15} /> {s.booked}/{s.cap}</span></td>
+                        <td><div className="ww-cap-bar"><i style={{ width: `${s.cap ? (s.booked / s.cap) * 100 : 0}%` }} /></div></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
 
-            <section className="ww-dcard">
-              <div className="ww-dcard-head">
+            <section className="ww-panel">
+              <div className="ww-panel-head">
                 <h2>Recente boekingen</h2>
                 <button className="ww-chip" onClick={() => setView("bookings")}>Alle boekingen</button>
               </div>
-              <div className="ww-dtable">
-                {bookings.slice(0, 4).map((b) => {
-                  const [cls, label] = STATUS_LABEL[b.status] || ["", b.status];
-                  return (
-                    <div className="ww-drow" key={b.code}>
-                      <span className="ww-drow-code">{b.code}</span>
-                      <span className="ww-drow-name">{b.name}</span>
-                      <span className="ww-drow-ws">{b.ws} · {b.date}</span>
-                      <span className="ww-drow-people">{b.people}p</span>
-                      <span className="ww-drow-price">€ {b.total}</span>
-                      <span className={`ww-badge ${cls}`}>{label}</span>
-                    </div>
-                  );
-                })}
+              <div className="ww-tablewrap">
+                <table className="ww-table">
+                  <thead>
+                    <tr><th>Code</th><th>Naam</th><th>Workshop</th><th>Pers.</th><th>Totaal</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    {bookings.slice(0, 4).map((b) => {
+                      const [cls, label] = STATUS_LABEL[b.status] || ["", b.status];
+                      return (
+                        <tr key={b.code}>
+                          <td><strong>{b.code}</strong></td>
+                          <td>{b.name}</td>
+                          <td>{b.ws} · {b.date}</td>
+                          <td>{b.people}p</td>
+                          <td>€ {b.total}</td>
+                          <td><span className={`ww-badge ${cls}`}>{label}</span></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </section>
           </>
         )}
 
         {view === "workshops" && (
-          <section className="ww-dcard">
-            <div className="ww-dcard-head">
+          <section className="ww-panel">
+            <div className="ww-panel-head">
               <h2>Jouw workshops</h2>
               <Button variant="primary" size="sm" icon="plus" onClick={() => setView("wizard")}>Toevoegen</Button>
             </div>
-            <div className="ww-dworkshops">
+            <div className="ww-panel-body">
               {workshops.map((w) => (
                 <article className="ww-dws" key={w.title}>
                   <Photo icon={w.icon} style={{ width: 80, height: 64, borderRadius: 12, flex: "none" }} />
@@ -176,92 +186,114 @@ export default function Dashboard({
         )}
 
         {view === "agenda" && (
-          <section className="ww-dcard">
-            <div className="ww-dcard-head">
+          <section className="ww-panel">
+            <div className="ww-panel-head">
               <h2>Agenda</h2>
               <Button variant="primary" size="sm" icon="plus">Datum toevoegen</Button>
             </div>
-            <div className="ww-dtable">
-              {sessions.map((s, i) => (
-                <div className="ww-drow" key={i}>
-                  <span className="ww-drow-date">{s.date}<span>{s.time}</span></span>
-                  <span className="ww-drow-ws">{s.ws}</span>
-                  <span className="ww-drow-people"><Icon name="users" size={15} /> {s.booked}/{s.cap}</span>
-                  <span className="ww-drow-bar"><i style={{ width: `${(s.booked / s.cap) * 100}%` }} /></span>
-                </div>
-              ))}
+            <div className="ww-tablewrap">
+              <table className="ww-table">
+                <thead>
+                  <tr><th>Datum</th><th>Workshop</th><th>Bezetting</th><th style={{width:100}}></th></tr>
+                </thead>
+                <tbody>
+                  {sessions.map((s, i) => (
+                    <tr key={i}>
+                      <td><strong>{s.date}</strong><span className="ww-meta" style={{display:"block",fontSize:12.5}}>{s.time}</span></td>
+                      <td>{s.ws}</td>
+                      <td><span className="ww-cap"><Icon name="users" size={15} /> {s.booked}/{s.cap}</span></td>
+                      <td><div className="ww-cap-bar"><i style={{ width: `${s.cap ? (s.booked / s.cap) * 100 : 0}%` }} /></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </section>
         )}
 
         {view === "bookings" && (
-          <section className="ww-dcard">
-            <div className="ww-dcard-head"><h2>Boekingen</h2></div>
-            <div className="ww-dtable">
-              {bookings.map((b) => {
-                const [cls, label] = STATUS_LABEL[b.status] || ["", b.status];
-                return (
-                  <div className="ww-drow" key={b.code}>
-                    <span className="ww-drow-code">{b.code}</span>
-                    <span className="ww-drow-name">{b.name}</span>
-                    <span className="ww-drow-ws">{b.ws} · {b.date}</span>
-                    <span className="ww-drow-people">{b.people}p</span>
-                    <span className="ww-drow-price">€ {b.total}</span>
-                    <span className={`ww-badge ${cls}`}>{label}</span>
-                  </div>
-                );
-              })}
+          <section className="ww-panel">
+            <div className="ww-panel-head"><h2>Boekingen</h2></div>
+            <div className="ww-tablewrap">
+              <table className="ww-table">
+                <thead>
+                  <tr><th>Code</th><th>Naam</th><th>Workshop</th><th>Pers.</th><th>Totaal</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  {bookings.map((b) => {
+                    const [cls, label] = STATUS_LABEL[b.status] || ["", b.status];
+                    return (
+                      <tr key={b.code}>
+                        <td><strong>{b.code}</strong></td>
+                        <td>{b.name}</td>
+                        <td>{b.ws} · {b.date}</td>
+                        <td>{b.people}p</td>
+                        <td>€ {b.total}</td>
+                        <td><span className={`ww-badge ${cls}`}>{label}</span></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </section>
         )}
 
         {view === "reviews" && (
-          <section className="ww-dcard">
-            <div className="ww-dcard-head"><h2>Reviews</h2></div>
-            <p className="ww-meta">Je hebt 412 reviews over 3 workshops. Gemiddeld 4,9 sterren.</p>
-            <div className="ww-dreviews">
-              {[
-                ["Sanne", "juli 2026", "Italiaans koken", "Marco maakt er echt een feestje van."],
-                ["Thomas", "juni 2026", "Pasta masterclass", "Dacht dat ik pasta kon maken. Bleek van niet."],
-                ["Iris", "mei 2026", "Tiramisu & dolci", "Gezellige avond met vriendinnen."],
-              ].map(([n, w, ws, body]) => (
-                <article className="ww-dreview" key={n}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <Avatar name={n} size={36} />
-                    <div><strong>{n}</strong><span className="ww-meta"> · {w} · {ws}</span></div>
-                    <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
-                      <Star size={14} />5,0
-                    </span>
-                  </div>
-                  <p style={{ marginTop: 10 }}>{body}</p>
-                  <Button variant="outline" size="sm" style={{ marginTop: 10 }}>Reageren</Button>
-                </article>
-              ))}
+          <section className="ww-panel">
+            <div className="ww-panel-head"><h2>Reviews</h2></div>
+            <div className="ww-panel-body">
+              <p className="ww-meta">Je hebt 412 reviews over 3 workshops. Gemiddeld 4,9 sterren.</p>
+              <div className="ww-dreviews">
+                {[
+                  ["Sanne", "juli 2026", "Italiaans koken", "Marco maakt er echt een feestje van."],
+                  ["Thomas", "juni 2026", "Pasta masterclass", "Dacht dat ik pasta kon maken. Bleek van niet."],
+                  ["Iris", "mei 2026", "Tiramisu & dolci", "Gezellige avond met vriendinnen."],
+                ].map(([n, w, ws, body]) => (
+                  <article className="ww-dreview" key={n}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <Avatar name={n} size={36} />
+                      <div><strong>{n}</strong><span className="ww-meta"> · {w} · {ws}</span></div>
+                      <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Star size={14} />5,0
+                      </span>
+                    </div>
+                    <p style={{ marginTop: 10 }}>{body}</p>
+                    <Button variant="outline" size="sm" style={{ marginTop: 10 }}>Reageren</Button>
+                  </article>
+                ))}
+              </div>
             </div>
           </section>
         )}
 
         {view === "payouts" && (
-          <section className="ww-dcard">
-            <div className="ww-dcard-head"><h2>Uitbetalingen</h2></div>
-            <div className="ww-dstats">
-              <Stat label="Deze maand" value="€ 1.245" sub="wordt 18 aug uitbetaald" accent />
-              <Stat label="Vorige maand" value="€ 980" sub="uitbetaald 21 jul" />
-              <Stat label="Tot nu toe" value="€ 12.480" sub="sinds januari 2026" />
-            </div>
-            <div className="ww-dtable">
-              {[
-                ["21 jul 2026", "€ 980", "juni 2026", "uitbetaald"],
-                ["21 jun 2026", "€ 1.120", "mei 2026", "uitbetaald"],
-                ["21 mei 2026", "€ 845", "april 2026", "uitbetaald"],
-              ].map(([d, a, p, s]) => (
-                <div className="ww-drow" key={d}>
-                  <span className="ww-drow-date">{d}</span>
-                  <span className="ww-drow-ws">{p}</span>
-                  <span className="ww-drow-price">{a}</span>
-                  <span className="ww-badge ww-badge--draft">{s}</span>
-                </div>
-              ))}
+          <section className="ww-panel">
+            <div className="ww-panel-head"><h2>Uitbetalingen</h2></div>
+            <div className="ww-panel-body">
+              <div className="ww-kpis">
+                <Stat label="Deze maand" value="€ 1.245" sub="wordt 18 aug uitbetaald" accent />
+                <Stat label="Vorige maand" value="€ 980" sub="uitbetaald 21 jul" />
+                <Stat label="Tot nu toe" value="€ 12.480" sub="sinds januari 2026" />
+              </div>
+              <div className="ww-tablewrap">
+                <table className="ww-table">
+                  <tbody>
+                    {[
+                      ["21 jul 2026", "€ 980", "juni 2026", "uitbetaald"],
+                      ["21 jun 2026", "€ 1.120", "mei 2026", "uitbetaald"],
+                      ["21 mei 2026", "€ 845", "april 2026", "uitbetaald"],
+                    ].map(([d, a, p, s]) => (
+                      <tr key={d}>
+                        <td><strong>{d}</strong></td>
+                        <td>{p}</td>
+                        <td>{a}</td>
+                        <td><span className="ww-badge ww-badge--draft">{s}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </section>
         )}

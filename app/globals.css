@@ -842,6 +842,26 @@ img, svg, video { display: block; max-width: 100%; }
   .ww-kpi b { font-size:21px; }
 }
 
+/* dashboard: extra klassen die het component gebruikt */
+.ww-dash-brand { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.ww-dash-nav { display:flex; flex-direction:column; gap:4px; flex:1; }
+.ww-dash-close { display:none; }
+@media (max-width:1023px) { .ww-dash-close { display:flex; } }
+.ww-dash-burger { display:none; }
+@media (max-width:1023px) { .ww-dash-burger { display:flex; } }
+.ww-dash-foot { margin-top:auto; display:flex; flex-direction:column; gap:8px; padding-top:12px; border-top:1px solid var(--line); }
+.ww-dash-logout { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; font-size:14px; font-weight:600; color:var(--slate); }
+.ww-dash-logout:hover { background:var(--mist); }
+@media (max-width:1023px) {
+  .ww-dash-side--open { position:fixed; inset:0 auto 0 0; width:280px; z-index:60; box-shadow:20px 0 60px rgba(30,20,60,.18); }
+}
+.ww-kpi--accent { background:var(--cloud); border-color:var(--brand); }
+.ww-dws { display:flex; align-items:center; gap:14px; padding:16px 0; border-bottom:1px solid var(--line); }
+.ww-dws:last-child { border-bottom:0; }
+.ww-dws h3 { font-size:15px; }
+.ww-dreviews { display:flex; flex-direction:column; gap:14px; }
+.ww-dreview { background:var(--mist); border-radius:14px; padding:16px; }
+
 /* zijlade voor de mobiele navigatie */
 .ww-drawer-wrap { position:fixed; inset:0; z-index:95; }
 .ww-drawer-bg { position:absolute; inset:0; background:rgba(27,22,48,.45); animation:ww-fade .18s ease; }
