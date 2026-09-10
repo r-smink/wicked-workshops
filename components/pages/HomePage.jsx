@@ -126,7 +126,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
         </section>
 
         <section className="ww-section">
-          <div className="ww-grid--2" style={{ gridTemplateColumns: "1fr", gap: 18 }}>
+          <div className="ww-grid--2" style={{ gridTemplateColumns: "2fr", gap: 18 }}>
             <div className="ww-band ww-band--cloud ww-band-split">
               <div>
                 <h2>Heb jij een talent om te delen?</h2>
