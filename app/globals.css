@@ -170,7 +170,7 @@ img, svg, video { display: block; max-width: 100%; }
 .ww-search input { flex:1; border:0; outline:0; font-size:15.5px; font-weight:500; min-width:0;
   background:transparent; color:var(--ink); height:44px; }
 .ww-search input::placeholder { color:var(--slate); }
-.ww-search-go { width:46px; height:46px; border-radius:13px; background:var(--brand); color:#fff;
+.ww-search-go { width:46px; height:46px; border-radius:13px; background:var(--brand); color:#fff!important;
   display:flex; align-items:center; justify-content:center; flex:none; }
 .ww-search-go:hover { background:var(--brand-deep); }
 .ww-quick { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:18px; position:relative; z-index:2; }
