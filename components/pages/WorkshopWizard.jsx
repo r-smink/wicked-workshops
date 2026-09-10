@@ -31,7 +31,6 @@ export default function WorkshopWizard({
 
   const filled = required.filter(([k]) => String(w[k]).trim() !== "");
   const pct = Math.round((filled.length / required.length) * 100);
-  const complete = pct === 100;
 
   const [h, d] = steps[step];
 
@@ -48,36 +47,20 @@ export default function WorkshopWizard({
         <p>{d}</p>
       </header>
 
-      <div className="ww-form-two">
-        <aside className="ww-side-sticky">
-          <div className="ww-rail">
-            {steps.map(([t, sub], i) => (
-              <button key={t} className="ww-rail-item"
+      <div className="ww-wizgrid">
+        <div>
+          <div className="ww-wizrail">
+            {steps.map(([t], i) => (
+              <button key={t} className="ww-wizrail-item"
                 data-on={i === step ? "true" : "false"}
                 data-done={i < step ? "true" : "false"}
                 onClick={() => setStep(i)}>
                 <span className="ww-rail-n">{i < step ? <Icon name="check" size={14} /> : i + 1}</span>
-                <span><strong>{t}</strong><span>{sub}</span></span>
+                <span>{t}</span>
               </button>
             ))}
           </div>
-          <div className="ww-prog">
-            <div className="ww-prog-top">
-              <strong style={{ fontSize: 13.5 }}>Klaar om te publiceren</strong>
-              <b>{pct}%</b>
-            </div>
-            <div className="ww-prog-bar"><i style={{ width: `${pct}%` }} /></div>
-            <ul className="ww-checklist">
-              {required.map(([k, label]) => (
-                <li key={k} data-done={String(w[k]).trim() !== "" ? "true" : "false"}>
-                  <span className="ww-tick"><Icon name="check" size={13} /></span>{label}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
 
-        <div>
           {done ? (
             <div className="ww-done">
               <span className="ww-done-ico"><Icon name="check" size={34} /></span>
@@ -312,6 +295,23 @@ export default function WorkshopWizard({
             </>
           )}
         </div>
+
+        <aside className="ww-side-sticky">
+          <div className="ww-prog">
+            <div className="ww-prog-top">
+              <strong style={{ fontSize: 13.5 }}>Klaar om te publiceren</strong>
+              <b>{pct}%</b>
+            </div>
+            <div className="ww-prog-bar"><i style={{ width: `${pct}%` }} /></div>
+            <ul className="ww-checklist">
+              {required.map(([k, label]) => (
+                <li key={k} data-done={String(w[k]).trim() !== "" ? "true" : "false"}>
+                  <span className="ww-tick"><Icon name="check" size={13} /></span>{label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
       </div>
     </div>
   );
