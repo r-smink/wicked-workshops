@@ -42,25 +42,26 @@ export default function WorkshopWizard({
         <span style={{ color: tokens.color.ink }}>Nieuwe workshop</span>
       </nav>
 
-      <header className="ww-wiz-head">
+      <header className="ww-form-head">
         <span className="ww-eyebrow">Stap {step + 1} van {steps.length}</span>
         <h1>{h}</h1>
         <p>{d}</p>
       </header>
 
-      <div className="ww-wiz">
-        <aside className="ww-wiz-side">
-          <ol className="ww-wiz-steps">
+      <div className="ww-form-two">
+        <aside className="ww-side-sticky">
+          <div className="ww-rail">
             {steps.map(([t, sub], i) => (
-              <li key={t} data-state={i === step ? "current" : i < step ? "done" : "todo"}>
-                <button onClick={() => setStep(i)}>
-                  <span className="ww-wiz-n">{i < step ? <Icon name="check" size={14} /> : i + 1}</span>
-                  <span><strong>{t}</strong><span>{sub}</span></span>
-                </button>
-              </li>
+              <button key={t} className="ww-rail-item"
+                data-on={i === step ? "true" : "false"}
+                data-done={i < step ? "true" : "false"}
+                onClick={() => setStep(i)}>
+                <span className="ww-rail-n">{i < step ? <Icon name="check" size={14} /> : i + 1}</span>
+                <span><strong>{t}</strong><span>{sub}</span></span>
+              </button>
             ))}
-          </ol>
-          <div className="ww-wiz-prog">
+          </div>
+          <div className="ww-prog">
             <div className="ww-prog-top">
               <strong style={{ fontSize: 13.5 }}>Klaar om te publiceren</strong>
               <b>{pct}%</b>
@@ -76,7 +77,7 @@ export default function WorkshopWizard({
           </div>
         </aside>
 
-        <div className="ww-wiz-main">
+        <div>
           {done ? (
             <div className="ww-done">
               <span className="ww-done-ico"><Icon name="check" size={34} /></span>
@@ -124,13 +125,13 @@ export default function WorkshopWizard({
                       placeholder="Je maakt verse pasta vanaf nul, een klassieke ragu en tiramisu..." />
                   </Field>
                   <Field label="Wat is inbegrepen" hint="Per regel een item.">
-                    <div className="ww-inc-list">
+                    <div>
                       {w.inclusions.map((inc, i) => (
-                        <div className="ww-inc-row" key={i}>
+                        <div className="ww-listrow" key={i}>
                           <input className="ww-input" value={inc}
                             onChange={(e) => put("inclusions", w.inclusions.map((x, j) => j === i ? e.target.value : x))}
                             placeholder="Alle ingredienten en materialen" />
-                          <button className="ww-iconbtn" aria-label="Verwijderen"
+                          <button className="ww-listrow-del" aria-label="Verwijderen"
                             onClick={() => put("inclusions", w.inclusions.filter((_, j) => j !== i))}>
                             <Icon name="close" size={18} />
                           </button>
@@ -148,16 +149,16 @@ export default function WorkshopWizard({
                     </div>
                   </Field>
                   <Field label="Veelgestelde vragen" hint="Per vraag een paar zinnen. Optioneel.">
-                    <div className="ww-faq-list">
+                    <div>
                       {w.faq.map((item, i) => (
-                        <div className="ww-faq-row" key={i}>
+                        <div className="ww-listrow" key={i} style={{ alignItems: "flex-start" }}>
                           <input className="ww-input" value={item.q}
                             onChange={(e) => put("faq", w.faq.map((x, j) => j === i ? { ...x, q: e.target.value } : x))}
                             placeholder="Wat als ik moet annuleren?" />
                           <textarea className="ww-textarea" rows={2} value={item.a}
                             onChange={(e) => put("faq", w.faq.map((x, j) => j === i ? { ...x, a: e.target.value } : x))}
                             placeholder="Je kunt tot 48 uur van tevoren gratis annuleren." />
-                          <button className="ww-iconbtn" aria-label="Verwijderen"
+                          <button className="ww-listrow-del" aria-label="Verwijderen"
                             onClick={() => put("faq", w.faq.filter((_, j) => j !== i))}>
                             <Icon name="close" size={18} />
                           </button>
@@ -227,11 +228,11 @@ export default function WorkshopWizard({
               {step === 3 && (
                 <>
                   <Field label="Foto's" hint="Minimaal een, maximaal zes. Eerste foto wordt de omslag.">
-                    <div className="ww-media-grid">
+                    <div className="ww-mediagrid">
                       {w.media.map((m, i) => (
-                        <button className="ww-media-up" key={i} data-on={m ? "true" : "false"}
+                        <button className="ww-mediaslot" key={i} data-filled={m ? "true" : "false"}
                           onClick={() => put("media", w.media.map((x, j) => j === i ? !x : x))}>
-                          {m ? <Photo icon="camera" /> : <span className="ww-media-add"><Icon name="plus" size={22} /> Toevoegen</span>}
+                          {m ? <Photo icon="camera" /> : <span><Icon name="plus" size={22} /> Toevoegen</span>}
                         </button>
                       ))}
                     </div>
@@ -274,17 +275,17 @@ export default function WorkshopWizard({
               {step === 5 && (
                 <>
                   <Field label="Datums toevoegen" hint="Voeg de eerste datums toe. Je kunt er later altijd meer zetten.">
-                    <div className="ww-sess-list">
+                    <div>
                       {w.sessions.map((s, i) => (
-                        <div className="ww-sess-row" key={i}>
+                        <div className="ww-sesrow" key={i}>
                           <input className="ww-input" type="date" value={s.date}
                             onChange={(e) => put("sessions", w.sessions.map((x, j) => j === i ? { ...x, date: e.target.value } : x))} />
                           <input className="ww-input" type="time" value={s.time}
                             onChange={(e) => put("sessions", w.sessions.map((x, j) => j === i ? { ...x, time: e.target.value } : x))} />
                           <input className="ww-input" value={s.capacity} inputMode="numeric"
                             onChange={(e) => put("sessions", w.sessions.map((x, j) => j === i ? { ...x, capacity: e.target.value } : x))}
-                            placeholder="Capaciteit" style={{ maxWidth: 120 }} />
-                          <button className="ww-iconbtn" aria-label="Verwijderen"
+                            placeholder="Capaciteit" />
+                          <button className="ww-listrow-del" aria-label="Verwijderen"
                             onClick={() => put("sessions", w.sessions.filter((_, j) => j !== i))}>
                             <Icon name="close" size={18} />
                           </button>
@@ -299,12 +300,14 @@ export default function WorkshopWizard({
                 </>
               )}
 
-              <div className="ww-wiz-nav">
-                {step > 0 && <Button variant="outline" icon="left" onClick={() => setStep(step - 1)}>Terug</Button>}
-                <Button variant="primary" block
-                  onClick={() => (step < steps.length - 1 ? setStep(step + 1) : setDone(true))}>
-                  {step < steps.length - 1 ? "Verder" : "Workshop publiceren"}
-                </Button>
+              <div className="ww-savebar">
+                <div className="ww-savebar-in">
+                  {step > 0 && <Button variant="outline" icon="left" onClick={() => setStep(step - 1)}>Terug</Button>}
+                  <Button variant="primary" block
+                    onClick={() => (step < steps.length - 1 ? setStep(step + 1) : setDone(true))}>
+                    {step < steps.length - 1 ? "Verder" : "Workshop publiceren"}
+                  </Button>
+                </div>
               </div>
             </>
           )}
