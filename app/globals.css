@@ -180,6 +180,12 @@ img, svg, video { display: block; max-width: 100%; }
 @media (min-width:560px) { .ww-grid { grid-template-columns:repeat(2,1fr); } }
 @media (min-width:1024px) { .ww-grid { grid-template-columns:repeat(3,1fr); } }
 @media (min-width:1240px) { .ww-grid--4 { grid-template-columns:repeat(4,1fr); } }
+
+.ww-grid--2 { display:grid; gap:18px; grid-template-columns:1fr; }
+@media (min-width:560px) { .ww-grid--2 { grid-template-columns:repeat(2,1fr); } }
+@media (min-width:1024px) { .ww-grid--2 { grid-template-columns:repeat(2,1fr); } }
+@media (min-width:1240px) { .ww-grid--2 { grid-template-columns:repeat(2,1fr); } }
+
 .ww-grid--cats { grid-template-columns:repeat(2,1fr); gap:12px; }
 @media (min-width:700px) { .ww-grid--cats { grid-template-columns:repeat(4,1fr); } }
 @media (min-width:1100px) { .ww-grid--cats { grid-template-columns:repeat(6,1fr); } }
