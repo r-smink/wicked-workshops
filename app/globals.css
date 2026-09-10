@@ -10,6 +10,14 @@
 */
 * { box-sizing: border-box; }
 
+root{
+  --brand:#6C2BD9; --brand-deep:#5620B0; --coral:#FF5C6E; --coral-deep:#E8394C;
+  --ink:#1B1630; --slate:#6E6A85; --cloud:#F1EAFB; --mist:#FBFAFE; --line:#E9E3F3;
+  --white:#fff; --sun:#FFB020; --soft-coral:#FFE7EB;
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--ink);
+  background:var(--mist); line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+
 html, body {
   margin: 0;
   padding: 0;
