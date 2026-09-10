@@ -34,7 +34,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="nl">
-      <body>{children}</body>
+      <body className="ww">{children}</body>
     </html>
   );
 }
