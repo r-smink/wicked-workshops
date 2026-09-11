@@ -1,17 +1,19 @@
 import Dashboard from "@/components/pages/Dashboard";
 import {
   DASH_NAV, DASH_TITLES,
-  getProviderProfile, getCategories, getCities,
+  getProviderProfile, getCategories, getCities, getWorkshopById,
 } from "@/lib/directus";
 
-export const metadata = { title: "Nieuwe workshop" };
+export const metadata = { title: "Workshop bewerken" };
 export const revalidate = 60;
 
-export default async function Page() {
-  const [provider, categories, cities] = await Promise.all([
+export default async function Page({ params }) {
+  const { id } = params;
+  const [provider, categories, cities, workshop] = await Promise.all([
     getProviderProfile(),
     getCategories(),
     getCities(),
+    getWorkshopById(id),
   ]);
   return (
     <Dashboard
@@ -21,6 +23,7 @@ export default async function Page() {
       provider={provider}
       categories={categories}
       cities={cities}
+      initialWorkshop={workshop}
     />
   );
 }

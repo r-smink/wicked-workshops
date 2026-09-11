@@ -4,11 +4,12 @@ import { useState } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import {
-  DASH_NAV, DASH_TITLES, DASH_SESSIONS, DASH_BOOKINGS, DASH_WORKSHOPS, STATUS_LABEL,
+  DASH_NAV, DASH_TITLES, DASH_SESSIONS, DASH_BOOKINGS, DASH_WORKSHOPS, DASH_VENUES, STATUS_LABEL,
 } from "@/lib/mock-data";
 import { Icon, Star, Button, Badge, Rating, Photo, Avatar } from "@/components/ui";
 import ProviderProfileForm from "@/components/pages/ProviderProfileForm";
 import WorkshopWizard from "@/components/pages/WorkshopWizard";
+import VenueForm from "@/components/pages/VenueForm";
 
 function Stat({ label, value, sub, accent }) {
   return (
@@ -25,20 +26,26 @@ export default function Dashboard({
   sessions = DASH_SESSIONS,
   bookings = DASH_BOOKINGS,
   workshops = DASH_WORKSHOPS,
+  venues = DASH_VENUES,
   nav = DASH_NAV,
   titles = DASH_TITLES,
   provider = null,
   categories = null,
+  cities = [],
+  initialWorkshop = null,
 }) {
   const go = useGo();
   const [view, setView] = useState(initialView);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (view === "wizard") {
-    return <WorkshopWizard go={go} provider={provider} categories={categories} />;
+    return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} initialWorkshop={initialWorkshop} />;
   }
   if (view === "profile") {
     return <ProviderProfileForm go={go} mode="edit" />;
+  }
+  if (view === "venue-form") {
+    return <VenueForm go={go} cities={cities} />;
   }
 
   const [title, sub] = titles[view] || ["Dashboard", ""];
@@ -176,7 +183,7 @@ export default function Dashboard({
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button className="ww-iconbtn" aria-label="Bewerken" onClick={() => setView("wizard")}>
+                    <button className="ww-iconbtn" aria-label="Bewerken" onClick={() => { window.location.href = `/dashboard/workshops/${w.id}/bewerken`; }}>
                       <Icon name="edit" size={17} />
                     </button>
                     <button className="ww-iconbtn" aria-label="Bekijken"><Icon name="eye" size={17} /></button>
@@ -265,6 +272,40 @@ export default function Dashboard({
                   </article>
                 ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {view === "locaties" && (
+          <section className="ww-panel">
+            <div className="ww-panel-head">
+              <h2>Locaties</h2>
+              <Button variant="primary" size="sm" icon="plus" onClick={() => setView("venue-form")}>Locatie toevoegen</Button>
+            </div>
+            <div className="ww-panel-body">
+              {venues.length === 0 ? (
+                <p className="ww-meta">Nog geen locaties. Voeg er een toe om je ruimte te verhuren.</p>
+              ) : (
+                venues.map((v) => (
+                  <article className="ww-dws" key={v.id || v.name}>
+                    <Photo icon="place" style={{ width: 80, height: 64, borderRadius: 12, flex: "none" }} />
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <h3>{v.name}</h3><Badge kind={v.status === "published" ? "live" : "draft"} />
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
+                        <span className="ww-meta">{v.city || "Onbekend"}</span>
+                        <span className="ww-meta">{v.max_capacity} pers.</span>
+                        <span className="ww-meta">€ {v.price_per_hour} / uur</span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button className="ww-iconbtn" aria-label="Bewerken"><Icon name="edit" size={17} /></button>
+                      <button className="ww-iconbtn" aria-label="Bekijken"><Icon name="eye" size={17} /></button>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
           </section>
         )}

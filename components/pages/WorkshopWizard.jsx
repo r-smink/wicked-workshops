@@ -20,11 +20,62 @@ export default function WorkshopWizard({
   emptyWorkshop = EMPTY_WORKSHOP,
   required = WIZ_REQUIRED,
   provider = null,
+  cities = [],
+  initialWorkshop = null,
 }) {
   const goNav = useGo();
   const nav = go || goNav;
   const [step, setStep] = useState(0);
-  const [w, setW] = useState(emptyWorkshop);
+  const [w, setW] = useState(() => {
+    if (!initialWorkshop) return emptyWorkshop;
+    const mins = initialWorkshop.duration_minutes;
+    const durationStr = mins
+      ? (() => {
+          const hours = mins / 60;
+          const str = Number.isInteger(hours) ? String(hours) : hours.toFixed(1).replace(".", ",");
+          return `${str} uur`;
+        })()
+      : initialWorkshop.duration || "";
+    return {
+      ...emptyWorkshop,
+      title: initialWorkshop.title || "",
+      category: typeof initialWorkshop.category === "object" ? initialWorkshop.category?.id || "" : initialWorkshop.category || "",
+      city: typeof initialWorkshop.city === "object" ? initialWorkshop.city?.id || "" : initialWorkshop.city || "",
+      occasions: Array.isArray(initialWorkshop.occasions) ? initialWorkshop.occasions : [],
+      intro: initialWorkshop.intro || "",
+      description: initialWorkshop.description || "",
+      inclusions: Array.isArray(initialWorkshop.inclusions) && initialWorkshop.inclusions.length ? initialWorkshop.inclusions : [""],
+      inclusion_types: Array.isArray(initialWorkshop.inclusion_types) ? initialWorkshop.inclusion_types : [],
+      faq: Array.isArray(initialWorkshop.faq) && initialWorkshop.faq.length
+        ? initialWorkshop.faq.map((f) => Array.isArray(f) ? { q: f[0], a: f[1] } : { q: f.q || "", a: f.a || "" })
+        : [{ q: "", a: "" }],
+      duration: durationStr,
+      level: initialWorkshop.level || "beginner",
+      languages: Array.isArray(initialWorkshop.languages) ? initialWorkshop.languages : ["Nederlands"],
+      min_participants: initialWorkshop.min_participants ? String(initialWorkshop.min_participants) : "4",
+      max_participants: initialWorkshop.max_participants ? String(initialWorkshop.max_participants) : "12",
+      format: initialWorkshop.format || "on_location",
+      diet: Array.isArray(initialWorkshop.diet) ? initialWorkshop.diet : [],
+      age_rating: initialWorkshop.age_rating || "Alle leeftijden",
+      wheelchair: initialWorkshop.wheelchair ?? false,
+      parking: initialWorkshop.parking ?? false,
+      transit: initialWorkshop.transit ?? false,
+      media: Array.isArray(initialWorkshop.media) && initialWorkshop.media.length ? initialWorkshop.media : [null, null, null, null, null, null],
+      price: initialWorkshop.price_per_person ? String(initialWorkshop.price_per_person) : initialWorkshop.price ? String(initialWorkshop.price) : "",
+      cancellation: initialWorkshop.cancellation_policy || "flexible_48h",
+      instant: initialWorkshop.instant_bookable ?? true,
+      giftcard: initialWorkshop.giftcard_eligible ?? true,
+      group_quote: initialWorkshop.group_quote_from != null ? true : true,
+      group_from: initialWorkshop.group_quote_from ? String(initialWorkshop.group_quote_from) : "10",
+      sessions: Array.isArray(initialWorkshop.sessions) && initialWorkshop.sessions.length
+        ? initialWorkshop.sessions.map((s) => ({
+            date: s.starts_at ? s.starts_at.slice(0, 10) : s.date || "",
+            time: s.starts_at ? s.starts_at.slice(11, 16) : s.time || "14:00",
+            capacity: s.capacity ? String(s.capacity) : s.capacity || "12",
+          }))
+        : [{ date: "", time: "14:00", capacity: "12" }],
+    };
+  });
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -73,11 +124,16 @@ export default function WorkshopWizard({
         location_inherits_provider: true,
         age_rating: w.age_rating || null,
         category: w.category || null,
+        city: w.city || null,
         provider: provider?.id || null,
       };
 
-      const res = await fetch("/api/workshops", {
-        method: "POST",
+      const isEdit = Boolean(initialWorkshop?.id);
+      const url = isEdit ? `/api/workshops?id=${initialWorkshop.id}` : "/api/workshops";
+      const method = isEdit ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workshop,
@@ -156,6 +212,12 @@ export default function WorkshopWizard({
                     <select className="ww-select" value={w.category} onChange={set("category")}>
                       <option value="">Kies een categorie</option>
                       {categories.map((c) => <option key={c.id || c} value={c.id || c}>{c.name || c}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Stad">
+                    <select className="ww-select" value={w.city} onChange={set("city")}>
+                      <option value="">Kies een stad</option>
+                      {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </Field>
                   <Field label="Geschikt voor" hint="Meerdere kiezen is goed.">
