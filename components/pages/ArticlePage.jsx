@@ -130,7 +130,7 @@ export default function ArticlePage({
           <div className="ww-sidecard" style={{ background: tokens.color.softCoral, border: 0 }}>
             <h3>Workshop cadeau geven?</h3>
             <p style={{ color: tokens.color.ink, opacity: .72 }}>De ontvanger kiest zelf datum en workshop.</p>
-            <Button variant="coral" block icon="gift">Naar de cadeaubon</Button>
+            <Button variant="coral" block icon="gift" onClick={() => go({ name: "giftcard" })}>Naar de cadeaubon</Button>
           </div>
         </aside>
       </div>

@@ -80,6 +80,7 @@ export default function WorkshopWizard({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [draftSaved, setDraftSaved] = useState(false);
+  const [dragIndex, setDragIndex] = useState(null);
   const set = (k) => (e) => setW({ ...w, [k]: e.target.value });
   const put = (k, v) => setW({ ...w, [k]: v });
 
@@ -88,7 +89,9 @@ export default function WorkshopWizard({
   const filled = required.filter(([k]) => String(w[k]).trim() !== "");
   const pct = Math.round((filled.length / required.length) * 100);
 
-  /* Converteer wizard-state naar Directus-veldnamen en POST naar de API */
+  /* Converteer wizard-state naar Directus-veldnamen en POST naar de API.
+     Ontbreken er verplichte velden, dan slaan we automatisch als concept op
+     zodat de aanbieder nooit zijn werk kwijtraakt. */
   async function publishWorkshop() {
     setSaving(true);
     setSaveError("");
@@ -106,6 +109,8 @@ export default function WorkshopWizard({
             return isNaN(hours) ? null : Math.round(hours * 60);
           })()
         : null;
+
+      const providerId = provider?.id || null;
 
       const workshop = {
         slug,
@@ -126,8 +131,18 @@ export default function WorkshopWizard({
         age_rating: w.age_rating || null,
         category: w.category || null,
         city: w.city || null,
-        provider: provider?.id || null,
+        provider: providerId,
       };
+
+      /* Als een verplicht veld ontbreekt, sla op als concept in plaats van
+         te falen. De aanbieder kan later aanvullen en publiceren. */
+      const missing = [
+        !providerId && "provider",
+        !workshop.category && "category",
+        !workshop.city && "city",
+        !workshop.duration_minutes && "duration_minutes",
+        !workshop.price_per_person && "price_per_person",
+      ].filter(Boolean);
 
       const isEdit = Boolean(initialWorkshop?.id);
       const url = isEdit ? `/api/workshops?id=${initialWorkshop.id}` : "/api/workshops";
@@ -140,8 +155,9 @@ export default function WorkshopWizard({
           workshop,
           inclusions: w.inclusions,
           faq: w.faq,
-          sessions: w.sessions,
+          sessions: w.sessions.filter((s) => s.date),
           media: w.media.filter((m) => m?.fileId),
+          isDraft: missing.length > 0,
         }),
       });
 
@@ -150,7 +166,12 @@ export default function WorkshopWizard({
         throw new Error(err.error || `HTTP ${res.status}`);
       }
 
-      setDone(true);
+      if (missing.length > 0) {
+        setSaveError(`Opgeslagen als concept. Nog aanvullen: ${missing.join(", ")}.`);
+        setDraftSaved(true);
+      } else {
+        setDone(true);
+      }
     } catch (err) {
       setSaveError(err.message || "Opslaan mislukt");
     } finally {
@@ -207,7 +228,7 @@ export default function WorkshopWizard({
           workshop,
           inclusions: w.inclusions,
           faq: w.faq,
-          sessions: w.sessions,
+          sessions: w.sessions.filter((s) => s.date),
           media: w.media.filter((m) => m?.fileId),
           isDraft: true,
         }),
@@ -371,11 +392,11 @@ export default function WorkshopWizard({
                     </Field>
                   </div>
                   <div className="ww-row ww-row--2">
-                    <Field label="Minimaal aantal deelnemers">
-                      <input className="ww-input" value={w.min_participants} onChange={set("min_participants")} inputMode="numeric" />
+                    <Field label="Minimaal aantal deelnemers" hint="Hieronder annuleren we automatisch en bieden we de gast een andere datum.">
+                      <input className="ww-input" value={w.min_participants} onChange={set("min_participants")} inputMode="numeric" placeholder="4" />
                     </Field>
                     <Field label="Maximaal aantal deelnemers">
-                      <input className="ww-input" value={w.max_participants} onChange={set("max_participants")} inputMode="numeric" />
+                      <input className="ww-input" value={w.max_participants} onChange={set("max_participants")} inputMode="numeric" placeholder="12" />
                     </Field>
                   </div>
                   <Field label="Waar geef je de workshop?">
@@ -414,13 +435,27 @@ export default function WorkshopWizard({
 
               {step === 3 && (
                 <>
-                  <Field label="Foto's" hint="Minimaal een, maximaal zes. Eerste foto wordt de omslag.">
+                  <Field label="Foto's" hint="Minimaal een, maximaal zes. Eerste foto wordt de omslag. Sleep om te herschikken.">
                     <div className="ww-mediagrid">
                       {w.media.map((m, i) => (
-                        <div className="ww-mediaslot" key={i} data-filled={m?.fileId ? "true" : "false"}>
+                        <div className="ww-mediaslot" key={i} data-filled={m?.fileId ? "true" : "false"}
+                          draggable={m?.fileId ? "true" : "false"}
+                          onDragStart={() => setDragIndex(i)}
+                          onDragOver={(e) => { e.preventDefault(); }}
+                          onDrop={() => {
+                            if (dragIndex === null || dragIndex === i) return;
+                            const next = [...w.media];
+                            const [moved] = next.splice(dragIndex, 1);
+                            next.splice(i, 0, moved);
+                            put("media", next);
+                            setDragIndex(null);
+                          }}
+                          onDragEnd={() => setDragIndex(null)}
+                          style={dragIndex === i ? { opacity: 0.4 } : undefined}>
                           {m?.fileId ? (
                             <>
-                              <img src={`/api/proxy/${m.fileId}`} alt={m.alt || ""} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 14 }} />
+                              <img src={`/api/proxy/${m.fileId}`} alt={m.alt || ""} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 14, pointerEvents: "none" }} />
+                              {i === 0 && <span className="ww-media-badge">Omslag</span>}
                               <button className="ww-listrow-del" style={{ position: "absolute", top: 6, right: 6, width: 32, height: 32 }}
                                 onClick={() => put("media", w.media.map((x, j) => j === i ? null : x))}>
                                 <Icon name="close" size={16} />
@@ -488,6 +523,54 @@ export default function WorkshopWizard({
 
               {step === 5 && (
                 <>
+                  <Field label="Herhalende datums" hint="Bijv. elke maandag. We genereren de komende weken voor je.">
+                    <div className="ww-row ww-row--2" style={{ alignItems: "flex-end" }}>
+                      <Switch on={w.recurring.enabled} onChange={(v) => put("recurring", { ...w.recurring, enabled: v })}
+                        title="Herhalen aanzetten" />
+                    </div>
+                    {w.recurring.enabled && (
+                      <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+                        <Field label="Dag van de week">
+                          <select className="ww-select" value={w.recurring.weekday}
+                            onChange={(e) => put("recurring", { ...w.recurring, weekday: Number(e.target.value) })}>
+                            {["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"].map((d, i) =>
+                              <option key={d} value={i}>{d}</option>)}
+                          </select>
+                        </Field>
+                        <Field label="Aantal weken">
+                          <input className="ww-input" type="number" min="1" max="52" value={w.recurring.weeks}
+                            onChange={(e) => put("recurring", { ...w.recurring, weeks: Number(e.target.value) })} style={{ width: 80 }} />
+                        </Field>
+                        <Field label="Tijd">
+                          <input className="ww-input" type="time" value={w.recurring.time}
+                            onChange={(e) => put("recurring", { ...w.recurring, time: e.target.value })} />
+                        </Field>
+                        <Field label="Capaciteit">
+                          <input className="ww-input" type="number" value={w.recurring.capacity}
+                            onChange={(e) => put("recurring", { ...w.recurring, capacity: e.target.value })} style={{ width: 80 }} />
+                        </Field>
+                        <Button variant="coral" size="sm" onClick={() => {
+                          const { weekday, weeks, time, capacity } = w.recurring;
+                          const today = new Date();
+                          const next = new Date(today);
+                          next.setDate(today.getDate() + ((7 - today.getDay() + weekday) % 7 || 7));
+                          const newSessions = [];
+                          for (let i = 0; i < weeks; i++) {
+                            const d = new Date(next);
+                            d.setDate(next.getDate() + i * 7);
+                            newSessions.push({
+                              date: d.toISOString().slice(0, 10),
+                              time,
+                              capacity: String(capacity),
+                            });
+                          }
+                          const existing = w.sessions.filter((s) => s.date);
+                          put("sessions", [...existing, ...newSessions]);
+                        }}>Genereer datums</Button>
+                      </div>
+                    )}
+                  </Field>
+
                   <Field label="Datums toevoegen" hint="Voeg de eerste datums toe. Je kunt er later altijd meer zetten.">
                     <div>
                       {w.sessions.map((s, i) => (

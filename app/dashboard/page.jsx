@@ -1,18 +1,20 @@
 import Dashboard from "@/components/pages/Dashboard";
 import {
   getDashboardSessions, getDashboardBookings, getDashboardWorkshops,
-  getDashboardVenues, getCities,
+  getDashboardVenues, getProviderProfile, getCategories, getCities,
   DASH_NAV, DASH_TITLES,
 } from "@/lib/directus";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  const [sessions, bookings, workshops, venues, cities] = await Promise.all([
+  const [sessions, bookings, workshops, venues, provider, categories, cities] = await Promise.all([
     getDashboardSessions(),
     getDashboardBookings(),
     getDashboardWorkshops(),
     getDashboardVenues(),
+    getProviderProfile(),
+    getCategories(),
     getCities(),
   ]);
   return (
@@ -22,6 +24,8 @@ export default async function Page() {
       bookings={bookings}
       workshops={workshops}
       venues={venues}
+      provider={provider}
+      categories={categories}
       cities={cities}
       nav={DASH_NAV}
       titles={DASH_TITLES}

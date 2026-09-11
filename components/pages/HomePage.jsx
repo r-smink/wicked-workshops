@@ -100,7 +100,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
                   ))}
                 </ul>
               </div>
-              <div><Button variant="coral" size="lg" block>Vraag een teamuitje aan</Button></div>
+              <div><Button variant="coral" size="lg" block onClick={() => go({ name: "business" })}>Vraag een teamuitje aan</Button></div>
             </div>
           </div>
         </section>
@@ -126,20 +126,20 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
         </section>
 
         <section className="ww-section">
-          <div className="ww-grid--2" style={{ gridTemplateColumns: "2fr", gap: 18 }}>
+          <div className="ww-grid--2" style={{ gridTemplateColumns: "2 1fr", gap: 18 }}>
             <div className="ww-band ww-band--cloud ww-band-split">
               <div>
                 <h2>Heb jij een talent om te delen?</h2>
                 <p>Start je eerste workshop, bepaal je eigen prijs en bereik heel Nederland.</p>
               </div>
-              <Button variant="primary" size="lg">Word workshopgever</Button>
+              <Button variant="primary" size="lg" onClick={() => go({ name: "auth", tab: "provider" })}>Word workshopgever</Button>
             </div>
             <div className="ww-band ww-band--coral ww-band-split">
               <div>
                 <h2>Geef een workshop cadeau</h2>
                 <p>Een beleving die ze niet vergeten, met de Wicked cadeaubon. De ontvanger kiest zelf de datum.</p>
               </div>
-              <Button variant="coral" size="lg" icon="gift">Bekijk de cadeaubon</Button>
+              <Button variant="coral" size="lg" icon="gift" onClick={() => go({ name: "giftcard" })}>Bekijk de cadeaubon</Button>
             </div>
           </div>
         </section>

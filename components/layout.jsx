@@ -85,7 +85,7 @@ export function MobileMenu({ go, onClose }) {
           </div>
 
           <h4>Meer</h4>
-          {[["Voor bedrijven", { name: "listing" }], ["Cadeaubon", null],
+          {[["Voor bedrijven", { name: "business" }], ["Cadeaubon", { name: "giftcard" }],
             ["Inspiratie", { name: "blog" }], ["Over ons", null]].map(([l, to]) => (
             <button className="ww-mrow" key={l} onClick={() => (to ? nav(to) : onClose())}>
               <span style={{ flex: 1 }}><strong>{l}</strong></span>
@@ -135,8 +135,8 @@ export function Header() {
           </button>
           <a onClick={() => go({ name: "listing" })}>Ontdek</a>
           <a onClick={() => go({ name: "blog" })}>Inspiratie</a>
-          <a>Voor bedrijven</a>
-          <a>Cadeaubon</a>
+          <a onClick={() => go({ name: "business" })}>Voor bedrijven</a>
+          <a onClick={() => go({ name: "giftcard" })}>Cadeaubon</a>
         </nav>
 
         <div className="ww-head-acts">
@@ -221,7 +221,7 @@ export function Footer() {
   const go = useGo();
   const cols = [
     ["Ontdekken", [["Categorieen", { name: "listing" }], ["Inspiratie", { name: "blog" }],
-      ["Cadeaubon", null], ["Teamuitjes", null]]],
+      ["Cadeaubon", { name: "giftcard" }], ["Voor bedrijven", { name: "business" }]]],
     ["Aanbieders", [["Word workshopgever", { name: "auth", tab: "provider" }],
       ["Voorbeeldprofiel", { name: "provider" }], ["Inloggen", { name: "auth", tab: "provider" }]]],
     ["Wicked", [["Over ons", null], ["Contact", null], ["Help", null]]],

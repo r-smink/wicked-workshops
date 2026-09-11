@@ -745,9 +745,12 @@ img, svg, video { display: block; max-width: 100%; }
   background:var(--mist); display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:6px; color:var(--slate); font-size:12.5px; font-weight:600; }
 .ww-mediaslot:hover { border-color:var(--brand); color:var(--brand); }
-.ww-mediaslot[data-filled="true"] { border-style:solid; border-color:transparent; padding:0; overflow:hidden; }
+.ww-mediaslot[data-filled="true"] { border-style:solid; border-color:transparent; padding:0; overflow:hidden; cursor:grab; }
+.ww-mediaslot[data-filled="true"]:active { cursor:grabbing; }
 .ww-mediaslot-tag { position:absolute; top:8px; left:8px; z-index:3; background:rgba(255,255,255,.94);
   border-radius:999px; padding:3px 9px; font-size:11px; font-weight:800; color:var(--ink); }
+.ww-media-badge { position:absolute; bottom:8px; left:8px; z-index:3; background:var(--brand);
+  border-radius:999px; padding:3px 10px; font-size:10.5px; font-weight:800; color:#fff; }
 .ww-summary li { display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
   padding:11px 0; border-bottom:1px solid var(--line); font-size:14.5px; }
 .ww-summary li:last-child { border-bottom:0; }
