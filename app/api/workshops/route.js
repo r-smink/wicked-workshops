@@ -3,6 +3,10 @@ import { directusCreate, directusUpdate, directusDeleteByFilter, isDirectusConfi
 
 export const dynamic = "force-dynamic";
 
+/* UUID validatie - relatie-velden moeten UUIDs zijn, geen strings */
+const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+const safeUUID = (val) => (val && isUUID(val) ? val : null);
+
 /* Maakt een nieuwe workshop aan in Directus met status "draft".
    De aanbieder vult het wizard-formulier in; na moderatie wordt
    de status door een beheerder naar "published" gezet.
@@ -68,10 +72,10 @@ export async function POST(request) {
     giftcard_eligible: workshop.giftcard_eligible ?? false,
     location_inherits_provider: workshop.location_inherits_provider ?? true,
     neighbourhood: workshop.neighbourhood || null,
-    category: workshop.category || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
-    city: workshop.city || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
-    provider: workshop.provider || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
-    age_rating: workshop.age_rating || null,
+    category: safeUUID(workshop.category) || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
+    city: safeUUID(workshop.city) || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
+    provider: safeUUID(workshop.provider) || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
+    age_rating: safeUUID(workshop.age_rating),
   });
 
   if (!created) {
@@ -191,10 +195,10 @@ export async function PATCH(request) {
     giftcard_eligible: workshop.giftcard_eligible ?? false,
     location_inherits_provider: workshop.location_inherits_provider ?? true,
     neighbourhood: workshop.neighbourhood || null,
-    category: workshop.category || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
-    city: workshop.city || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
-    provider: workshop.provider || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
-    age_rating: workshop.age_rating || null,
+    category: safeUUID(workshop.category) || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
+    city: safeUUID(workshop.city) || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
+    provider: safeUUID(workshop.provider) || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
+    age_rating: safeUUID(workshop.age_rating),
   });
 
   if (!updated) {
