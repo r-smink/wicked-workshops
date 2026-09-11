@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://wickedworkshops.nl";
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
       <body className="ww">
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
