@@ -76,7 +76,7 @@ function formToUser(body) {
 }
 
 export async function GET() {
-  const token = getAccessToken();
+  const token = await getAccessToken();
   if (!token) {
     return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   }
@@ -94,7 +94,7 @@ export async function GET() {
 }
 
 export async function PATCH(request) {
-  const token = getAccessToken();
+  const token = await getAccessToken();
   if (!token) {
     return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   }

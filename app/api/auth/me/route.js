@@ -13,7 +13,7 @@ export async function GET() {
     );
   }
 
-  const token = getAccessToken();
+  const token = await getAccessToken();
   if (!token) {
     return NextResponse.json({ user: null }, { status: 200 });
   }

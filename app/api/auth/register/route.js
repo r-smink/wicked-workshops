@@ -62,7 +62,7 @@ export async function POST(request) {
   }
 
   const user = await directusMe(tokens.accessToken);
-  setAuthCookies({
+  await setAuthCookies({
     accessToken: tokens.accessToken,
     user: user ? {
       id: user.id,

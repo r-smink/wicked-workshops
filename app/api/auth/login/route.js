@@ -47,7 +47,7 @@ export async function POST(request) {
     );
   }
 
-  setAuthCookies({
+  await setAuthCookies({
     accessToken: tokens.accessToken,
     user: {
       id: user.id,

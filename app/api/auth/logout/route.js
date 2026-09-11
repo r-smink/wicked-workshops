@@ -5,6 +5,6 @@ export const dynamic = "force-dynamic";
 
 /* POST /api/auth/logout — verwijdert de auth-cookies. */
 export async function POST() {
-  clearAuthCookies();
+  await clearAuthCookies();
   return NextResponse.json({ ok: true });
 }
