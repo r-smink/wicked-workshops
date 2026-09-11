@@ -44,12 +44,6 @@ export default function Dashboard({
   if (view === "wizard") {
     return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} initialWorkshop={initialWorkshop} />;
   }
-  if (view === "profile") {
-    return <ProviderProfileForm go={go} mode="edit" provider={provider} user={user} />;
-  }
-  if (view === "venue-form") {
-    return <VenueForm go={go} cities={cities} />;
-  }
 
   const [title, sub] = titles[view] || ["Dashboard", ""];
 
@@ -112,7 +106,6 @@ export default function Dashboard({
               <Stat label="Beoordeling" value={kpis?.avgRating ? String(kpis.avgRating).replace(".", ",") : "—"} sub={kpis ? `${kpis.reviewCount} reviews` : ""} />
               <Stat label="Wachtrij" value={kpis ? String(kpis.pendingBookings) : "0"} sub="wacht op antwoord" />
             </div>
-
             <section className="ww-panel">
               <div className="ww-panel-head">
                 <h2>Komende sessies</h2>
@@ -345,6 +338,14 @@ export default function Dashboard({
               </p>
             </div>
           </section>
+        )}
+
+        {view === "profile" && (
+          <ProviderProfileForm go={go} mode="edit" provider={provider} user={user} cities={cities} />
+        )}
+
+        {view === "venue-form" && (
+          <VenueForm go={go} cities={cities} />
         )}
       </main>
     </div>
