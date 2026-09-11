@@ -14,7 +14,7 @@ export default async function Page() {
   if (!user) redirect("/inloggen?tab=provider");
 
   const [provider, categories, cities] = await Promise.all([
-    getProviderProfile(),
+    getProviderProfile(user.id),
     getCategories(),
     getCities(),
   ]);

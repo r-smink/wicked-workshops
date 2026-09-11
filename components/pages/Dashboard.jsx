@@ -26,6 +26,7 @@ export default function Dashboard({
   sessions = DASH_SESSIONS,
   bookings = DASH_BOOKINGS,
   workshops = DASH_WORKSHOPS,
+  reviews = [],
   venues = DASH_VENUES,
   nav = DASH_NAV,
   titles = DASH_TITLES,
@@ -33,6 +34,7 @@ export default function Dashboard({
   categories = null,
   cities = [],
   initialWorkshop = null,
+  kpis = null,
 }) {
   const go = useGo();
   const [view, setView] = useState(initialView);
@@ -55,11 +57,11 @@ export default function Dashboard({
       <aside className={`ww-dash-side${menuOpen ? " ww-dash-side--open" : ""}`}>
         <div className="ww-dash-brand">
           <a className="ww-logo" onClick={() => go({ name: "home" })}>
-            <Avatar name="Marco Rossi" size={36} />
+            <Avatar name={provider?.display_name || "Wicked"} size={36} />
           </a>
           <div style={{ minWidth: 0 }}>
-            <strong style={{ fontSize: 14, display: "block" }}>Marco Rossi</strong>
-            <span className="ww-meta" style={{ fontSize: 12.5 }}>Kookstudio De Pan</span>
+            <strong style={{ fontSize: 14, display: "block" }}>{provider?.display_name || "Aanbieder"}</strong>
+            <span className="ww-meta" style={{ fontSize: 12.5 }}>{provider?.location_name || provider?.profession || ""}</span>
           </div>
           <button className="ww-iconbtn ww-dash-close" aria-label="Menu sluiten" onClick={() => setMenuOpen(false)}>
             <Icon name="close" />
@@ -104,10 +106,10 @@ export default function Dashboard({
         {view === "overview" && (
           <>
             <div className="ww-kpis">
-              <Stat label="Deze maand" value="€ 1.245" sub="8 boekingen" accent />
-              <Stat label="Deelnemers" value="34" sub="6 komende sessies" />
-              <Stat label="Beoordeling" value="4,9" sub="412 reviews" />
-              <Stat label="Wachtrij" value="2" sub="wacht op antwoord" />
+              <Stat label="Deze maand" value={kpis ? `€ ${kpis.monthTotal.toLocaleString("nl-NL")}` : "€ 0"} sub={kpis ? `${kpis.monthBookings} boekingen` : ""} accent />
+              <Stat label="Deelnemers" value={kpis ? String(kpis.totalParticipants) : "0"} sub={kpis ? `${kpis.upcomingSessions} komende sessies` : ""} />
+              <Stat label="Beoordeling" value={kpis?.avgRating ? String(kpis.avgRating).replace(".", ",") : "—"} sub={kpis ? `${kpis.reviewCount} reviews` : ""} />
+              <Stat label="Wachtrij" value={kpis ? String(kpis.pendingBookings) : "0"} sub="wacht op antwoord" />
             </div>
 
             <section className="ww-panel">
@@ -172,27 +174,31 @@ export default function Dashboard({
               <Button variant="primary" size="sm" icon="plus" onClick={() => setView("wizard")}>Toevoegen</Button>
             </div>
             <div className="ww-panel-body">
-              {workshops.map((w) => (
-                <article className="ww-dws" key={w.title}>
-                  <Photo icon={w.icon} style={{ width: 80, height: 64, borderRadius: 12, flex: "none" }} />
-                  <div style={{ flex: 1, minWidth: 200 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <h3>{w.title}</h3><Badge kind={w.status} />
+              {workshops.length === 0 ? (
+                <p className="ww-meta" style={{ padding: 24 }}>Nog geen workshops. Klik op "Toevoegen" om je eerste workshop aan te maken.</p>
+              ) : (
+                workshops.map((w) => (
+                  <article className="ww-dws" key={w.id || w.title}>
+                    <Photo icon={w.icon} style={{ width: 80, height: 64, borderRadius: 12, flex: "none" }} />
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <h3>{w.title}</h3><Badge kind={w.status} />
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
+                        {w.rating != null ? <Rating value={w.rating} count={w.count} /> : <span className="ww-meta">Nog geen reviews</span>}
+                        <span className="ww-meta">{w.sessions} sessies</span>
+                        <span className="ww-meta">€ {w.price} p.p.</span>
+                      </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
-                      {w.rating != null ? <Rating value={w.rating} count={w.count} /> : <span className="ww-meta">Nog geen reviews</span>}
-                      <span className="ww-meta">{w.sessions} sessies</span>
-                      <span className="ww-meta">€ {w.price} p.p.</span>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button className="ww-iconbtn" aria-label="Bewerken" onClick={() => { window.location.href = `/dashboard/workshops/${w.id}/bewerken`; }}>
+                        <Icon name="edit" size={17} />
+                      </button>
+                      <button className="ww-iconbtn" aria-label="Bekijken"><Icon name="eye" size={17} /></button>
                     </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button className="ww-iconbtn" aria-label="Bewerken" onClick={() => { window.location.href = `/dashboard/workshops/${w.id}/bewerken`; }}>
-                      <Icon name="edit" size={17} />
-                    </button>
-                    <button className="ww-iconbtn" aria-label="Bekijken"><Icon name="eye" size={17} /></button>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                ))
+              )}
             </div>
           </section>
         )}
@@ -204,21 +210,25 @@ export default function Dashboard({
               <Button variant="primary" size="sm" icon="plus">Datum toevoegen</Button>
             </div>
             <div className="ww-tablewrap">
-              <table className="ww-table">
-                <thead>
-                  <tr><th>Datum</th><th>Workshop</th><th>Bezetting</th><th style={{width:100}}></th></tr>
-                </thead>
-                <tbody>
-                  {sessions.map((s, i) => (
-                    <tr key={i}>
-                      <td><strong>{s.date}</strong><span className="ww-meta" style={{display:"block",fontSize:12.5}}>{s.time}</span></td>
-                      <td>{s.ws}</td>
-                      <td><span className="ww-cap"><Icon name="users" size={15} /> {s.booked}/{s.cap}</span></td>
-                      <td><div className="ww-cap-bar"><i style={{ width: `${s.cap ? (s.booked / s.cap) * 100 : 0}%` }} /></div></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {sessions.length === 0 ? (
+                <p className="ww-meta" style={{ padding: 24 }}>Nog geen sessies. Voeg datums toe aan je workshops zodat mensen kunnen boeken.</p>
+              ) : (
+                <table className="ww-table">
+                  <thead>
+                    <tr><th>Datum</th><th>Workshop</th><th>Bezetting</th><th style={{width:100}}></th></tr>
+                  </thead>
+                  <tbody>
+                    {sessions.map((s, i) => (
+                      <tr key={i}>
+                        <td><strong>{s.date}</strong><span className="ww-meta" style={{display:"block",fontSize:12.5}}>{s.time}</span></td>
+                        <td>{s.ws}</td>
+                        <td><span className="ww-cap"><Icon name="users" size={15} /> {s.booked}/{s.cap}</span></td>
+                        <td><div className="ww-cap-bar"><i style={{ width: `${s.cap ? (s.booked / s.cap) * 100 : 0}%` }} /></div></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
         )}
@@ -227,26 +237,30 @@ export default function Dashboard({
           <section className="ww-panel">
             <div className="ww-panel-head"><h2>Boekingen</h2></div>
             <div className="ww-tablewrap">
-              <table className="ww-table">
-                <thead>
-                  <tr><th>Code</th><th>Naam</th><th>Workshop</th><th>Pers.</th><th>Totaal</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  {bookings.map((b) => {
-                    const [cls, label] = STATUS_LABEL[b.status] || ["", b.status];
-                    return (
-                      <tr key={b.code}>
-                        <td><strong>{b.code}</strong></td>
-                        <td>{b.name}</td>
-                        <td>{b.ws} · {b.date}</td>
-                        <td>{b.people}p</td>
-                        <td>€ {b.total}</td>
-                        <td><span className={`ww-badge ${cls}`}>{label}</span></td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              {bookings.length === 0 ? (
+                <p className="ww-meta" style={{ padding: 24 }}>Nog geen boekingen. Zodra iemand een workshop boekt, verschijnt dit hier.</p>
+              ) : (
+                <table className="ww-table">
+                  <thead>
+                    <tr><th>Code</th><th>Naam</th><th>Workshop</th><th>Pers.</th><th>Totaal</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    {bookings.map((b) => {
+                      const [cls, label] = STATUS_LABEL[b.status] || ["", b.status];
+                      return (
+                        <tr key={b.code || b.id}>
+                          <td><strong>{b.code}</strong></td>
+                          <td>{b.name}</td>
+                          <td>{b.ws} · {b.date}</td>
+                          <td>{b.people}p</td>
+                          <td>€ {b.total}</td>
+                          <td><span className={`ww-badge ${cls}`}>{label}</span></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
         )}
@@ -255,26 +269,28 @@ export default function Dashboard({
           <section className="ww-panel">
             <div className="ww-panel-head"><h2>Reviews</h2></div>
             <div className="ww-panel-body">
-              <p className="ww-meta">Je hebt 412 reviews over 3 workshops. Gemiddeld 4,9 sterren.</p>
-              <div className="ww-dreviews">
-                {[
-                  ["Sanne", "juli 2026", "Italiaans koken", "Marco maakt er echt een feestje van."],
-                  ["Thomas", "juni 2026", "Pasta masterclass", "Dacht dat ik pasta kon maken. Bleek van niet."],
-                  ["Iris", "mei 2026", "Tiramisu & dolci", "Gezellige avond met vriendinnen."],
-                ].map(([n, w, ws, body]) => (
-                  <article className="ww-dreview" key={n}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <Avatar name={n} size={36} />
-                      <div><strong>{n}</strong><span className="ww-meta"> · {w} · {ws}</span></div>
-                      <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
-                        <Star size={14} />5,0
-                      </span>
-                    </div>
-                    <p style={{ marginTop: 10 }}>{body}</p>
-                    <Button variant="outline" size="sm" style={{ marginTop: 10 }}>Reageren</Button>
-                  </article>
-                ))}
-              </div>
+              {reviews.length === 0 ? (
+                <p className="ww-meta">Nog geen reviews. Zodra deelnemers een workshop hebben gevolgd, verschijnen hun beoordelingen hier.</p>
+              ) : (
+                <>
+                  <p className="ww-meta">
+                    Je hebt {reviews.length} review{reviews.length !== 1 ? "s" : ""}.
+                    {provider?.rating ? ` Gemiddeld ${String(provider.rating).replace(".", ",")} sterren.` : ""}
+                  </p>
+                  <div className="ww-dreviews">
+                    {reviews.map((r, i) => (
+                      <article className="ww-dreview" key={i}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <Avatar name={r.name || "Deelnemer"} size={36} />
+                          <div><strong>{r.name || "Deelnemer"}</strong><span className="ww-meta"> · {r.when || ""}{r.ws ? ` · ${r.ws}` : ""}</span></div>
+                        </div>
+                        <p style={{ marginTop: 10 }}>{r.body || ""}</p>
+                        <Button variant="outline" size="sm" style={{ marginTop: 10 }}>Reageren</Button>
+                      </article>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </section>
         )}
@@ -318,28 +334,14 @@ export default function Dashboard({
             <div className="ww-panel-head"><h2>Uitbetalingen</h2></div>
             <div className="ww-panel-body">
               <div className="ww-kpis">
-                <Stat label="Deze maand" value="€ 1.245" sub="wordt 18 aug uitbetaald" accent />
-                <Stat label="Vorige maand" value="€ 980" sub="uitbetaald 21 jul" />
-                <Stat label="Tot nu toe" value="€ 12.480" sub="sinds januari 2026" />
+                <Stat label="Deze maand" value={kpis ? `€ ${kpis.monthTotal.toLocaleString("nl-NL")}` : "€ 0"} sub={kpis ? `${kpis.monthBookings} boekingen` : ""} accent />
+                <Stat label="Totaal dit jaar" value="—" sub="nog niet beschikbaar" />
+                <Stat label="Volgende uitbetaling" value="—" sub="automatisch elke maand" />
               </div>
-              <div className="ww-tablewrap">
-                <table className="ww-table">
-                  <tbody>
-                    {[
-                      ["21 jul 2026", "€ 980", "juni 2026", "uitbetaald"],
-                      ["21 jun 2026", "€ 1.120", "mei 2026", "uitbetaald"],
-                      ["21 mei 2026", "€ 845", "april 2026", "uitbetaald"],
-                    ].map(([d, a, p, s]) => (
-                      <tr key={d}>
-                        <td><strong>{d}</strong></td>
-                        <td>{p}</td>
-                        <td>{a}</td>
-                        <td><span className="ww-badge ww-badge--draft">{s}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <p className="ww-meta" style={{ marginTop: 16 }}>
+                Uitbetalingen worden automatisch verwerkt aan het einde van elke maand.
+                Zorg dat je IBAN en tenaamstelling ingevuld zijn in je profiel.
+              </p>
             </div>
           </section>
         )}
