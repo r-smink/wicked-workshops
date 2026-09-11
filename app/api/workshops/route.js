@@ -23,23 +23,27 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { workshop, inclusions, faq, sessions, media } = body;
+  const { workshop, inclusions, faq, sessions, media, isDraft } = body;
 
   if (!workshop || !workshop.title) {
     return NextResponse.json({ error: "Titel is verplicht" }, { status: 400 });
   }
 
-  const missing = [];
-  if (!workshop.provider) missing.push("provider");
-  if (!workshop.category) missing.push("category");
-  if (!workshop.city) missing.push("city");
-  if (!workshop.duration_minutes) missing.push("duration_minutes");
-  if (!workshop.price_per_person) missing.push("price_per_person");
-  if (missing.length) {
-    return NextResponse.json(
-      { error: `Verplichte velden ontbreken: ${missing.join(", ")}` },
-      { status: 400 }
-    );
+  /* Bij opslaan als concept slaan we de verplichte velden over — de
+     aanbieder kan later terugkomen om alles in te vullen. */
+  if (!isDraft) {
+    const missing = [];
+    if (!workshop.provider) missing.push("provider");
+    if (!workshop.category) missing.push("category");
+    if (!workshop.city) missing.push("city");
+    if (!workshop.duration_minutes) missing.push("duration_minutes");
+    if (!workshop.price_per_person) missing.push("price_per_person");
+    if (missing.length) {
+      return NextResponse.json(
+        { error: `Verplichte velden ontbreken: ${missing.join(", ")}` },
+        { status: 400 }
+      );
+    }
   }
 
   /* Hoofdrecord aanmaken met status "draft" */
@@ -161,7 +165,7 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { workshop, inclusions, faq, sessions } = body;
+  const { workshop, inclusions, faq, sessions, media } = body;
 
   if (!workshop || !workshop.title) {
     return NextResponse.json({ error: "Titel is verplicht" }, { status: 400 });
@@ -196,6 +200,20 @@ export async function PATCH(request) {
       { error: "Kon workshop niet bijwerken in Directus" },
       { status: 500 }
     );
+  }
+
+  if (Array.isArray(media)) {
+    await directusDeleteByFilter("workshop_media", { workshop: { _eq: id } });
+    for (let i = 0; i < media.length; i++) {
+      if (media[i]?.fileId) {
+        await directusCreate("workshop_media", {
+          workshop: id,
+          file: media[i].fileId,
+          alt: media[i].alt || "",
+          sort: i + 1,
+        });
+      }
+    }
   }
 
   if (Array.isArray(inclusions)) {
