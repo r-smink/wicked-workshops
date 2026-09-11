@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
+import { useAuth } from "@/lib/use-auth";
 import { CATEGORIES, OCCASIONS, MOBILE_CITIES } from "@/lib/mock-data";
-import { Icon, Logo, Wordmark, Button, Chip } from "@/components/ui";
+import { Icon, Logo, Wordmark, Button, Chip, Avatar } from "@/components/ui";
 
 export function useIsMobile(query = "(max-width: 767px)") {
   const [match, setMatch] = useState(false);
@@ -37,6 +38,8 @@ export function ReadMore({ children, label = "Lees meer" }) {
 
 /* De zijlade vervangt op mobiel het mega-menu */
 export function MobileMenu({ go, onClose }) {
+  const { user, logout } = useAuth();
+
   useEffect(() => {
     const esc = (e) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", esc);
@@ -44,6 +47,7 @@ export function MobileMenu({ go, onClose }) {
   }, [onClose]);
 
   const nav = (to) => { onClose(); go(to); };
+  const handleLogout = async () => { await logout(); onClose(); window.location.href = "/"; };
 
   return (
     <div className="ww-drawer-wrap" role="dialog" aria-label="Menu">
@@ -95,12 +99,23 @@ export function MobileMenu({ go, onClose }) {
         </div>
 
         <div className="ww-mdrawer-foot">
-          <Button variant="outline" block onClick={() => nav({ name: "auth", tab: "provider" })}>
-            Word workshopgever
-          </Button>
-          <Button variant="primary" block onClick={() => nav({ name: "auth", tab: "visitor" })}>
-            Inloggen
-          </Button>
+          {user ? (
+            <>
+              <Button variant="outline" block icon="user" onClick={() => nav({ name: "dashboard" })}>
+                Mijn profiel
+              </Button>
+              <Button variant="ghost" block onClick={handleLogout}>Uitloggen</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" block onClick={() => nav({ name: "auth", tab: "provider" })}>
+                Word workshopgever
+              </Button>
+              <Button variant="primary" block onClick={() => nav({ name: "auth", tab: "visitor" })}>
+                Inloggen
+              </Button>
+            </>
+          )}
         </div>
       </nav>
     </div>
@@ -110,6 +125,7 @@ export function MobileMenu({ go, onClose }) {
 /* Gedeelde navigatie */
 export function Header() {
   const go = useGo();
+  const { user, logout } = useAuth();
   const [mega, setMega] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const mobile = useIsMobile("(max-width: 1023px)");
@@ -140,10 +156,26 @@ export function Header() {
         </nav>
 
         <div className="ww-head-acts">
-          <button className="ww-btn ww-btn--ghost" onClick={() => go({ name: "auth", tab: "provider" })}>
-            Word workshopgever
-          </button>
-          <Button variant="outline" onClick={() => go({ name: "auth", tab: "visitor" })}>Inloggen</Button>
+          {user ? (
+            <>
+              <button className="ww-btn ww-btn--ghost" onClick={() => go({ name: "dashboard" })}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Avatar name={`${user.first_name} ${user.last_name}`.trim() || user.email} size={26} />
+                  Mijn profiel
+                </span>
+              </button>
+              <Button variant="outline" onClick={async () => { await logout(); window.location.href = "/"; }}>
+                Uitloggen
+              </Button>
+            </>
+          ) : (
+            <>
+              <button className="ww-btn ww-btn--ghost" onClick={() => go({ name: "auth", tab: "provider" })}>
+                Word workshopgever
+              </button>
+              <Button variant="outline" onClick={() => go({ name: "auth", tab: "visitor" })}>Inloggen</Button>
+            </>
+          )}
         </div>
 
         <div className="ww-mob-acts">
@@ -200,11 +232,12 @@ export function Header() {
 
 export function BottomNav({ route }) {
   const go = useGo();
+  const { user } = useAuth();
   const items = [
     { key: "home", label: "Ontdek", icon: "compass", to: { name: "home" } },
     { key: "listing", label: "Zoeken", icon: "search", to: { name: "listing" } },
     { key: "fav", label: "Favorieten", icon: "heart", to: { name: "listing" } },
-    { key: "profile", label: "Profiel", icon: "user", to: { name: "auth", tab: "visitor" } },
+    { key: "profile", label: "Profiel", icon: "user", to: user ? { name: "dashboard" } : { name: "auth", tab: "visitor" } },
   ];
   return (
     <nav className="ww-bottom">
@@ -219,11 +252,14 @@ export function BottomNav({ route }) {
 
 export function Footer() {
   const go = useGo();
+  const { user } = useAuth();
   const cols = [
     ["Ontdekken", [["Categorieen", { name: "listing" }], ["Inspiratie", { name: "blog" }],
       ["Cadeaubon", { name: "giftcard" }], ["Voor bedrijven", { name: "business" }]]],
-    ["Aanbieders", [["Word workshopgever", { name: "auth", tab: "provider" }],
-      ["Voorbeeldprofiel", { name: "provider" }], ["Inloggen", { name: "auth", tab: "provider" }]]],
+    ["Aanbieders", user
+      ? [["Mijn dashboard", { name: "dashboard" }], ["Voorbeeldprofiel", { name: "provider" }]]
+      : [["Word workshopgever", { name: "auth", tab: "provider" }],
+        ["Voorbeeldprofiel", { name: "provider" }], ["Inloggen", { name: "auth", tab: "provider" }]]],
     ["Wicked", [["Over ons", null], ["Contact", null], ["Help", null]]],
   ];
   return (
