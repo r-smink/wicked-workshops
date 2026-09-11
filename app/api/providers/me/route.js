@@ -80,7 +80,8 @@ export async function GET() {
   }
 
   const provider = await directusFetch(
-    `/items/providers?filter[user]=${user.id}&fields=id,slug,display_name,profession,bio_short,bio_long,neighbourhood,location_name,address,postal_code,lat,lng,active_since,verified,accepts_groups,max_group_size,response_time_minutes,rating_avg,rating_count,participants_count,workshops_count,is_top_rated,kvk_number,vat_number,city.name,city.slug&single`
+    `/items/providers?filter[user]=${user.id}&fields=id,slug,display_name,profession,bio_short,bio_long,neighbourhood,location_name,address,postal_code,lat,lng,active_since,verified,accepts_groups,max_group_size,response_time_minutes,rating_avg,rating_count,participants_count,workshops_count,is_top_rated,kvk_number,vat_number,city.name,city.slug&single`,
+    { noCache: true }
   );
 
   return NextResponse.json({ user, provider });
@@ -103,7 +104,8 @@ export async function PATCH(request) {
   await directusUpdate("directus_users", user.id, formToUser(body));
 
   const existingProvider = await directusFetch(
-    `/items/providers?filter[user]=${user.id}&fields=id,slug,display_name,profession,bio_short,bio_long,neighbourhood,location_name,address,postal_code,lat,lng,active_since,verified,accepts_groups,max_group_size,response_time_minutes,rating_avg,rating_count,participants_count,workshops_count,is_top_rated,kvk_number,vat_number,city.name,city.slug,details&single`
+    `/items/providers?filter[user]=${user.id}&fields=id,slug,display_name,profession,bio_short,bio_long,neighbourhood,location_name,address,postal_code,lat,lng,active_since,verified,accepts_groups,max_group_size,response_time_minutes,rating_avg,rating_count,participants_count,workshops_count,is_top_rated,kvk_number,vat_number,city.name,city.slug,details&single`,
+    { noCache: true }
   );
   if (!existingProvider?.id) {
     return NextResponse.json({ error: "Geen provider gevonden voor dit account" }, { status: 404 });
