@@ -98,11 +98,9 @@ export async function PATCH(request) {
 
   const body = await request.json().catch(() => ({}));
 
-  /* Eerst de Directus user bijwerken. */
-  const userUpdate = await directusUpdate("directus_users", user.id, formToUser(body));
-  if (!userUpdate) {
-    return NextResponse.json({ error: "Gebruiker kon niet worden bijgewerkt" }, { status: 500 });
-  }
+  /* Eerst de Directus user bijwerken. Niet-blokkerend: als dit mislukt
+     gaan we toch door met de provider-update. */
+  await directusUpdate("directus_users", user.id, formToUser(body));
 
   const existingProvider = await directusFetch(
     `/items/providers?filter[user_created]=${user.id}&fields=id,slug,display_name,profession,bio_short,bio_long,neighbourhood,location_name,address,postal_code,lat,lng,active_since,verified,accepts_groups,max_group_size,response_time_minutes,rating_avg,rating_count,participants_count,workshops_count,is_top_rated,kvk_number,vat_number,city.name,city.slug,details&single`
@@ -116,5 +114,5 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Provider kon niet worden bijgewerkt" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, provider: updated, user: userUpdate });
+  return NextResponse.json({ ok: true, provider: updated });
 }

@@ -37,7 +37,7 @@ function providerToForm(provider = null, user = null) {
     active_since: provider?.active_since || d.active_since || "",
     website: d.website || provider?.website || "",
     instagram: d.instagram || provider?.instagram || "",
-    city: typeof provider?.city === "string" ? provider.city : provider?.city?.name || d.city || "",
+    city: typeof provider?.city === "string" ? provider.city : provider?.city?.id || d.city || "",
     neighbourhood: provider?.neighbourhood || d.neighbourhood || "",
     location_name: provider?.location_name || d.location_name || "",
     location_same: d.location_same ?? provider?.location_same ?? true,
@@ -59,7 +59,7 @@ export default function ProviderProfileForm({
   mode = "signup",
   required = REQUIRED,
   langs = PROFILE_LANGS,
-  cities = PROFILE_CITIES,
+  cities = [],
   provider = null,
   user = null,
 }) {
@@ -248,7 +248,7 @@ export default function ProviderProfileForm({
               <Field label="Stad" hint="Bepaalt in welke stadpagina je aanbod verschijnt.">
                 <select className="ww-select" value={f.city} onChange={set("city")}>
                   <option value="">Kies een stad</option>
-                  {cities.map((c) => <option key={c}>{c}</option>)}
+                  {cities.map((c) => <option key={c.id || c} value={c.id || c}>{c.name || c}</option>)}
                 </select>
               </Field>
               <Field label={<>Wijk of buurt <Optional /></>}>

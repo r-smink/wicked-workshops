@@ -3,7 +3,7 @@ import Dashboard from "@/components/pages/Dashboard";
 import { requireAuth } from "@/lib/auth";
 import {
   DASH_NAV, DASH_TITLES,
-  getProviderProfile, getCategories, getCities, getWorkshopById,
+  getProviderProfile, getCategories, getCities, getWorkshopById, createProviderForUser,
 } from "@/lib/directus";
 
 export const metadata = { title: "Workshop bewerken" };
@@ -13,9 +13,14 @@ export default async function Page({ params }) {
   const user = await requireAuth();
   if (!user) redirect("/inloggen?tab=provider");
 
+  let provider = await getProviderProfile(user.id);
+  if (!provider) {
+    await createProviderForUser(user);
+    provider = await getProviderProfile(user.id);
+  }
+
   const { id } = await params;
-  const [provider, categories, cities, workshop] = await Promise.all([
-    getProviderProfile(user.id),
+  const [categories, cities, workshop] = await Promise.all([
     getCategories(),
     getCities(),
     getWorkshopById(id),

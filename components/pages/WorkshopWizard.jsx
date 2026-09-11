@@ -80,6 +80,7 @@ export default function WorkshopWizard({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [draftSaved, setDraftSaved] = useState(false);
+  const [savedId, setSavedId] = useState(initialWorkshop?.id || null);
   const [dragIndex, setDragIndex] = useState(null);
   const set = (k) => (e) => setW({ ...w, [k]: e.target.value });
   const put = (k, v) => setW({ ...w, [k]: v });
@@ -144,8 +145,9 @@ export default function WorkshopWizard({
         !workshop.price_per_person && "price_per_person",
       ].filter(Boolean);
 
-      const isEdit = Boolean(initialWorkshop?.id);
-      const url = isEdit ? `/api/workshops?id=${initialWorkshop.id}` : "/api/workshops";
+      const isEdit = Boolean(savedId || initialWorkshop?.id);
+      const editId = savedId || initialWorkshop?.id;
+      const url = isEdit ? `/api/workshops?id=${editId}` : "/api/workshops";
       const method = isEdit ? "PATCH" : "POST";
 
       const res = await fetch(url, {
@@ -165,6 +167,9 @@ export default function WorkshopWizard({
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || `HTTP ${res.status}`);
       }
+
+      const data = await res.json();
+      if (data.id) setSavedId(data.id);
 
       if (missing.length > 0) {
         setSaveError(`Opgeslagen als concept. Nog aanvullen: ${missing.join(", ")}.`);
@@ -217,8 +222,9 @@ export default function WorkshopWizard({
         provider: provider?.id || null,
       };
 
-      const isEdit = Boolean(initialWorkshop?.id);
-      const url = isEdit ? `/api/workshops?id=${initialWorkshop.id}` : "/api/workshops";
+      const isEdit = Boolean(savedId || initialWorkshop?.id);
+      const editId = savedId || initialWorkshop?.id;
+      const url = isEdit ? `/api/workshops?id=${editId}` : "/api/workshops";
       const method = isEdit ? "PATCH" : "POST";
 
       const res = await fetch(url, {
@@ -240,6 +246,7 @@ export default function WorkshopWizard({
       }
 
       const data = await res.json();
+      if (data.id) setSavedId(data.id);
       setSaveError("");
       setDraftSaved(true);
     } catch (err) {

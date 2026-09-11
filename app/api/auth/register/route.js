@@ -21,7 +21,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { email, password, first_name, last_name } = body;
+  const { email, password, first_name, last_name, role } = body;
   if (!email || !password) {
     return NextResponse.json(
       { error: "E-mailadres en wachtwoord zijn verplicht" },
@@ -42,6 +42,12 @@ export async function POST(request) {
       { error: "Kon account niet aanmaken. Misschien bestaat dit e-mailadres al." },
       { status: 400 }
     );
+  }
+
+  /* Als dit een provider-registratie is, maak direct een provider-record aan. */
+  if (role === "provider") {
+    const { createProviderForUser } = await import("@/lib/directus");
+    await createProviderForUser(created);
   }
 
   /* Log direct in zodat de gebruiker meteen door kan. */

@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth";
 import {
   getDashboardSessions, getDashboardBookings, getDashboardWorkshops,
   getDashboardReviews, getDashboardVenues, getProviderProfile, getCategories, getCities,
+  createProviderForUser,
   DASH_NAV, DASH_TITLES,
 } from "@/lib/directus";
 
@@ -16,7 +17,16 @@ export default async function Page() {
   if (!user) redirect("/inloggen?tab=provider");
 
   /* Provider ophalen die hoort bij deze user. */
-  const provider = await getProviderProfile(user.id);
+  let provider = await getProviderProfile(user.id);
+
+  /* Als er geen provider-record is, maak er een aan. */
+  if (!provider) {
+    const created = await createProviderForUser(user);
+    if (created) {
+      provider = await getProviderProfile(user.id);
+    }
+  }
+
   const pid = provider?.id || null;
 
   /* Fallback: als provider niet gevonden wordt, gebruik de user-naam. */

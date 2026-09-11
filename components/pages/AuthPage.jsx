@@ -65,6 +65,7 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
           password: form.password,
           first_name: form.first_name,
           last_name: form.last_name,
+          role: tab === "provider" ? "provider" : "visitor",
         }),
       });
       const data = await res.json();
