@@ -19,6 +19,9 @@ export default async function Page() {
   const provider = await getProviderProfile(user.id);
   const pid = provider?.id || null;
 
+  /* Fallback: als provider niet gevonden wordt, gebruik de user-naam. */
+  const displayName = provider?.display_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email || "Aanbieder";
+
   const [sessions, bookings, workshops, reviews, venues, categories, cities] = await Promise.all([
     getDashboardSessions(pid),
     getDashboardBookings(pid),
@@ -49,8 +52,13 @@ export default async function Page() {
 
   const titles = {
     ...DASH_TITLES,
-    overview: [`Hoi ${provider?.display_name?.split(" ")[0] || "there"}`, "Hier staat je week in een oogopslag."],
+    overview: [`Hoi ${displayName.split(" ")[0]}`, "Hier staat je week in een oogopslag."],
   };
+
+  /* Zorg dat provider altijd een display_name heeft voor de sidebar. */
+  const providerWithFallback = provider
+    ? { ...provider, display_name: provider.display_name || displayName }
+    : { id: null, display_name: displayName, location_name: "", profession: "" };
 
   return (
     <Dashboard
@@ -60,7 +68,7 @@ export default async function Page() {
       workshops={workshops}
       reviews={reviews}
       venues={venues}
-      provider={provider}
+      provider={providerWithFallback}
       categories={categories}
       cities={cities}
       nav={nav}

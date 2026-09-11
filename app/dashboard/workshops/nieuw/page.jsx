@@ -18,12 +18,16 @@ export default async function Page() {
     getCategories(),
     getCities(),
   ]);
+  const displayName = provider?.display_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email || "Aanbieder";
+  const providerWithFallback = provider
+    ? { ...provider, display_name: provider.display_name || displayName }
+    : { id: null, display_name: displayName, location_name: "", profession: "" };
   return (
     <Dashboard
       initialView="wizard"
       nav={DASH_NAV}
       titles={DASH_TITLES}
-      provider={provider}
+      provider={providerWithFallback}
       categories={categories}
       cities={cities}
     />

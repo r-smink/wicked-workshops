@@ -46,7 +46,9 @@ export async function POST(request) {
     }
   }
 
-  /* Hoofdrecord aanmaken met status "draft" */
+  /* Hoofdrecord aanmaken met status "draft". Bij opslaan als concept
+     vult Directus nog verplichte velden in met placeholders, anders
+     weigert Directus de record. */
   const created = await directusCreate("workshops", {
     status: "draft",
     slug: workshop.slug,
@@ -54,21 +56,21 @@ export async function POST(request) {
     subtitle: workshop.subtitle || null,
     intro: workshop.intro || null,
     description: workshop.description || null,
-    duration_minutes: workshop.duration_minutes || null,
+    duration_minutes: workshop.duration_minutes || (isDraft ? 60 : null),
     level: workshop.level || null,
     min_participants: workshop.min_participants || null,
     max_participants: workshop.max_participants || null,
     format: workshop.format || null,
-    price_per_person: workshop.price_per_person || null,
+    price_per_person: workshop.price_per_person || (isDraft ? "0.00" : null),
     group_quote_from: workshop.group_quote_from || null,
     cancellation_policy: workshop.cancellation_policy || null,
     instant_bookable: workshop.instant_bookable ?? false,
     giftcard_eligible: workshop.giftcard_eligible ?? false,
     location_inherits_provider: workshop.location_inherits_provider ?? true,
     neighbourhood: workshop.neighbourhood || null,
-    category: workshop.category || null,
-    city: workshop.city || null,
-    provider: workshop.provider || null,
+    category: workshop.category || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
+    city: workshop.city || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
+    provider: workshop.provider || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
     age_rating: workshop.age_rating || null,
   });
 
@@ -165,7 +167,7 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { workshop, inclusions, faq, sessions, media } = body;
+  const { workshop, inclusions, faq, sessions, media, isDraft } = body;
 
   if (!workshop || !workshop.title) {
     return NextResponse.json({ error: "Titel is verplicht" }, { status: 400 });
@@ -177,21 +179,21 @@ export async function PATCH(request) {
     subtitle: workshop.subtitle || null,
     intro: workshop.intro || null,
     description: workshop.description || null,
-    duration_minutes: workshop.duration_minutes || null,
+    duration_minutes: workshop.duration_minutes || (isDraft ? 60 : null),
     level: workshop.level || null,
     min_participants: workshop.min_participants || null,
     max_participants: workshop.max_participants || null,
     format: workshop.format || null,
-    price_per_person: workshop.price_per_person || null,
+    price_per_person: workshop.price_per_person || (isDraft ? "0.00" : null),
     group_quote_from: workshop.group_quote_from || null,
     cancellation_policy: workshop.cancellation_policy || null,
     instant_bookable: workshop.instant_bookable ?? false,
     giftcard_eligible: workshop.giftcard_eligible ?? false,
     location_inherits_provider: workshop.location_inherits_provider ?? true,
     neighbourhood: workshop.neighbourhood || null,
-    category: workshop.category || null,
-    city: workshop.city || null,
-    provider: workshop.provider || null,
+    category: workshop.category || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
+    city: workshop.city || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
+    provider: workshop.provider || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
     age_rating: workshop.age_rating || null,
   });
 

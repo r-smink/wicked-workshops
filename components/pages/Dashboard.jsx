@@ -61,7 +61,7 @@ export default function Dashboard({
           </a>
           <div style={{ minWidth: 0 }}>
             <strong style={{ fontSize: 14, display: "block" }}>{provider?.display_name || "Aanbieder"}</strong>
-            <span className="ww-meta" style={{ fontSize: 12.5 }}>{provider?.location_name || provider?.profession || ""}</span>
+            <span className="ww-meta" style={{ fontSize: 12.5 }}>{provider?.location_name || provider?.profession || "Wicked Workshops"}</span>
           </div>
           <button className="ww-iconbtn ww-dash-close" aria-label="Menu sluiten" onClick={() => setMenuOpen(false)}>
             <Icon name="close" />
