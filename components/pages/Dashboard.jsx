@@ -27,13 +27,15 @@ export default function Dashboard({
   workshops = DASH_WORKSHOPS,
   nav = DASH_NAV,
   titles = DASH_TITLES,
+  provider = null,
+  categories = null,
 }) {
   const go = useGo();
   const [view, setView] = useState(initialView);
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (view === "wizard") {
-    return <WorkshopWizard go={go} />;
+    return <WorkshopWizard go={go} provider={provider} categories={categories} />;
   }
   if (view === "profile") {
     return <ProviderProfileForm go={go} mode="edit" />;

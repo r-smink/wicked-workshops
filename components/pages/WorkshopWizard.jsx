@@ -19,6 +19,7 @@ export default function WorkshopWizard({
   inclusionTypes = WIZ_INCLUSION_TYPES,
   emptyWorkshop = EMPTY_WORKSHOP,
   required = WIZ_REQUIRED,
+  provider = null,
 }) {
   const goNav = useGo();
   const nav = go || goNav;
@@ -71,6 +72,8 @@ export default function WorkshopWizard({
         giftcard_eligible: w.giftcard ?? false,
         location_inherits_provider: true,
         age_rating: w.age_rating || null,
+        category: w.category || null,
+        provider: provider?.id || null,
       };
 
       const res = await fetch("/api/workshops", {
@@ -81,6 +84,7 @@ export default function WorkshopWizard({
           inclusions: w.inclusions,
           faq: w.faq,
           sessions: w.sessions,
+          media: w.media.filter((m) => m?.fileId),
         }),
       });
 
@@ -151,7 +155,7 @@ export default function WorkshopWizard({
                   <Field label="Categorie">
                     <select className="ww-select" value={w.category} onChange={set("category")}>
                       <option value="">Kies een categorie</option>
-                      {categories.map((c) => <option key={c}>{c}</option>)}
+                      {categories.map((c) => <option key={c.id || c} value={c.id || c}>{c.name || c}</option>)}
                     </select>
                   </Field>
                   <Field label="Geschikt voor" hint="Meerdere kiezen is goed.">
@@ -280,10 +284,37 @@ export default function WorkshopWizard({
                   <Field label="Foto's" hint="Minimaal een, maximaal zes. Eerste foto wordt de omslag.">
                     <div className="ww-mediagrid">
                       {w.media.map((m, i) => (
-                        <button className="ww-mediaslot" key={i} data-filled={m ? "true" : "false"}
-                          onClick={() => put("media", w.media.map((x, j) => j === i ? !x : x))}>
-                          {m ? <Photo icon="camera" /> : <span><Icon name="plus" size={22} /> Toevoegen</span>}
-                        </button>
+                        <div className="ww-mediaslot" key={i} data-filled={m?.fileId ? "true" : "false"}>
+                          {m?.fileId ? (
+                            <>
+                              <img src={`/api/proxy/${m.fileId}`} alt={m.alt || ""} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 14 }} />
+                              <button className="ww-listrow-del" style={{ position: "absolute", top: 6, right: 6, width: 32, height: 32 }}
+                                onClick={() => put("media", w.media.map((x, j) => j === i ? null : x))}>
+                                <Icon name="close" size={16} />
+                              </button>
+                            </>
+                          ) : (
+                            <label className="ww-mediaslot-label" style={{ width: "100%", height: "100%", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                              <Icon name="plus" size={22} />
+                              <span>Toevoegen</span>
+                              <input type="file" accept="image/*" style={{ display: "none" }}
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  try {
+                                    const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                    if (!res.ok) throw new Error("Upload mislukt");
+                                    const data = await res.json();
+                                    put("media", w.media.map((x, j) => j === i ? { fileId: data.id, alt: file.name } : x));
+                                  } catch (err) {
+                                    setSaveError(err.message);
+                                  }
+                                }} />
+                            </label>
+                          )}
+                        </div>
                       ))}
                     </div>
                   </Field>

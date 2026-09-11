@@ -23,7 +23,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { workshop, inclusions, faq, sessions } = body;
+  const { workshop, inclusions, faq, sessions, media } = body;
 
   if (!workshop || !workshop.title) {
     return NextResponse.json({ error: "Titel is verplicht" }, { status: 400 });
@@ -60,6 +60,20 @@ export async function POST(request) {
       { error: "Kon workshop niet opslaan in Directus" },
       { status: 500 }
     );
+  }
+
+  /* Foto's koppelen (m2m via workshop_media) */
+  if (Array.isArray(media)) {
+    for (let i = 0; i < media.length; i++) {
+      if (media[i]?.fileId) {
+        await directusCreate("workshop_media", {
+          workshop: created.id,
+          file: media[i].fileId,
+          alt: media[i].alt || "",
+          sort: i + 1,
+        });
+      }
+    }
   }
 
   /* Inbegrepen items aanmaken (m2m) */
