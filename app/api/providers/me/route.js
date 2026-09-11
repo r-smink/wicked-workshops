@@ -41,12 +41,15 @@ function formToProvider(body, existingProvider) {
   const locationAddition = body.location_same ? body.addition : null;
   const fullAddress = [locationStreet, locationHouse, locationAddition].filter(Boolean).join(" ") || existingProvider?.address || null;
 
-  return {
+  /* City moet een UUID zijn of null — geen lege string of stadsnaam */
+  const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+  const cityValue = body.city && isUUID(body.city) ? body.city : null;
+
+  const result = {
     display_name: body.display_name || null,
     profession: body.profession || null,
     bio_short: body.bio_short || null,
     bio_long: body.bio_long || null,
-    city: body.city || null,
     neighbourhood: body.neighbourhood || null,
     location_name: body.location_name || null,
     address: fullAddress,
@@ -59,6 +62,9 @@ function formToProvider(body, existingProvider) {
     payout_iban_last4: body.iban ? body.iban.slice(-4) : null,
     details,
   };
+  /* Alleen city meesturen als het een geldige UUID is */
+  if (cityValue) result.city = cityValue;
+  return result;
 }
 
 function formToUser(body) {
