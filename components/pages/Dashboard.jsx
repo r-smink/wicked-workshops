@@ -35,6 +35,7 @@ export default function Dashboard({
   cities = [],
   initialWorkshop = null,
   kpis = null,
+  user = null,
 }) {
   const go = useGo();
   const [view, setView] = useState(initialView);
@@ -44,7 +45,7 @@ export default function Dashboard({
     return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} initialWorkshop={initialWorkshop} />;
   }
   if (view === "profile") {
-    return <ProviderProfileForm go={go} mode="edit" />;
+    return <ProviderProfileForm go={go} mode="edit" provider={provider} user={user} />;
   }
   if (view === "venue-form") {
     return <VenueForm go={go} cities={cities} />;

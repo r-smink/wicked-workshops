@@ -4,23 +4,71 @@ import { useState } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import {
-  REQUIRED, EMPTY_PROFILE, MARCO_PROFILE, PROFILE_LANGS, PROFILE_CITIES,
+  REQUIRED, EMPTY_PROFILE, PROFILE_LANGS, PROFILE_CITIES,
 } from "@/lib/mock-data";
 import { Icon, Button, Chip, Avatar, Field, Switch, Optional } from "@/components/ui";
+
+function providerToForm(provider = null, user = null) {
+  if (!provider && !user) return EMPTY_PROFILE;
+  return {
+    ...EMPTY_PROFILE,
+    first_name: user?.first_name || provider?.first_name || "",
+    last_name: user?.last_name || provider?.last_name || "",
+    email: user?.email || provider?.email || "",
+    phone: provider?.phone || "",
+    birth_date: provider?.birth_date || "",
+    street: provider?.street || "",
+    house_number: provider?.house_number || "",
+    addition: provider?.addition || "",
+    postal_code: provider?.postal_code || "",
+    residence: provider?.residence || "",
+    country: provider?.country || "Nederland",
+    company_name: provider?.company_name || "",
+    kvk_number: provider?.kvk_number || "",
+    vat_number: provider?.vat_number || "",
+    vat_liable: provider?.vat_liable ?? true,
+    kor: provider?.kor ?? false,
+    display_name: provider?.display_name || [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "",
+    profession: provider?.profession || "",
+    bio_short: provider?.bio_short || "",
+    bio_long: provider?.bio_long || "",
+    languages: Array.isArray(provider?.languages) ? provider.languages : ["Nederlands"],
+    active_since: provider?.active_since || "",
+    website: provider?.website || "",
+    instagram: provider?.instagram || "",
+    city: typeof provider?.city === "string" ? provider.city : provider?.city?.name || "",
+    neighbourhood: provider?.neighbourhood || "",
+    location_name: provider?.location_name || "",
+    location_same: provider?.location_same ?? true,
+    location_street: provider?.location_street || "",
+    location_postal: provider?.location_postal || "",
+    wheelchair: provider?.wheelchair ?? false,
+    parking: provider?.parking ?? false,
+    transit: provider?.transit ?? false,
+    accepts_groups: provider?.accepts_groups ?? true,
+    max_group_size: String(provider?.max_group_size || "12"),
+    iban: provider?.iban || "",
+    account_holder: provider?.account_holder || "",
+    terms: provider?.terms ?? false,
+  };
+}
 
 export default function ProviderProfileForm({
   go,
   mode = "signup",
   required = REQUIRED,
-  emptyProfile = EMPTY_PROFILE,
-  profile = MARCO_PROFILE,
   langs = PROFILE_LANGS,
   cities = PROFILE_CITIES,
+  provider = null,
+  user = null,
 }) {
   const goNav = useGo();
   const nav = go || goNav;
-  const [f, setF] = useState(mode === "edit" ? profile : emptyProfile);
+  const initial = providerToForm(provider, user);
+  const [f, setF] = useState(initial);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const set = (k) => (e) => { setF({ ...f, [k]: e.target.value }); setSaved(false); };
   const put = (k, v) => { setF({ ...f, [k]: v }); setSaved(false); };
 
@@ -31,6 +79,27 @@ export default function ProviderProfileForm({
   const toggleLang = (l) => put("languages",
     f.languages.includes(l) ? f.languages.filter((x) => x !== l) : [...f.languages, l]);
 
+  async function saveProfile() {
+    setSaving(true);
+    setSaveError("");
+    try {
+      const res = await fetch("/api/providers/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(f),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.message || "Opslaan mislukt");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const sections = [
     "Persoonsgegevens", "Adres", "Bedrijfsgegevens", "Je profiel",
     "Waar je lesgeeft", "Groepen", "Uitbetaling",
@@ -40,7 +109,7 @@ export default function ProviderProfileForm({
     <>
       <div className="ww-form-two">
         <div>
-          {/* 1. Persoonsgegevens -> directus_users + providers.display_name */}
+          {/* 1. Persoonsgegevens */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">1</span>
@@ -62,7 +131,7 @@ export default function ProviderProfileForm({
             </Field>
           </section>
 
-          {/* 2. Adres -> providers.address, postal_code, city */}
+          {/* 2. Adres */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">2</span>
@@ -87,7 +156,7 @@ export default function ProviderProfileForm({
             </Field>
           </section>
 
-          {/* 3. Bedrijfsgegevens -> providers.kvk_number, vat_number */}
+          {/* 3. Bedrijfsgegevens */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">3</span>
@@ -116,7 +185,7 @@ export default function ProviderProfileForm({
             </p>
           </section>
 
-          {/* 4. Openbaar profiel -> providers.display_name, profession, bio, avatar, languages */}
+          {/* 4. Openbaar profiel */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">4</span>
@@ -167,7 +236,7 @@ export default function ProviderProfileForm({
             </Field>
           </section>
 
-          {/* 5. Werklocatie -> providers.city, neighbourhood, location_name, amenities */}
+          {/* 5. Werklocatie */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">5</span>
@@ -208,7 +277,7 @@ export default function ProviderProfileForm({
             <Switch on={f.transit} onChange={(v) => put("transit", v)} title="Goed bereikbaar met het OV" />
           </section>
 
-          {/* 6. Groepen -> providers.accepts_groups, max_group_size */}
+          {/* 6. Groepen */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">6</span>
@@ -224,7 +293,7 @@ export default function ProviderProfileForm({
             )}
           </section>
 
-          {/* 7. Uitbetaling -> providers.payout_iban_last4, mollie_connect_id */}
+          {/* 7. Uitbetaling */}
           <section className="ww-fsec">
             <div className="ww-fsec-head">
               <span className="ww-fsec-n">7</span>
@@ -275,7 +344,7 @@ export default function ProviderProfileForm({
                 <div style={{ minWidth: 0 }}>
                   <strong style={{ fontSize: 15, display: "block" }}>{f.display_name || "Je naam"}</strong>
                   <span className="ww-meta" style={{ fontSize: 12.5 }}>
-                    {[f.profession || "Je vakgebied", f.city || "Je stad"].join(" · ")}
+                    {[f.profession || "Je vakgebied", f.city || "Je stad"].filter(Boolean).join(" · ")}
                   </span>
                 </div>
               </div>
@@ -293,17 +362,20 @@ export default function ProviderProfileForm({
 
       <div className="ww-savebar">
         <div className="ww-savebar-in">
-          <Button variant="outline" onClick={() => setSaved(true)}>Opslaan als concept</Button>
-          <Button variant="primary" disabled={!complete}
-            onClick={() => { setSaved(true); if (complete && mode === "signup") nav({ name: "dashboard" }); }}>
+          <Button variant="outline" disabled={saving} onClick={saveProfile}>
+            {saving ? "Opslaan..." : "Opslaan als concept"}
+          </Button>
+          <Button variant="primary" disabled={!complete || saving} onClick={saveProfile}>
             {mode === "edit" ? "Wijzigingen opslaan" : "Profiel indienen"}
           </Button>
           <span className="ww-meta" style={{ marginLeft: "auto" }}>
-            {saved
-              ? "Opgeslagen. Je kunt later verder."
-              : complete
-                ? "Alles staat erin. We kijken je profiel binnen een werkdag na."
-                : `Nog ${required.length - filled.length} verplichte velden${f.terms ? "" : " en de voorwaarden"} te gaan.`}
+            {saveError
+              ? saveError
+              : saved
+                ? "Opgeslagen."
+                : complete
+                  ? "Alles staat erin. We kijken je profiel binnen een werkdag na."
+                  : `Nog ${required.length - filled.length} verplichte velden${f.terms ? "" : " en de voorwaarden"} te gaan.`}
           </span>
         </div>
       </div>
