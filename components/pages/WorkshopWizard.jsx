@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import {
@@ -70,7 +71,9 @@ export default function WorkshopWizard({
                 datums toevoegen in je agenda. Wil je nog wat aanpassen? Dat kan altijd.
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Button variant="primary" size="lg" onClick={() => nav({ name: "dashboard" })}>Naar mijn workshops</Button>
+                <Link href="/dashboard" className="ww-btn ww-btn--primary ww-btn--lg" style={{ textDecoration: "none" }}>
+                  Naar mijn workshops
+                </Link>
                 <Button variant="outline" size="lg" onClick={() => { setDone(false); setStep(0); }}>Nog een workshop</Button>
               </div>
             </div>
