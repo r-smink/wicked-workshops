@@ -78,7 +78,10 @@ export default function Dashboard({
           <Button variant="primary" block icon="plus" onClick={() => setView("wizard")}>
             Nieuwe workshop
           </Button>
-          <button className="ww-dash-logout" onClick={() => go({ name: "home" })}>
+          <button className="ww-dash-logout" onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/inloggen";
+          }}>
             <Icon name="logout" size={17} /> Uitloggen
           </button>
         </div>

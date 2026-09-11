@@ -3,20 +3,92 @@
 import { useState, useEffect } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
+import { useRouter } from "next/navigation";
 import { SIDE_COPY } from "@/lib/mock-data";
 import { Icon, Logo, Wordmark, Button, Field } from "@/components/ui";
 
 export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
   const go = useGo();
+  const router = useRouter();
   const [tab, setTab] = useState(initialTab || "visitor");
   const [mode, setMode] = useState("login");
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const copy = sideCopy[tab];
 
-  useEffect(() => { setMode("login"); setStep(1); setDone(false); }, [tab]);
+  /* Form state */
+  const [form, setForm] = useState({
+    first_name: "", last_name: "", email: "", password: "",
+    terms: false,
+  });
+  const setField = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const setCheck = (k) => (e) => setForm({ ...form, [k]: e.target.checked });
+
+  useEffect(() => { setMode("login"); setStep(1); setDone(false); setError(""); }, [tab]);
 
   const isProviderSignup = tab === "provider" && mode === "signup";
+
+  /* Login: POST naar /api/auth/login */
+  async function handleLogin() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, password: form.password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Inloggen mislukt");
+      /* Succes — redirect op basis van tab */
+      router.push(tab === "provider" ? "/dashboard" : "/");
+      router.refresh();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* Register: POST naar /api/auth/register */
+  async function handleRegister() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+          first_name: form.first_name,
+          last_name: form.last_name,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Account aanmaken mislukt");
+      if (data.needsLogin) {
+        /* Account aangemaakt maar niet ingelogd — stuur naar login. */
+        setMode("login");
+        setError(data.message || "Account aangemaakt. Log in om verder te gaan.");
+      } else {
+        /* Ingelogd — toon succes of redirect. */
+        setDone(true);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* Provider signup: registreer na stap 1, daarna naar dashboard. */
+  async function handleProviderSignup() {
+    if (step < 3) { setStep(step + 1); return; }
+    await handleRegister();
+  }
 
   return (
     <div className="ww-auth">
@@ -55,6 +127,13 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
             </button>
           </div>
 
+          {error && (
+            <div className="ww-alert" style={{ marginBottom: 20 }}>
+              <Icon name="alert" size={18} style={{ color: tokens.color.coral, flex: "none" }} />
+              <p style={{ fontSize: 14, color: tokens.color.coral }}>{error}</p>
+            </div>
+          )}
+
           {done ? (
             <div className="ww-done">
               <span className="ww-done-ico"><Icon name="check" size={34} /></span>
@@ -65,15 +144,9 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
                   : "Je kunt nu boeken, favorieten bewaren en je boekingen terugvinden."}
               </p>
               <Button variant="primary" size="lg" block
-                onClick={() => go({ name: tab === "provider" ? "signup" : "home" })}>
-                {tab === "provider" ? "Profiel compleet maken" : "Verder zoeken"}
+                onClick={() => go({ name: tab === "provider" ? "dashboard" : "home" })}>
+                {tab === "provider" ? "Naar mijn dashboard" : "Verder zoeken"}
               </Button>
-              {tab === "provider" && (
-                <button className="ww-btn ww-btn--ghost" style={{ marginTop: 12 }}
-                  onClick={() => go({ name: "dashboard" })}>
-                  Later, breng me naar mijn dashboard
-                </button>
-              )}
             </div>
           ) : (
             <>
@@ -98,28 +171,29 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
 
               {mode === "login" && (
                 <>
-                  <div className="ww-social">
-                    <Button variant="outline" block icon="google">Verder met Google</Button>
-                    <Button variant="outline" block icon="apple">Verder met Apple</Button>
-                  </div>
-                  <div className="ww-or">of met e-mail</div>
                   <Field label="E-mailadres">
-                    <input className="ww-input" type="email" placeholder="jouw@email.nl" autoComplete="email" />
+                    <input className="ww-input" type="email" placeholder="jouw@email.nl"
+                      autoComplete="email" value={form.email} onChange={setField("email")} />
                   </Field>
                   <Field label="Wachtwoord">
-                    <input className="ww-input" type="password" placeholder="Je wachtwoord" autoComplete="current-password" />
+                    <input className="ww-input" type="password" placeholder="Je wachtwoord"
+                      autoComplete="current-password" value={form.password} onChange={setField("password")}
+                      onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
                   </Field>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "4px 0 22px" }}>
                     <label className="ww-check"><input type="checkbox" defaultChecked /> Ingelogd blijven</label>
-                    <a style={{ fontSize: 13.5, fontWeight: 700, color: tokens.color.brand }}>Wachtwoord vergeten?</a>
+                    <a style={{ fontSize: 13.5, fontWeight: 700, color: tokens.color.brand, cursor: "pointer" }}>
+                      Wachtwoord vergeten?
+                    </a>
                   </div>
-                  <Button variant="primary" size="lg" block
-                    onClick={() => go({ name: tab === "provider" ? "dashboard" : "home" })}>
-                    Inloggen
+                  <Button variant="primary" size="lg" block disabled={loading}
+                    onClick={handleLogin}>
+                    {loading ? "Inloggen..." : "Inloggen"}
                   </Button>
                   <p className="ww-meta" style={{ textAlign: "center", marginTop: 18 }}>
                     Nog geen account?{" "}
-                    <a style={{ color: tokens.color.brand, fontWeight: 700 }} onClick={() => setMode("signup")}>
+                    <a style={{ color: tokens.color.brand, fontWeight: 700, cursor: "pointer" }}
+                      onClick={() => setMode("signup")}>
                       {tab === "provider" ? "Word workshopgever" : "Maak er een aan"}
                     </a>
                   </p>
@@ -128,25 +202,34 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
 
               {mode === "signup" && tab === "visitor" && (
                 <>
-                  <div className="ww-social">
-                    <Button variant="outline" block icon="google">Verder met Google</Button>
-                  </div>
-                  <div className="ww-or">of met e-mail</div>
                   <div className="ww-row ww-row--2">
-                    <Field label="Voornaam"><input className="ww-input" placeholder="Sanne" /></Field>
-                    <Field label="Achternaam"><input className="ww-input" placeholder="de Vries" /></Field>
+                    <Field label="Voornaam">
+                      <input className="ww-input" placeholder="Sanne" value={form.first_name} onChange={setField("first_name")} />
+                    </Field>
+                    <Field label="Achternaam">
+                      <input className="ww-input" placeholder="de Vries" value={form.last_name} onChange={setField("last_name")} />
+                    </Field>
                   </div>
-                  <Field label="E-mailadres"><input className="ww-input" type="email" placeholder="jouw@email.nl" /></Field>
+                  <Field label="E-mailadres">
+                    <input className="ww-input" type="email" placeholder="jouw@email.nl"
+                      value={form.email} onChange={setField("email")} />
+                  </Field>
                   <Field label="Wachtwoord" hint="Minimaal 8 tekens, gebruik iets dat je onthoudt.">
-                    <input className="ww-input" type="password" placeholder="Kies een wachtwoord" autoComplete="new-password" />
+                    <input className="ww-input" type="password" placeholder="Kies een wachtwoord"
+                      autoComplete="new-password" value={form.password} onChange={setField("password")} />
                   </Field>
                   <label className="ww-check" style={{ margin: "4px 0 22px" }}>
-                    <input type="checkbox" /> Stuur me elke maand de leukste workshops. Geen spam, beloofd.
+                    <input type="checkbox" checked={form.terms} onChange={setCheck("terms")} />
+                    Stuur me elke maand de leukste workshops. Geen spam, beloofd.
                   </label>
-                  <Button variant="primary" size="lg" block onClick={() => setDone(true)}>Account aanmaken</Button>
+                  <Button variant="primary" size="lg" block disabled={loading || !form.email || !form.password}
+                    onClick={handleRegister}>
+                    {loading ? "Account aanmaken..." : "Account aanmaken"}
+                  </Button>
                   <p className="ww-meta" style={{ textAlign: "center", marginTop: 18 }}>
                     Al een account?{" "}
-                    <a style={{ color: tokens.color.brand, fontWeight: 700 }} onClick={() => setMode("login")}>Inloggen</a>
+                    <a style={{ color: tokens.color.brand, fontWeight: 700, cursor: "pointer" }}
+                      onClick={() => setMode("login")}>Inloggen</a>
                   </p>
                 </>
               )}
@@ -156,15 +239,24 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
                   {step === 1 && (
                     <>
                       <div className="ww-row ww-row--2">
-                        <Field label="Voornaam"><input className="ww-input" placeholder="Marco" /></Field>
-                        <Field label="Achternaam"><input className="ww-input" placeholder="Rossi" /></Field>
+                        <Field label="Voornaam">
+                          <input className="ww-input" placeholder="Marco" value={form.first_name} onChange={setField("first_name")} />
+                        </Field>
+                        <Field label="Achternaam">
+                          <input className="ww-input" placeholder="Rossi" value={form.last_name} onChange={setField("last_name")} />
+                        </Field>
                       </div>
-                      <Field label="E-mailadres"><input className="ww-input" type="email" placeholder="marco@kookstudio.nl" /></Field>
+                      <Field label="E-mailadres">
+                        <input className="ww-input" type="email" placeholder="marco@kookstudio.nl"
+                          value={form.email} onChange={setField("email")} />
+                      </Field>
                       <Field label="Wachtwoord" hint="Minimaal 8 tekens.">
-                        <input className="ww-input" type="password" placeholder="Kies een wachtwoord" autoComplete="new-password" />
+                        <input className="ww-input" type="password" placeholder="Kies een wachtwoord"
+                          autoComplete="new-password" value={form.password} onChange={setField("password")} />
                       </Field>
                       <label className="ww-check" style={{ margin: "4px 0 22px" }}>
-                        <input type="checkbox" /> Ik ga akkoord met de voorwaarden voor workshopgevers.
+                        <input type="checkbox" checked={form.terms} onChange={setCheck("terms")} />
+                        Ik ga akkoord met de voorwaarden voor workshopgevers.
                       </label>
                     </>
                   )}
@@ -219,14 +311,15 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
 
                   <div style={{ display: "flex", gap: 12 }}>
                     {step > 1 && <Button variant="outline" size="lg" icon="left" onClick={() => setStep(step - 1)}>Terug</Button>}
-                    <Button variant="primary" size="lg" block
-                      onClick={() => (step < 3 ? setStep(step + 1) : setDone(true))}>
-                      {step < 3 ? "Verder" : "Workshop klaarzetten"}
+                    <Button variant="primary" size="lg" block disabled={loading || (step === 1 && (!form.email || !form.password))}
+                      onClick={handleProviderSignup}>
+                      {loading ? "Opslaan..." : step < 3 ? "Verder" : "Account aanmaken"}
                     </Button>
                   </div>
                   <p className="ww-meta" style={{ textAlign: "center", marginTop: 18 }}>
                     Al een account?{" "}
-                    <a style={{ color: tokens.color.brand, fontWeight: 700 }} onClick={() => setMode("login")}>Inloggen</a>
+                    <a style={{ color: tokens.color.brand, fontWeight: 700, cursor: "pointer" }}
+                      onClick={() => setMode("login")}>Inloggen</a>
                   </p>
                 </>
               )}
