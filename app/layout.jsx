@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from '@vercel/analytics/next';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://wickedworkshops.nl";
 
@@ -34,7 +35,10 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="nl">
-      <body className="ww">{children}</body>
+      <body className="ww">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
