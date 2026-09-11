@@ -25,6 +25,8 @@ export default function WorkshopWizard({
   const [step, setStep] = useState(0);
   const [w, setW] = useState(emptyWorkshop);
   const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const set = (k) => (e) => setW({ ...w, [k]: e.target.value });
   const put = (k, v) => setW({ ...w, [k]: v });
 
@@ -32,6 +34,68 @@ export default function WorkshopWizard({
 
   const filled = required.filter(([k]) => String(w[k]).trim() !== "");
   const pct = Math.round((filled.length / required.length) * 100);
+
+  /* Converteer wizard-state naar Directus-veldnamen en POST naar de API */
+  async function publishWorkshop() {
+    setSaving(true);
+    setSaveError("");
+    try {
+      const slug = w.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+
+      const durationMinutes = w.duration
+        ? (() => {
+            const hours = parseFloat(w.duration.replace(",", "."));
+            return isNaN(hours) ? null : Math.round(hours * 60);
+          })()
+        : null;
+
+      const workshop = {
+        slug,
+        title: w.title,
+        intro: w.intro || null,
+        description: w.description || null,
+        duration_minutes: durationMinutes,
+        level: w.level || null,
+        min_participants: w.min_participants ? Number(w.min_participants) : null,
+        max_participants: w.max_participants ? Number(w.max_participants) : null,
+        format: w.format || null,
+        price_per_person: w.price ? String(w.price) : null,
+        group_quote_from: w.group_quote ? Number(w.group_from) : null,
+        cancellation_policy: w.cancellation || null,
+        instant_bookable: w.instant ?? false,
+        giftcard_eligible: w.giftcard ?? false,
+        location_inherits_provider: true,
+        age_rating: w.age_rating || null,
+      };
+
+      const res = await fetch("/api/workshops", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workshop,
+          inclusions: w.inclusions,
+          faq: w.faq,
+          sessions: w.sessions,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      setDone(true);
+    } catch (err) {
+      setSaveError(err.message || "Opslaan mislukt");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const [h, d] = steps[step];
 
@@ -289,11 +353,12 @@ export default function WorkshopWizard({
               <div className="ww-savebar">
                 <div className="ww-savebar-in">
                   {step > 0 && <Button variant="outline" icon="left" onClick={() => setStep(step - 1)}>Terug</Button>}
-                  <Button variant="primary" block
-                    onClick={() => (step < steps.length - 1 ? setStep(step + 1) : setDone(true))}>
-                    {step < steps.length - 1 ? "Verder" : "Workshop publiceren"}
+                  <Button variant="primary" block disabled={saving}
+                    onClick={() => (step < steps.length - 1 ? setStep(step + 1) : publishWorkshop())}>
+                    {saving ? "Opslaan..." : step < steps.length - 1 ? "Verder" : "Workshop publiceren"}
                   </Button>
                 </div>
+                {saveError && <p style={{ color: tokens.color.coral, fontSize: 13, marginTop: 8 }}>{saveError}</p>}
               </div>
             </>
           )}

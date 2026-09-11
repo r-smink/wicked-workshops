@@ -88,7 +88,7 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
   const facts = [
     ["clock", w.duration || "Variabel", "Duur"],
     ["users", `${w.min_participants ?? 4} tot ${w.max_participants ?? 12} personen`, "Groepsgrootte"],
-    ["gauge", w.level ? w.level.charAt(0).toUpperCase() + w.level.slice(1) : "Alle niveaus", "Niveau"],
+    ["gauge", w.level ? (w.level.charAt(0).toUpperCase() + w.level.slice(1)) : "Alle niveaus", "Niveau"],
     ["globe", formatLangs(w.languages), "Taal"],
   ];
 
@@ -129,13 +129,32 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
         </header>
 
         <div className="ww-gallery">
-          <Photo icon={w.icon} tone="coral" />
-          <Photo icon="glass" /><Photo icon="fork" />
-          <Photo icon="users" />
-          <Photo icon="camera">
-            <button className="ww-gallery-btn"><Icon name="eye" size={16} /> Alle 12 foto's</button>
-          </Photo>
-          <span className="ww-gallery-count"><Icon name="camera" size={14} /> 1 / 12</span>
+          {w.media && w.media.length > 0 ? (
+            <>
+              {w.media.slice(0, 5).map((m, i) => (
+                <div className="ww-ph" key={i} style={i === 0 ? { gridArea: "1 / 1 / 3 / 3" } : undefined}>
+                  <img src={m.url} alt={m.alt || w.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+              ))}
+              {w.media.length > 5 && (
+                <div className="ww-ph" style={{ position: "relative" }}>
+                  <img src={w.media[5].url} alt={w.media[5].alt || w.title} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(.55)" }} />
+                  <button className="ww-gallery-btn"><Icon name="eye" size={16} /> Alle {w.media.length} foto's</button>
+                </div>
+              )}
+              <span className="ww-gallery-count"><Icon name="camera" size={14} /> 1 / {w.media.length}</span>
+            </>
+          ) : (
+            <>
+              <Photo icon={w.icon} tone="coral" />
+              <Photo icon="glass" /><Photo icon="fork" />
+              <Photo icon="users" />
+              <Photo icon="camera">
+                <button className="ww-gallery-btn"><Icon name="eye" size={16} /> Alle 12 foto's</button>
+              </Photo>
+              <span className="ww-gallery-count"><Icon name="camera" size={14} /> 1 / 12</span>
+            </>
+          )}
         </div>
 
         <div className="ww-detail">
