@@ -33,6 +33,7 @@ export default function Dashboard({
   provider = null,
   categories = null,
   cities = [],
+  ageRatings = [],
   initialWorkshop = null,
   kpis = null,
   user = null,
@@ -42,7 +43,7 @@ export default function Dashboard({
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (view === "wizard") {
-    return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} initialWorkshop={initialWorkshop} />;
+    return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} ageRatings={ageRatings} initialWorkshop={initialWorkshop} />;
   }
 
   const [title, sub] = titles[view] || ["Dashboard", ""];

@@ -3,7 +3,7 @@ import Dashboard from "@/components/pages/Dashboard";
 import { requireAuth } from "@/lib/auth";
 import {
   DASH_NAV, DASH_TITLES,
-  getProviderProfile, getCategories, getCities, getWorkshopById, createProviderForUser,
+  getProviderProfile, getCategories, getCities, getAgeRatings, getWorkshopById, createProviderForUser,
 } from "@/lib/directus";
 
 export const metadata = { title: "Workshop bewerken" };
@@ -20,9 +20,10 @@ export default async function Page({ params }) {
   }
 
   const { id } = await params;
-  const [categories, cities, workshop] = await Promise.all([
+  const [categories, cities, ageRatings, workshop] = await Promise.all([
     getCategories(),
     getCities(),
+    getAgeRatings(),
     getWorkshopById(id),
   ]);
   const displayName = provider?.display_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email || "Aanbieder";
@@ -37,6 +38,7 @@ export default async function Page({ params }) {
       provider={providerWithFallback}
       categories={categories}
       cities={cities}
+      ageRatings={ageRatings}
       initialWorkshop={workshop}
     />
   );

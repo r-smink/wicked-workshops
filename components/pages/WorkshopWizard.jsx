@@ -21,6 +21,7 @@ export default function WorkshopWizard({
   required = WIZ_REQUIRED,
   provider = null,
   cities = [],
+  ageRatings = [],
   initialWorkshop = null,
 }) {
   const goNav = useGo();
@@ -39,8 +40,8 @@ export default function WorkshopWizard({
     return {
       ...emptyWorkshop,
       title: initialWorkshop.title || "",
-      category: typeof initialWorkshop.category === "object" ? initialWorkshop.category?.id || "" : initialWorkshop.category || "",
-      city: typeof initialWorkshop.city === "object" ? initialWorkshop.city?.id || "" : initialWorkshop.city || "",
+      category: initialWorkshop.categoryId || (typeof initialWorkshop.category === "object" ? initialWorkshop.category?.id || "" : initialWorkshop.category || ""),
+      city: initialWorkshop.cityId || (typeof initialWorkshop.city === "object" ? initialWorkshop.city?.id || "" : initialWorkshop.city || ""),
       occasions: Array.isArray(initialWorkshop.occasions) ? initialWorkshop.occasions : [],
       intro: initialWorkshop.intro || "",
       description: initialWorkshop.description || "",
@@ -56,7 +57,7 @@ export default function WorkshopWizard({
       max_participants: initialWorkshop.max_participants ? String(initialWorkshop.max_participants) : "12",
       format: initialWorkshop.format || "on_location",
       diet: Array.isArray(initialWorkshop.diet) ? initialWorkshop.diet : [],
-      age_rating: initialWorkshop.age_rating || "Alle leeftijden",
+      age_rating: initialWorkshop.age_rating || "",
       wheelchair: initialWorkshop.wheelchair ?? false,
       parking: initialWorkshop.parking ?? false,
       transit: initialWorkshop.transit ?? false,
@@ -430,7 +431,8 @@ export default function WorkshopWizard({
                   </Field>
                   <Field label="Geschikt voor leeftijd">
                     <select className="ww-select" value={w.age_rating} onChange={set("age_rating")}>
-                      {["Alle leeftijden", "Kindvriendelijk", "16+", "18+"].map((a) => <option key={a}>{a}</option>)}
+                      <option value="">Kies een leeftijd</option>
+                      {ageRatings.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                     </select>
                   </Field>
                   <p className="ww-hint" style={{ fontWeight: 700, color: tokens.color.ink, margin: "16px 0 8px" }}>Voorzieningen</p>
