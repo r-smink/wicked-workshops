@@ -41,6 +41,26 @@ export default function Dashboard({
   const go = useGo();
   const [view, setView] = useState(initialView);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirming, setConfirming] = useState(null);
+  const [payLinks, setPayLinks] = useState({});
+
+  /* Provider bevestigt een aanvraag → betaallink voor de gast. */
+  async function confirmBooking(id) {
+    setConfirming(id);
+    try {
+      const res = await fetch("/api/bookings/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ booking_id: id }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        setPayLinks((p) => ({ ...p, [id]: data.checkoutUrl }));
+      }
+    } finally {
+      setConfirming(null);
+    }
+  }
 
   if (view === "wizard") {
     return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} ageRatings={ageRatings} initialWorkshop={initialWorkshop} />;
@@ -84,6 +104,8 @@ export default function Dashboard({
           </button>
         </div>
       </aside>
+
+      {menuOpen && <div className="ww-dash-backdrop" onClick={() => setMenuOpen(false)} />}
 
       <main className="ww-dash-main">
         <div className="ww-dash-head">
@@ -237,7 +259,7 @@ export default function Dashboard({
               ) : (
                 <table className="ww-table">
                   <thead>
-                    <tr><th>Code</th><th>Naam</th><th>Workshop</th><th>Pers.</th><th>Totaal</th><th>Status</th></tr>
+                    <tr><th>Code</th><th>Naam</th><th>Workshop</th><th>Pers.</th><th>Totaal</th><th>Status</th><th></th></tr>
                   </thead>
                   <tbody>
                     {bookings.map((b) => {
@@ -250,6 +272,18 @@ export default function Dashboard({
                           <td>{b.people}p</td>
                           <td>€ {b.total}</td>
                           <td><span className={`ww-badge ${cls}`}>{label}</span></td>
+                          <td>
+                            {payLinks[b.id] ? (
+                              <input readOnly value={payLinks[b.id]} aria-label="Betaallink"
+                                style={{ fontSize: 12, width: 180, padding: "6px 8px", border: "1px solid var(--line)", borderRadius: 8 }}
+                                onFocus={(e) => e.target.select()} />
+                            ) : b.status === "pending" ? (
+                              <button className="ww-chip" disabled={confirming === b.id}
+                                onClick={() => confirmBooking(b.id)}>
+                                {confirming === b.id ? "Bezig..." : "Bevestig"}
+                              </button>
+                            ) : null}
+                          </td>
                         </tr>
                       );
                     })}

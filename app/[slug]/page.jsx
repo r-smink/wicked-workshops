@@ -1,21 +1,22 @@
 import { notFound } from "next/navigation";
 import PublicLayout from "@/components/PublicLayout";
 import StaticPage from "@/components/pages/StaticPage";
-import { getSeoPage, getSeoPageSlugs } from "@/lib/directus";
+import { getContentPage, getContentPageSlugs, getSeoPage, getSeoPageSlugs } from "@/lib/directus";
 
 export const revalidate = 60;
 
-/* Pre-render alle bekende SEO-landingspagina's. Zonder Directus valt
-   dit terug op de mock-data slug's uit lib/mock-data.js. */
+/* Pre-render de bekende pagina's: content-pagina's uit de `pages`-collectie
+   plus de mock SEO-landingspagina's. Nieuwe pagina's verschijnen via ISR
+   binnen ~60 seconden na publiceren. */
 export async function generateStaticParams() {
-  const slugs = await getSeoPageSlugs();
-  return slugs.map((slug) => ({ slug }));
+  const [pageSlugs, seoSlugs] = await Promise.all([getContentPageSlugs(), getSeoPageSlugs()]);
+  return [...new Set([...pageSlugs, ...seoSlugs])].map((slug) => ({ slug }));
 }
 
-/* SEO-metadata per landingspagina. */
+/* SEO-metadata per pagina. */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const page = await getSeoPage(slug);
+  const page = (await getContentPage(slug)) || (await getSeoPage(slug));
   if (!page) return {};
   return {
     title: page.seo_title || page.title,
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { slug } = await params;
-  const page = await getSeoPage(slug);
+  const page = (await getContentPage(slug)) || (await getSeoPage(slug));
   if (!page) notFound();
   return (
     <PublicLayout>

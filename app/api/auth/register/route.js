@@ -35,8 +35,9 @@ export async function POST(request) {
     );
   }
 
-  /* Maak de gebruiker aan. */
-  const created = await directusRegister({ email, password, first_name, last_name });
+  /* Maak de gebruiker aan met de juiste rol ("visitor" → Customer,
+     "provider" → Provider). */
+  const created = await directusRegister({ email, password, first_name, last_name, role });
   if (!created) {
     return NextResponse.json(
       { error: "Kon account niet aanmaken. Misschien bestaat dit e-mailadres al." },
@@ -44,10 +45,20 @@ export async function POST(request) {
     );
   }
 
-  /* Als dit een provider-registratie is, maak direct een provider-record aan. */
+  /* Als dit een provider-registratie is, maak direct een provider-record aan
+     met de profielgegevens uit stap 2 van de aanmeldfow. */
   if (role === "provider") {
+    const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || "");
     const { createProviderForUser } = await import("@/lib/directus");
-    await createProviderForUser(created);
+    await createProviderForUser(created, {
+      profession: body.profession || null,
+      bio_short: body.bio_short || null,
+      city: isUUID(body.city) ? body.city : null,
+      /* active_since is een date-veld — jaar ("2024") wordt "2024-01-01". */
+      active_since: /^\d{4}$/.test(String(body.active_since || ""))
+        ? `${body.active_since}-01-01`
+        : null,
+    });
   }
 
   /* Log direct in zodat de gebruiker meteen door kan. */

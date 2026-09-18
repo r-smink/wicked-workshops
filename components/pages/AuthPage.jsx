@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { SIDE_COPY } from "@/lib/mock-data";
 import { Icon, Logo, Wordmark, Button, Field } from "@/components/ui";
 
-export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
+export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities = [] }) {
   const go = useGo();
   const router = useRouter();
   const [tab, setTab] = useState(initialTab || "visitor");
@@ -21,6 +21,7 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
   /* Form state */
   const [form, setForm] = useState({
     first_name: "", last_name: "", email: "", password: "",
+    profession: "", city: "", active_since: "", bio_short: "",
     terms: false,
   });
   const setField = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -66,6 +67,10 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
           first_name: form.first_name,
           last_name: form.last_name,
           role: tab === "provider" ? "provider" : "visitor",
+          profession: form.profession,
+          bio_short: form.bio_short,
+          city: form.city,
+          active_since: form.active_since,
         }),
       });
       const data = await res.json();
@@ -85,9 +90,10 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
     }
   }
 
-  /* Provider signup: registreer na stap 1, daarna naar dashboard. */
+  /* Provider signup: twee stappen — account, dan profiel. De eerste
+     workshop maakt de aanbieder daarna via de wizard in het dashboard. */
   async function handleProviderSignup() {
-    if (step < 3) { setStep(step + 1); return; }
+    if (step < 2) { setStep(step + 1); return; }
     await handleRegister();
   }
 
@@ -160,13 +166,13 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
                 {mode === "login"
                   ? "Log in om verder te gaan waar je gebleven was."
                   : (tab === "provider"
-                    ? "Drie korte stappen en je eerste workshop staat klaar."
+                    ? "Twee korte stappen en je account staat klaar."
                     : "Even iets invullen en je kunt boeken.")}
               </p>
 
               {isProviderSignup && (
-                <div className="ww-steps-bar" aria-label={`Stap ${step} van 3`}>
-                  {[1, 2, 3].map((i) => <i key={i} data-on={i <= step ? "true" : "false"} />)}
+                <div className="ww-steps-bar" aria-label={`Stap ${step} van 2`}>
+                  {[1, 2].map((i) => <i key={i} data-on={i <= step ? "true" : "false"} />)}
                 </div>
               )}
 
@@ -265,56 +271,40 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY }) {
                   {step === 2 && (
                     <>
                       <Field label="Wat geef je voor workshops?" hint="Een zin is genoeg, dit staat straks op je profiel.">
-                        <input className="ww-input" placeholder="Italiaanse kookworkshops in een echte kookstudio" />
+                        <input className="ww-input" placeholder="Italiaanse kookworkshops in een echte kookstudio"
+                          value={form.profession} onChange={setField("profession")} />
                       </Field>
                       <div className="ww-row ww-row--2">
                         <Field label="Stad">
-                          <select className="ww-select">
-                            {["Utrecht", "Amsterdam", "Rotterdam", "Den Haag", "Eindhoven", "Groningen"].map((c) => <option key={c}>{c}</option>)}
+                          <select className="ww-select" value={form.city} onChange={setField("city")}>
+                            <option value="">Kies een stad</option>
+                            {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                           </select>
                         </Field>
                         <Field label="Actief sinds">
-                          <select className="ww-select">
-                            {["2026", "2025", "2024", "2023", "2022", "Eerder"].map((c) => <option key={c}>{c}</option>)}
+                          <select className="ww-select" value={form.active_since} onChange={setField("active_since")}>
+                            <option value="">Kies een jaar</option>
+                            {["2026", "2025", "2024", "2023", "2022"].map((c) => <option key={c} value={c}>{c}</option>)}
+                            <option value="2021">Eerder</option>
                           </select>
                         </Field>
                       </div>
                       <Field label="Vertel kort over jezelf" hint="Waarom doe je dit, en wat maakt jouw workshop anders?">
-                        <textarea className="ww-textarea" placeholder="Opgegroeid in de keuken van mijn nonna in Bologna..." />
+                        <textarea className="ww-textarea" placeholder="Opgegroeid in de keuken van mijn nonna in Bologna..."
+                          value={form.bio_short} onChange={setField("bio_short")} />
                       </Field>
-                    </>
-                  )}
-
-                  {step === 3 && (
-                    <>
-                      <Field label="Titel van je eerste workshop" hint="Zeg wat mensen gaan doen, niet wat het is.">
-                        <input className="ww-input" placeholder="Italiaans koken met Marco" />
-                      </Field>
-                      <Field label="Categorie">
-                        <select className="ww-select">
-                          {["Koken & bakken", "Keramiek & klei", "Schilderen & kunst", "Drinks & proeverijen",
-                            "Bloemen & groen", "Ambacht & maken"].map((c) => <option key={c}>{c}</option>)}
-                        </select>
-                      </Field>
-                      <div className="ww-row ww-row--2">
-                        <Field label="Prijs per persoon"><input className="ww-input" placeholder="45" inputMode="numeric" /></Field>
-                        <Field label="Duur in minuten"><input className="ww-input" placeholder="180" inputMode="numeric" /></Field>
-                      </div>
-                      <div className="ww-row ww-row--2">
-                        <Field label="Minimaal aantal"><input className="ww-input" placeholder="4" inputMode="numeric" /></Field>
-                        <Field label="Maximaal aantal"><input className="ww-input" placeholder="12" inputMode="numeric" /></Field>
-                      </div>
                       <p className="ww-hint" style={{ marginBottom: 22 }}>
-                        Je kunt dit later allemaal nog aanpassen. Datums voeg je toe in je agenda.
+                        Na het aanmaken van je account voeg je je eerste workshop toe via het dashboard.
                       </p>
                     </>
                   )}
 
                   <div style={{ display: "flex", gap: 12 }}>
                     {step > 1 && <Button variant="outline" size="lg" icon="left" onClick={() => setStep(step - 1)}>Terug</Button>}
-                    <Button variant="primary" size="lg" block disabled={loading || (step === 1 && (!form.email || !form.password))}
+                    <Button variant="primary" size="lg" block
+                      disabled={loading || (step === 1 && (!form.email || !form.password)) || (step === 2 && !form.terms)}
                       onClick={handleProviderSignup}>
-                      {loading ? "Opslaan..." : step < 3 ? "Verder" : "Account aanmaken"}
+                      {loading ? "Opslaan..." : step < 2 ? "Verder" : "Account aanmaken"}
                     </Button>
                   </div>
                   <p className="ww-meta" style={{ textAlign: "center", marginTop: 18 }}>

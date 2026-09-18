@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import { useAuth } from "@/lib/use-auth";
@@ -43,7 +44,12 @@ export function MobileMenu({ go, onClose }) {
   useEffect(() => {
     const esc = (e) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", esc);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [onClose]);
 
   const nav = (to) => { onClose(); go(to); };
@@ -89,7 +95,7 @@ export function MobileMenu({ go, onClose }) {
           </div>
 
           <h4>Meer</h4>
-          {[["Voor bedrijven", { name: "business" }], ["Cadeaubon", { name: "giftcard" }],
+          {[["Voor bedrijven", { name: "business" }],
             ["Inspiratie", { name: "blog" }], ["Over ons", null]].map(([l, to]) => (
             <button className="ww-mrow" key={l} onClick={() => (to ? nav(to) : onClose())}>
               <span style={{ flex: 1 }}><strong>{l}</strong></span>
@@ -152,7 +158,6 @@ export function Header() {
           <a onClick={() => go({ name: "listing" })}>Ontdek</a>
           <a onClick={() => go({ name: "blog" })}>Inspiratie</a>
           <a onClick={() => go({ name: "business" })}>Voor bedrijven</a>
-          <a onClick={() => go({ name: "giftcard" })}>Cadeaubon</a>
         </nav>
 
         <div className="ww-head-acts">
@@ -225,7 +230,7 @@ export function Header() {
         </div>
       )}
 
-      {drawer && <MobileMenu go={go} onClose={() => setDrawer(false)} />}
+      {drawer && createPortal(<MobileMenu go={go} onClose={() => setDrawer(false)} />, document.body)}
     </header>
   );
 }

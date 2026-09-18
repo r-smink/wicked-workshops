@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
+import { useAuth } from "@/lib/use-auth";
 import { FEATURED, SESSIONS, REVIEWS, FAQ, LISTING } from "@/lib/mock-data";
 import { Icon, Star, Button, Chip, Badge, Rating, Photo, Avatar } from "@/components/ui";
 import { ReadMore } from "@/components/layout";
@@ -20,13 +21,50 @@ function formatLangs(langs) {
 }
 
 function BookingCard({ workshop, sessions = SESSIONS }) {
+  const { user } = useAuth();
   const [session, setSession] = useState(sessions[0]?.id);
   const [people, setPeople] = useState(2);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [requested, setRequested] = useState(false);
   const price = workshop.price ?? 0;
   const chosen = sessions.find((s) => s.id === session) || sessions[0];
   const max = Math.min(12, chosen?.seats ?? 12);
+  const instant = Boolean(workshop.instant_bookable);
 
   useEffect(() => { if (people > max) setPeople(max); }, [session, max, people]);
+
+  async function handleBook() {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: chosen?.id,
+          participants: people,
+          guest_name: guestName,
+          guest_email: guestEmail,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Boeken mislukt");
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+      setRequested(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const canBook = chosen?.id && (user || (guestName.trim() && guestEmail.trim()));
 
   return (
     <div className="ww-booking">
@@ -63,10 +101,44 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
         </span>
       </div>
 
-      <Button variant="primary" size="lg" block>Boek voor {"\u20AC"}{formatPrice(price * people)}</Button>
-      <p style={{ fontSize: 12.5, color: tokens.color.slate, textAlign: "center", marginTop: 10 }}>
-        Je betaalt nog niets, eerst bevestigen
-      </p>
+      {requested ? (
+        <div className="ww-alert" style={{ marginTop: 18 }}>
+          <Icon name="check" size={18} style={{ color: tokens.color.brand, flex: "none" }} />
+          <p style={{ fontSize: 14 }}>
+            Aanvraag verstuurd! De aanbieder bevestigt je boeking; daarna ontvang je een betaallink.
+          </p>
+        </div>
+      ) : (
+        <>
+          {!user && (
+            <div style={{ marginTop: 18 }}>
+              <h3 style={{ fontSize: 16, margin: "0 0 10px" }}>Je gegevens</h3>
+              <input className="ww-input" style={{ marginBottom: 10 }} placeholder="Je naam"
+                autoComplete="name" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+              <input className="ww-input" type="email" placeholder="jouw@email.nl"
+                autoComplete="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} />
+            </div>
+          )}
+
+          {error && (
+            <div className="ww-alert" style={{ marginTop: 14 }}>
+              <Icon name="alert" size={18} style={{ color: tokens.color.coral, flex: "none" }} />
+              <p style={{ fontSize: 14, color: tokens.color.coral }}>{error}</p>
+            </div>
+          )}
+
+          <div style={{ marginTop: 16 }}>
+            <Button variant="primary" size="lg" block disabled={busy || !canBook} onClick={handleBook}>
+              {busy ? "Bezig..." : instant ? `Boek voor €${formatPrice(price * people)}` : "Vraag aan"}
+            </Button>
+          </div>
+          <p style={{ fontSize: 12.5, color: tokens.color.slate, textAlign: "center", marginTop: 10 }}>
+            {instant
+              ? "Direct boeken en betalen via iDEAL of creditcard"
+              : "Je betaalt nog niets — eerst bevestigt de aanbieder"}
+          </p>
+        </>
+      )}
 
       <ul className="ww-trust">
         {["shield", "check", "chat"].map((i, idx) => (

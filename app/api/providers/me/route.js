@@ -56,7 +56,11 @@ function formToProvider(body, existingProvider) {
     postal_code: locationPostal || existingProvider?.postal_code || null,
     kvk_number: body.kvk_number || null,
     vat_number: body.vat_number || null,
-    active_since: body.active_since ? Number(body.active_since) : null,
+    /* active_since is een date-veld — los jaar ("2019") wordt "2019-01-01",
+       een volledige datum blijft zoals die is. */
+    active_since: /^\d{4}$/.test(String(body.active_since || ""))
+      ? `${body.active_since}-01-01`
+      : (body.active_since || null),
     accepts_groups: body.accepts_groups ?? true,
     max_group_size: body.max_group_size ? Number(body.max_group_size) : null,
     payout_iban_last4: body.iban ? body.iban.slice(-4) : null,

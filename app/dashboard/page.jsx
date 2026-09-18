@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Dashboard from "@/components/pages/Dashboard";
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, providerRoleId } from "@/lib/auth";
 import {
   getDashboardSessions, getDashboardBookings, getDashboardWorkshops,
   getDashboardReviews, getDashboardVenues, getProviderProfile, getCategories, getCities,
@@ -18,6 +18,13 @@ export default async function Page() {
 
   /* Provider ophalen die hoort bij deze user. */
   let provider = await getProviderProfile(user.id);
+
+  /* Alleen provider-accounts horen hier. Bezoekers zonder provider-record
+     of -rol gaan terug naar de site. Accounts van voor de rol-fix hebben
+     role: null maar wél een provider-record — die mogen er ook in. */
+  if (!provider && user.role !== providerRoleId()) {
+    redirect("/");
+  }
 
   /* Als er geen provider-record is, maak er een aan. */
   if (!provider) {
