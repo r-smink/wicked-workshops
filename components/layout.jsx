@@ -21,6 +21,25 @@ export function useIsMobile(query = "(max-width: 767px)") {
   return match;
 }
 
+async function fetchMenu(location) {
+  try {
+    const res = await fetch(`/api/menu?location=${location}`);
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json.items) ? json.items : [];
+  } catch {
+    return [];
+  }
+}
+
+export function useMenu(location) {
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    fetchMenu(location).then(setItems);
+  }, [location]);
+  return items;
+}
+
 /* Tekst die op mobiel inklapt, zoals de "Lees meer" blokken in de wireframes */
 export function ReadMore({ children, label = "Lees meer" }) {
   const mobile = useIsMobile();
@@ -38,7 +57,7 @@ export function ReadMore({ children, label = "Lees meer" }) {
 }
 
 /* De zijlade vervangt op mobiel het mega-menu */
-export function MobileMenu({ go, onClose }) {
+export function MobileMenu({ go, onClose, menuItems = [] }) {
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -94,14 +113,17 @@ export function MobileMenu({ go, onClose }) {
             <Chip soft onClick={() => nav({ name: "listing" })}>Alle steden</Chip>
           </div>
 
-          <h4>Meer</h4>
-          {[["Voor bedrijven", { name: "business" }],
-            ["Inspiratie", { name: "blog" }], ["Over ons", null]].map(([l, to]) => (
-            <button className="ww-mrow" key={l} onClick={() => (to ? nav(to) : onClose())}>
-              <span style={{ flex: 1 }}><strong>{l}</strong></span>
-              <Icon name="right" size={17} style={{ color: tokens.color.slate }} />
-            </button>
-          ))}
+          {menuItems.length > 0 && (
+            <>
+              <h4>Meer</h4>
+              {menuItems.map((item) => (
+                <button className="ww-mrow" key={item.slug} onClick={() => nav({ name: "page", slug: item.slug })}>
+                  <span style={{ flex: 1 }}><strong>{item.label}</strong></span>
+                  <Icon name="right" size={17} style={{ color: tokens.color.slate }} />
+                </button>
+              ))}
+            </>
+          )}
         </div>
 
         <div className="ww-mdrawer-foot">
@@ -135,6 +157,7 @@ export function Header() {
   const [mega, setMega] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const mobile = useIsMobile("(max-width: 1023px)");
+  const menuItems = useMenu("header");
   const ref = useRef(null);
 
   useEffect(() => {
@@ -158,6 +181,11 @@ export function Header() {
           <a onClick={() => go({ name: "listing" })}>Ontdek</a>
           <a onClick={() => go({ name: "blog" })}>Inspiratie</a>
           <a onClick={() => go({ name: "business" })}>Voor bedrijven</a>
+          {menuItems.map((item) => (
+            <a key={item.slug} onClick={() => go({ name: "page", slug: item.slug })}>
+              {item.label}
+            </a>
+          ))}
         </nav>
 
         <div className="ww-head-acts">
@@ -230,7 +258,7 @@ export function Header() {
         </div>
       )}
 
-      {drawer && createPortal(<MobileMenu go={go} onClose={() => setDrawer(false)} />, document.body)}
+      {drawer && createPortal(<MobileMenu go={go} onClose={() => setDrawer(false)} menuItems={menuItems} />, document.body)}
     </header>
   );
 }
@@ -258,6 +286,12 @@ export function BottomNav({ route }) {
 export function Footer() {
   const go = useGo();
   const { user } = useAuth();
+  const footerMenu = useMenu("footer");
+
+  const pageLinks = footerMenu.length
+    ? footerMenu.map((item) => [item.label, { name: "page", slug: item.slug }])
+    : [["Over ons", null], ["Contact", null], ["Help", null]];
+
   const cols = [
     ["Ontdekken", [["Categorieen", { name: "listing" }], ["Inspiratie", { name: "blog" }],
       ["Cadeaubon", { name: "giftcard" }], ["Voor bedrijven", { name: "business" }]]],
@@ -265,7 +299,7 @@ export function Footer() {
       ? [["Mijn dashboard", { name: "dashboard" }], ["Voorbeeldprofiel", { name: "provider" }]]
       : [["Word workshopgever", { name: "auth", tab: "provider" }],
         ["Voorbeeldprofiel", { name: "provider" }], ["Inloggen", { name: "auth", tab: "provider" }]]],
-    ["Wicked", [["Over ons", null], ["Contact", null], ["Help", null]]],
+    ["Pagina's", pageLinks],
   ];
   return (
     <footer className="ww-footer">

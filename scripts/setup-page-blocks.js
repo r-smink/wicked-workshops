@@ -158,11 +158,17 @@ async function main() {
         { text: "Hero", value: "hero" },
         { text: "Tekst", value: "text" },
         { text: "Tekst + afbeelding", value: "text_image" },
+        { text: "Twee kolommen", value: "two_columns" },
         { text: "Stappen", value: "steps" },
         { text: "Vinkjes", value: "ticks" },
+        { text: "Features / USP's", value: "features" },
         { text: "Quotes", value: "quotes" },
+        { text: "Cards", value: "cards" },
         { text: "Call-to-action", value: "cta" },
+        { text: "Afbeelding banner", value: "image_banner" },
         { text: "Galerij", value: "gallery" },
+        { text: "FAQ", value: "faq" },
+        { text: "Video", value: "video" },
       ],
     },
     note: "Welk bloktype wil je tonen?",
@@ -226,6 +232,29 @@ async function main() {
   }, { is_nullable: true });
 
   await createRelation("page_blocks", "image", "directus_files", null);
+
+  await createField("page_blocks", "column_left", "text", {
+    interface: "input-rich-text-html",
+    note: "Linkerkolom voor 'Twee kolommen' blok",
+  });
+
+  await createField("page_blocks", "column_right", "text", {
+    interface: "input-rich-text-html",
+    note: "Rechterkolom voor 'Twee kolommen' blok",
+  });
+
+  await createField("page_blocks", "video_url", "string", {
+    interface: "input",
+    note: "YouTube/Vimeo URL of directe video-URL",
+  }, { max_length: 500, is_nullable: true });
+
+  await createField("page_blocks", "video_file", "uuid", {
+    interface: "file",
+    special: ["file"],
+    note: "Geüploade video voor het 'Video' blok",
+  }, { is_nullable: true });
+
+  await createRelation("page_blocks", "video_file", "directus_files", null);
 
   /* Alias veld op pages waarmee je blokken kunt toevoegen/bewerken in Directus. */
   await createField("pages", "blocks", "alias", {

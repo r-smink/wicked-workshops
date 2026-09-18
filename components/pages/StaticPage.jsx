@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import { Icon, Star, Button, Avatar } from "@/components/ui";
@@ -8,9 +9,9 @@ import { Icon, Star, Button, Avatar } from "@/components/ui";
    StaticPage — gedeelde renderer voor statische contentpagina's.
 
    Bronnen (in volgorde van voorkeur):
-     1. `page.blocks`  — nieuwe Directus O2M `page_blocks` met M2A-achtige
-        `type`-discriminator (hero, text, text_image, steps, ticks, quotes, cta,
-        gallery).
+     1. `page.blocks`  — Directus O2M `page_blocks` met `type`-discriminator
+        (hero, text, text_image, two_columns, steps, ticks, features,
+         quotes, cards, cta, image_banner, gallery, faq, video).
      2. `page.sections` — legacy O2M-secties met `layout`.
      3. `page.body`     — vrije HTML/proza.
 
@@ -22,15 +23,10 @@ import { Icon, Star, Button, Avatar } from "@/components/ui";
 function normalizeItems(items, type) {
   if (!Array.isArray(items)) return [];
   if (type === "ticks") {
-    return items
-      .map((i) => (typeof i === "string" ? i : i?.text || i?.title || ""))
-      .filter(Boolean);
+    return items.map((i) => (typeof i === "string" ? i : i?.text || i?.title || "")).filter(Boolean);
   }
   if (type === "steps") {
-    return items.map((i) => [
-      i?.title || i?.text || "",
-      i?.description || "",
-    ]);
+    return items.map((i) => [i?.title || i?.text || "", i?.description || ""]);
   }
   if (type === "quotes") {
     return items.map((i) => [
@@ -38,6 +34,28 @@ function normalizeItems(items, type) {
       i?.context || i?.subtitle || "",
       i?.body || i?.text || "",
     ]);
+  }
+  if (type === "cards") {
+    return items.map((i) => ({
+      title: i?.title || "",
+      body: i?.body || i?.text || "",
+      image: i?.image || null,
+      url: i?.url || i?.cta_to || "",
+      cta_label: i?.cta_label || "Lees meer",
+    }));
+  }
+  if (type === "features") {
+    return items.map((i) => ({
+      icon: i?.icon || "check",
+      title: i?.title || "",
+      body: i?.body || i?.description || i?.text || "",
+    }));
+  }
+  if (type === "faq") {
+    return items.map((i) => ({
+      question: i?.question || i?.title || "",
+      answer: i?.answer || i?.body || "",
+    }));
   }
   return items;
 }
@@ -95,10 +113,7 @@ function BlockTextImage({ block }) {
   const go = useGo();
   return (
     <section className="ww-section" {...blockAttr(block, "type,title,body,image,cta_label,cta_to")}>
-      <div
-        className="ww-band-split"
-        style={{ gap: 36, alignItems: "center" }}
-      >
+      <div className="ww-band-split" style={{ gap: 36, alignItems: "center" }}>
         <div>
           <SectionHead block={block} attr />
           {block.body && (
@@ -114,6 +129,22 @@ function BlockTextImage({ block }) {
           <div className="ww-art-hero" {...blockAttr(block, "image")}>
             <img src={block.image} alt={block.title || ""} />
           </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function BlockTwoColumns({ block }) {
+  return (
+    <section className="ww-section" {...blockAttr(block, "type,title,column_left,column_right")}>
+      <SectionHead block={block} attr />
+      <div className="ww-grid--2">
+        {block.column_left && (
+          <div className="ww-prose" {...blockAttr(block, "column_left")} dangerouslySetInnerHTML={{ __html: block.column_left }} />
+        )}
+        {block.column_right && (
+          <div className="ww-prose" {...blockAttr(block, "column_right")} dangerouslySetInnerHTML={{ __html: block.column_right }} />
         )}
       </div>
     </section>
@@ -157,6 +188,26 @@ function BlockTicks({ block }) {
   );
 }
 
+function BlockFeatures({ block }) {
+  const items = normalizeItems(block.items, "features");
+  return (
+    <section className="ww-section" {...blockAttr(block, "type,title,items")}>
+      <SectionHead block={block} attr />
+      <div className="ww-grid">
+        {items.map((item, i) => (
+          <div className="ww-step" key={i} style={{ textAlign: "center" }}>
+            <div style={{ marginBottom: 12, color: tokens.color.brand }}>
+              <Icon name={item.icon} size={28} />
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function BlockQuotes({ block }) {
   const items = normalizeItems(block.items, "quotes");
   return (
@@ -179,6 +230,36 @@ function BlockQuotes({ block }) {
               </span>
             </figcaption>
           </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function BlockCards({ block }) {
+  const go = useGo();
+  const items = normalizeItems(block.items, "cards");
+  return (
+    <section className="ww-section" {...blockAttr(block, "type,title,items")}>
+      <SectionHead block={block} attr />
+      <div className="ww-grid">
+        {items.map((card, i) => (
+          <div className="ww-card" key={i}>
+            {card.image && (
+              <div className="ww-art-hero" style={{ margin: 0, borderRadius: "20px 20px 0 0" }}>
+                <img src={card.image} alt={card.title || ""} />
+              </div>
+            )}
+            <div style={{ padding: "22px 24px" }}>
+              {card.title && <h3 style={{ marginBottom: 8 }}>{card.title}</h3>}
+              {card.body && <p style={{ color: tokens.color.slate, fontSize: 14.5 }}>{card.body}</p>}
+              {card.cta_label && card.url && (
+                <Button variant="outline" size="sm" onClick={() => go(card.url)} style={{ marginTop: 14 }}>
+                  {card.cta_label}
+                </Button>
+              )}
+            </div>
+          </div>
         ))}
       </div>
     </section>
@@ -208,6 +289,28 @@ function BlockCta({ block }) {
   );
 }
 
+function BlockImageBanner({ block }) {
+  return (
+    <section className="ww-section" {...blockAttr(block, "type,title,body,image")}>
+      {block.title && (
+        <div className="ww-shead">
+          <h2 {...blockAttr(block, "title")}>{block.title}</h2>
+        </div>
+      )}
+      {block.image && (
+        <div className="ww-art-hero" style={{ margin: 0 }} {...blockAttr(block, "image")}>
+          <img src={block.image} alt={block.title || ""} />
+        </div>
+      )}
+      {block.body && (
+        <p style={{ marginTop: 18, color: tokens.color.slate }} {...blockAttr(block, "body")}>
+          {block.body}
+        </p>
+      )}
+    </section>
+  );
+}
+
 function BlockGallery({ block }) {
   const items = Array.isArray(block.items) ? block.items : [];
   const images = items
@@ -217,16 +320,69 @@ function BlockGallery({ block }) {
   return (
     <section className="ww-section" {...blockAttr(block, "type,title,image,items")}>
       <SectionHead block={block} attr />
-      <div
-        className="ww-quotes"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}
-      >
+      <div className="ww-mediagrid">
         {images.map((src, i) => (
-          <div className="ww-art-hero" key={i} style={{ margin: 0 }}>
-            <img src={src} alt={`${block.title || "Afbeelding"} ${i + 1}`} />
+          <div className="ww-mediaslot" data-filled="true" key={i}>
+            <img src={src} alt={`${block.title || "Afbeelding"} ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         ))}
       </div>
+    </section>
+  );
+}
+
+function BlockFaq({ block }) {
+  const items = normalizeItems(block.items, "faq");
+  const [open, setOpen] = useState(null);
+  return (
+    <section className="ww-section" {...blockAttr(block, "type,title,items")}>
+      <SectionHead block={block} attr />
+      <div>
+        {items.map((item, i) => (
+          <div className="ww-faq-item" key={i}>
+            <button className="ww-faq-q" onClick={() => setOpen(open === i ? null : i)}>
+              {item.question}
+              <Icon name="down" size={18} style={{ color: tokens.color.slate, flex: "none", transform: open === i ? "rotate(180deg)" : "none" }} />
+            </button>
+            {open === i && (
+              <div className="ww-faq-a" dangerouslySetInnerHTML={{ __html: item.answer }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function getVideoEmbed(url) {
+  if (!url) return null;
+  // YouTube
+  const yt = url.match(/(?:youtube\.com\/(?:[^/]+\/)*(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  // Vimeo
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return url;
+}
+
+function BlockVideo({ block }) {
+  const embedUrl = getVideoEmbed(block.video_url);
+  return (
+    <section className="ww-section" {...blockAttr(block, "type,title,video_url,video_file")}>
+      <SectionHead block={block} attr />
+      {block.video_file ? (
+        <video src={block.video_file} controls style={{ width: "100%", borderRadius: 20 }} />
+      ) : embedUrl ? (
+        <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: 20, overflow: "hidden" }}>
+          <iframe
+            src={embedUrl}
+            title={block.title || "Video"}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -236,19 +392,32 @@ function renderBlock(block, i) {
   switch (block.type) {
     case "hero":
       return <BlockHero key={block.id || i} block={block} />;
+    case "text":
+      return <BlockText key={block.id || i} block={block} />;
     case "text_image":
       return <BlockTextImage key={block.id || i} block={block} />;
+    case "two_columns":
+      return <BlockTwoColumns key={block.id || i} block={block} />;
     case "steps":
       return <BlockSteps key={block.id || i} block={block} />;
     case "ticks":
       return <BlockTicks key={block.id || i} block={block} />;
+    case "features":
+      return <BlockFeatures key={block.id || i} block={block} />;
     case "quotes":
       return <BlockQuotes key={block.id || i} block={block} />;
+    case "cards":
+      return <BlockCards key={block.id || i} block={block} />;
     case "cta":
       return <BlockCta key={block.id || i} block={block} />;
+    case "image_banner":
+      return <BlockImageBanner key={block.id || i} block={block} />;
     case "gallery":
       return <BlockGallery key={block.id || i} block={block} />;
-    case "text":
+    case "faq":
+      return <BlockFaq key={block.id || i} block={block} />;
+    case "video":
+      return <BlockVideo key={block.id || i} block={block} />;
     default:
       return <BlockText key={block.id || i} block={block} />;
   }
