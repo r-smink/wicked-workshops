@@ -11,13 +11,18 @@ const nextConfig = {
   },
 
   async headers() {
+    /* frame-ancestors bepaalt wie de site in een iframe mag laden. Het
+       Directus-domein staat erbij voor de Visual Editor, die de site in
+       een iframe toont. Verder mag niemand iframen — zelfde bescherming
+       als X-Frame-Options: SAMEORIGIN, maar dan per domein instelbaar. */
+    const frameAncestors = ["'self'", process.env.DIRECTUS_URL].filter(Boolean).join(" ");
     return [
       {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: `frame-ancestors ${frameAncestors}` },
         ],
       },
     ];
