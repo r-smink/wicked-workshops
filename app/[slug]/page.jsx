@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import PublicLayout from "@/components/PublicLayout";
 import StaticPage from "@/components/pages/StaticPage";
+import VisualEditing from "@/components/VisualEditing";
 import { getContentPage, getContentPageSlugs, getSeoPage, getSeoPageSlugs } from "@/lib/directus";
 
 export const revalidate = 60;
@@ -36,6 +37,7 @@ export default async function Page({ params }) {
   return (
     <PublicLayout>
       <StaticPage page={page} />
+      <VisualEditing directusUrl={process.env.DIRECTUS_URL} />
     </PublicLayout>
   );
 }

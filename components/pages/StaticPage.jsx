@@ -105,6 +105,13 @@ export default function StaticPage({ page }) {
   const go = useGo();
   if (!page) return null;
 
+  /* data-directus attributen voor de Visual Editor — alleen als de page
+     uit Directus komt (mapContentPage zet page.directus). */
+  const dAttr = (fields, mode) =>
+    page.directus
+      ? { "data-directus": `collection:${page.directus.collection};item:${page.directus.item};fields:${fields};mode:${mode}` }
+      : {};
+
   return (
     <div className="ww-wrap">
       <nav className="ww-crumbs" aria-label="Kruimelpad">
@@ -113,8 +120,8 @@ export default function StaticPage({ page }) {
       </nav>
 
       <section className="ww-hero">
-        <h1>{page.hero_title || page.title}</h1>
-        {page.hero_subtitle && <p>{page.hero_subtitle}</p>}
+        <h1 {...dAttr("title", "popover")}>{page.hero_title || page.title}</h1>
+        {page.hero_subtitle && <p {...dAttr("hero_subtitle", "popover")}>{page.hero_subtitle}</p>}
         {page.hero_image && (
           <div className="ww-art-hero" style={{ marginTop: 24 }}>
             <img src={page.hero_image} alt={page.title} />
@@ -132,7 +139,7 @@ export default function StaticPage({ page }) {
 
       {page.body && (
         <section className="ww-section" style={{ paddingTop: 0 }}>
-          <div className="ww-prose" dangerouslySetInnerHTML={{ __html: page.body }} />
+          <div className="ww-prose" {...dAttr("body", "drawer")} dangerouslySetInnerHTML={{ __html: page.body }} />
         </section>
       )}
 

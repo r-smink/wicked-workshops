@@ -15,7 +15,14 @@ const nextConfig = {
        Directus-domein staat erbij voor de Visual Editor, die de site in
        een iframe toont. Verder mag niemand iframen — zelfde bescherming
        als X-Frame-Options: SAMEORIGIN, maar dan per domein instelbaar. */
-    const frameAncestors = ["'self'", process.env.DIRECTUS_URL].filter(Boolean).join(" ");
+    const directusOrigin = (() => {
+      try {
+        return new URL(process.env.DIRECTUS_URL || "").origin;
+      } catch {
+        return null;
+      }
+    })();
+    const frameAncestors = ["'self'", directusOrigin].filter(Boolean).join(" ");
     return [
       {
         source: "/:path*",
