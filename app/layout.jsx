@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { GoogleTagManager } from '@next/third-parties/google';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://wickedworkshops.nl";
 
@@ -36,6 +37,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="nl">
+      <GoogleTagManager gtmId="GTM-NM694S6Z" />
       <body className="ww">
         {children}
         <Analytics />
