@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useGo } from "@/lib/use-go";
 import { Icon, Button, Chip } from "@/components/ui";
 import { WorkshopCard } from "@/components/cards";
+import { useDemoMode } from "@/components/DemoModeProvider";
+import { DEMO_IMAGES } from "@/lib/demo-data";
 
 const TEAM_CHOICES = [
   { slug: "samen-koken-en-daarna-eten", title: "Samen koken en daarna eten", city: "Utrecht", duration: "3 uur", rating: 4.9, count: 42, price: 52, badge: "top_rated", icon: "fork", groupSize: 10 },
@@ -21,11 +23,17 @@ const FAQ = [
 
 export default function BusinessPage() {
   const go = useGo();
+  const { demoMode } = useDemoMode();
+  const teamChoices = TEAM_CHOICES.map((workshop, index) => demoMode ? {
+    ...workshop,
+    image: ["/demo/koken2.jpg", "/demo/keramiek2.jpg", "/demo/buiten2.jpg"][index],
+    imageAlt: `${workshop.title}, tijdelijk conceptbeeld`,
+  } : workshop);
   const [openFaq, setOpenFaq] = useState(0);
 
   return (
     <>
-      <section className="ww-business-hero">
+      <section className="ww-business-hero" style={demoMode ? { "--ww-demo-business": `url(${DEMO_IMAGES.business})` } : undefined}>
         <div className="ww-wrap">
           <div className="ww-business-grid">
             <div>
@@ -98,7 +106,7 @@ export default function BusinessPage() {
             <a onClick={() => go({ name: "listing" })}>Bekijk alles <Icon name="right" size={14} /></a>
           </div>
           <div className="ww-grid ww-grid--3 ww-snap">
-            {TEAM_CHOICES.map((w) => (
+            {teamChoices.map((w) => (
               <WorkshopCard key={w.slug} w={w} go={go} />
             ))}
           </div>

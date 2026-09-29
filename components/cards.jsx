@@ -8,7 +8,7 @@ export function WorkshopCard({ w, go, showKm }) {
   return (
     <article className="ww-wcard">
       <a onClick={() => go({ name: "workshop", workshop: w })} className="ww-wcard-img">
-        <Photo icon={w.icon} ratio="4/3" style={{ height: "100%" }} />
+        <Photo icon={w.icon} src={w.image || w.media?.[0]?.url} alt={w.imageAlt || w.media?.[0]?.alt || w.title} ratio="4/3" style={{ height: "100%" }} />
         <span className="ww-wcard-badges">
           {w.badge && <Badge kind={w.badge} />}
           {w.spots != null && w.spots <= 3 && <Badge kind="spots" />}
@@ -44,7 +44,7 @@ export function ArticleCard({ article, go }) {
   return (
     <article className="ww-acard" onClick={() => go({ name: "article", article })}>
       <div className="ww-acard-img">
-        <Photo icon={article.icon} ratio="16/10" />
+        <Photo icon={article.icon} src={article.image || article.hero} alt={article.imageAlt || article.title} ratio="16/10" />
       </div>
       <div className="ww-acard-body">
         <span className="ww-eyebrow">{article.cat}</span>

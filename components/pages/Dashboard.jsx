@@ -7,6 +7,7 @@ import {
   DASH_NAV, DASH_TITLES, DASH_SESSIONS, DASH_BOOKINGS, DASH_WORKSHOPS, DASH_VENUES, STATUS_LABEL,
 } from "@/lib/mock-data";
 import { Icon, Star, Button, Badge, Rating, Photo, Avatar } from "@/components/ui";
+import { useDemoMode } from "@/components/DemoModeProvider";
 import ProviderProfileForm from "@/components/pages/ProviderProfileForm";
 import WorkshopWizard from "@/components/pages/WorkshopWizard";
 import VenueForm from "@/components/pages/VenueForm";
@@ -43,6 +44,7 @@ export default function Dashboard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirming, setConfirming] = useState(null);
   const [payLinks, setPayLinks] = useState({});
+  const { demoMode, mounted: demoMounted, setDemoMode } = useDemoMode();
 
   /* Provider bevestigt een aanvraag → betaallink voor de gast. */
   async function confirmBooking(id) {
@@ -116,6 +118,11 @@ export default function Dashboard({
             <h1>{title}</h1>
             <p className="ww-meta">{sub}</p>
           </div>
+          <label className="ww-demo-toggle">
+            <span><strong>Demo-modus</strong><small>{demoMode ? "Demo-inhoud actief" : "Normale inhoud"}</small></span>
+            <button type="button" role="switch" aria-checked={demoMode} disabled={!demoMounted}
+              onClick={() => setDemoMode(!demoMode)}><i /></button>
+          </label>
           <button className="ww-btn ww-btn--primary" onClick={() => setView("wizard")}>
             <Icon name="plus" size={17} /> Nieuwe workshop
           </button>

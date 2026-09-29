@@ -7,6 +7,8 @@ import { Icon, Button, Chip, Star } from "@/components/ui";
 import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
 import Map from "@/components/Map";
+import { useDemoMode } from "@/components/DemoModeProvider";
+import { DEMO_CATEGORIES, DEMO_LISTING } from "@/lib/demo-data";
 
 function FilterDrawer({ open, onClose, active, setActive, price, setPrice, count }) {
   useEffect(() => {
@@ -72,15 +74,19 @@ function FilterDrawer({ open, onClose, active, setActive, price, setPrice, count
   );
 }
 
-export default function ListingPage({ category, listing = LISTING, filterGroups = FILTER_GROUPS }) {
+export default function ListingPage({ category, listing: sourceListing = LISTING, filterGroups = FILTER_GROUPS }) {
   const go = useGo();
+  const { demoMode } = useDemoMode();
+  const listing = demoMode ? DEMO_LISTING : sourceListing;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState({ snel: ["Kleine groep"] });
   const [price, setPrice] = useState(120);
   const [hover, setHover] = useState(null);
   const [sort, setSort] = useState("Aanbevolen");
 
-  const cat = category || CATEGORIES[0];
+  const cat = demoMode
+    ? DEMO_CATEGORIES.find((item) => item.slug === category?.slug) || DEMO_CATEGORIES[0]
+    : category || CATEGORIES[0];
   const activeCount = Object.values(active).reduce((a, v) => a + v.length, 0) + (price < 120 ? 1 : 0);
   const results = listing.filter((w) => w.price <= price);
   const markers = results.map((w) => ({

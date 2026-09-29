@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { DemoModeProvider } from "@/components/DemoModeProvider";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://wickedworkshops.nl";
 
@@ -53,7 +54,9 @@ export default function RootLayout({ children }) {
       <GoogleTagManager gtmId="GTM-NM694S6Z" />
       <body className="ww">
         <ThemeProvider>
-          {children}
+          <DemoModeProvider>
+            {children}
+          </DemoModeProvider>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

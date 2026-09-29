@@ -5,6 +5,8 @@ import { useGo } from "@/lib/use-go";
 import { CATEGORIES, FEATURED } from "@/lib/mock-data";
 import { Icon, Star, Button, Chip, Avatar } from "@/components/ui";
 import { WorkshopCard } from "@/components/cards";
+import { useDemoMode } from "@/components/DemoModeProvider";
+import { DEMO_CATEGORIES, DEMO_FEATURED, DEMO_IMAGES } from "@/lib/demo-data";
 
 const HERO_QUICK = ["Koken", "Keramiek", "Cocktails", "Bloemschikken", "Schilderen", "Teamuitje"];
 
@@ -28,15 +30,18 @@ const REVIEWS = [
   { name: "Iris Bakker", context: "BBQ workshop, Rotterdam", body: "Nog nooit zo gelachen met de vriendinnen. Absolute aanrader voor een dagje uit.", rating: 5 },
 ];
 
-export default function HomePage({ categories = CATEGORIES, featured = FEATURED }) {
+export default function HomePage({ categories: sourceCategories = CATEGORIES, featured: sourceFeatured = FEATURED }) {
   const go = useGo();
+  const { demoMode } = useDemoMode();
+  const categories = demoMode ? DEMO_CATEGORIES : sourceCategories;
+  const featured = demoMode ? DEMO_FEATURED : sourceFeatured;
   const [q, setQ] = useState("");
 
   return (
     <>
       <section className="ww-hero">
         <div className="ww-hero-bg" aria-hidden="true">
-          <div />
+          {demoMode ? <img src={DEMO_IMAGES.hero} alt="" /> : <div />}
         </div>
         <div className="ww-wrap ww-hero-in">
           <h1>Workshops en uitjes om iets <em>wicked</em> te doen</h1>
@@ -84,7 +89,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
           <div className="ww-catgrid">
             {categories.slice(0, 12).map((c) => (
               <a key={c.slug} className="ww-catcard" onClick={() => go({ name: "listing", category: c })}>
-                <PhotoPlaceholder icon={c.icon} />
+                <PhotoPlaceholder icon={c.icon} src={c.image} alt={c.name} />
                 <strong>{c.name}</strong>
                 <span>{c.count} workshops</span>
               </a>
@@ -102,7 +107,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
           <div className="ww-citygrid">
             {CITIES.map((c) => (
               <a key={c.name} className={`ww-citycard${c.brand ? " ww-citycard--brand" : ""}`} onClick={() => go({ name: "listing" })}>
-                {!c.brand && <PhotoPlaceholder />}
+                {!c.brand && <PhotoPlaceholder src={demoMode ? DEMO_IMAGES.cities[c.name] : null} alt={c.name} />}
                 {c.brand && <Icon name={c.icon} size={28} />}
                 <strong>{c.name}</strong>
               </a>
@@ -213,7 +218,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
               <Button variant="primary" size="lg" onClick={() => go({ name: "auth", tab: "provider" })}>Word workshopgever</Button>
             </div>
             <div>
-              <PhotoPlaceholder ratio="4/3" />
+              <PhotoPlaceholder ratio="4/3" src={demoMode ? DEMO_IMAGES.provider : null} alt="Workshopgever aan het werk" />
             </div>
           </div>
         </section>
@@ -239,7 +244,7 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
               </div>
             </div>
             <div>
-              <PhotoPlaceholder ratio="4/3" tone="ink" />
+              <PhotoPlaceholder ratio="4/3" tone="ink" src={demoMode ? DEMO_IMAGES.nationwide : null} alt="Workshop in de buitenlucht" />
             </div>
           </div>
         </section>
@@ -248,10 +253,10 @@ export default function HomePage({ categories = CATEGORIES, featured = FEATURED 
   );
 }
 
-function PhotoPlaceholder({ icon = "spark", ratio, tone }) {
+function PhotoPlaceholder({ icon = "spark", ratio, tone, src, alt = "" }) {
   return (
-    <div className="ww-ph" data-tone={tone} style={{ aspectRatio: ratio, height: "100%" }}>
-      <span className="ww-ph-i"><Icon name={icon} size={32} /></span>
+    <div className="ww-ph" data-tone={tone} data-image={src ? "true" : "false"} style={{ aspectRatio: ratio, height: "100%" }}>
+      {src ? <img className="ww-ph-img" src={src} alt={alt} /> : <span className="ww-ph-i"><Icon name={icon} size={32} /></span>}
     </div>
   );
 }

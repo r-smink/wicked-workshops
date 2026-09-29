@@ -5,6 +5,8 @@ import { useGo } from "@/lib/use-go";
 import { ARTICLES, ART_SECTIONS, ART_FAQ } from "@/lib/mock-data";
 import { Icon, Star, Button, Photo, Avatar } from "@/components/ui";
 import { WorkshopCard } from "@/components/cards";
+import { useDemoMode } from "@/components/DemoModeProvider";
+import { DEMO_ARTICLES, DEMO_IMAGES } from "@/lib/demo-data";
 
 const RELATED_WORKSHOPS = [
   { slug: "kaarsen-gieten-met-droogbloemen", title: "Kaarsen gieten met droogbloemen", city: "Rotterdam", duration: "2 uur", rating: 4.9, count: 42, price: 32, badge: "top_rated", icon: "flower" },
@@ -13,8 +15,12 @@ const RELATED_WORKSHOPS = [
   { slug: "kaarsen-maken-met-vriendinnen", title: "Kaarsen maken met vriendinnen", city: "Rotterdam", duration: "2 uur", rating: 4.9, count: 65, price: 34, icon: "heart" },
 ];
 
-export default function ArticlePage({ article = ARTICLES[0] }) {
+export default function ArticlePage({ article: sourceArticle = ARTICLES[0] }) {
   const go = useGo();
+  const { demoMode } = useDemoMode();
+  const article = demoMode
+    ? DEMO_ARTICLES.find((item) => item.slug === sourceArticle?.slug) || DEMO_ARTICLES[0]
+    : sourceArticle;
   const [openFaq, setOpenFaq] = useState(0);
   const [tocOpen, setTocOpen] = useState(false);
 
@@ -150,8 +156,8 @@ export default function ArticlePage({ article = ARTICLES[0] }) {
           <a onClick={() => go({ name: "listing" })}>Alle 74 <Icon name="right" size={14} /></a>
         </div>
         <div className="ww-grid ww-grid--4 ww-snap">
-          {RELATED_WORKSHOPS.map((w) => (
-            <WorkshopCard key={w.slug} w={w} go={go} />
+          {RELATED_WORKSHOPS.map((w, index) => (
+            <WorkshopCard key={w.slug} w={demoMode ? { ...w, image: [DEMO_IMAGES.gift, "/demo/kaarsen2.jpg", "/demo/ambacht2.jpg", DEMO_IMAGES.business][index], imageAlt: `${w.title}, tijdelijk conceptbeeld` } : w} go={go} />
           ))}
         </div>
       </section>

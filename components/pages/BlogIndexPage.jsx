@@ -5,9 +5,13 @@ import { useGo } from "@/lib/use-go";
 import { ARTICLES, ART_CATEGORIES } from "@/lib/mock-data";
 import { Icon, Button, Chip } from "@/components/ui";
 import { ArticleCard } from "@/components/cards";
+import { useDemoMode } from "@/components/DemoModeProvider";
+import { DEMO_ARTICLES } from "@/lib/demo-data";
 
-export default function BlogIndexPage({ articles = ARTICLES, categories = ART_CATEGORIES }) {
+export default function BlogIndexPage({ articles: sourceArticles = ARTICLES, categories = ART_CATEGORIES }) {
   const go = useGo();
+  const { demoMode } = useDemoMode();
+  const articles = demoMode ? DEMO_ARTICLES : sourceArticles;
   const [cat, setCat] = useState("Alles");
   const [shown, setShown] = useState(6);
   const [mail, setMail] = useState("");
@@ -52,7 +56,7 @@ export default function BlogIndexPage({ articles = ARTICLES, categories = ART_CA
               </span>
             </div>
             <div className="ww-lead-img">
-              <PhotoPlaceholder icon={lead.icon} />
+              <PhotoPlaceholder icon={lead.icon} src={lead.image || lead.hero} alt={lead.imageAlt || lead.title} />
             </div>
           </button>
         )}
@@ -129,10 +133,10 @@ export default function BlogIndexPage({ articles = ARTICLES, categories = ART_CA
   );
 }
 
-function PhotoPlaceholder({ icon = "spark", tone }) {
+function PhotoPlaceholder({ icon = "spark", tone, src, alt = "" }) {
   return (
-    <div className="ww-ph" data-tone={tone} style={{ height: "100%" }}>
-      <span className="ww-ph-i"><Icon name={icon} size={38} /></span>
+    <div className="ww-ph" data-tone={tone} data-image={src ? "true" : "false"} style={{ height: "100%" }}>
+      {src ? <img className="ww-ph-img" src={src} alt={alt} /> : <span className="ww-ph-i"><Icon name={icon} size={38} /></span>}
     </div>
   );
 }

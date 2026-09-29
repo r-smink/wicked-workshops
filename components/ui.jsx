@@ -92,9 +92,9 @@ export const Rating = ({ value, count, size = 15 }) => {
   );
 };
 
-export const Photo = ({ icon = "spark", tone, ratio, size = 30, style, children }) => (
-  <div className="ww-ph" data-tone={tone} style={{ aspectRatio: ratio, ...style }}>
-    <span className="ww-ph-i"><Icon name={icon} size={size} /></span>
+export const Photo = ({ icon = "spark", tone, ratio, size = 30, style, src, alt = "", children }) => (
+  <div className="ww-ph" data-tone={tone} data-image={src ? "true" : "false"} style={{ aspectRatio: ratio, ...style }}>
+    {src ? <img className="ww-ph-img" src={src} alt={alt} /> : <span className="ww-ph-i"><Icon name={icon} size={size} /></span>}
     {children}
   </div>
 );
