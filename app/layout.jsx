@@ -2,6 +2,7 @@ import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { GoogleTagManager } from '@next/third-parties/google';
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://wickedworkshops.nl";
 
@@ -34,12 +35,26 @@ export const viewport = {
   viewportFit: "cover",
 };
 
+const themeScript = `
+  (function() {
+    const saved = localStorage.getItem('ww-theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const dark = saved === 'dark' || (!saved && systemDark) || (saved === 'system' && systemDark);
+    if (dark) document.documentElement.classList.add('dark');
+  })();
+`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="nl">
+    <html lang="nl" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <GoogleTagManager gtmId="GTM-NM694S6Z" />
       <body className="ww">
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Analytics />
         <SpeedInsights />
       </body>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { tokens } from "@/lib/tokens";
 import { Icon, Photo, Badge, Rating } from "@/components/ui";
 
 export function WorkshopCard({ w, go, showKm }) {
@@ -10,22 +9,50 @@ export function WorkshopCard({ w, go, showKm }) {
     <article className="ww-wcard">
       <a onClick={() => go({ name: "workshop", workshop: w })} className="ww-wcard-img">
         <Photo icon={w.icon} ratio="4/3" style={{ height: "100%" }} />
-        {w.badge && <span className="ww-wcard-badge"><Badge kind={w.badge} /></span>}
-        <button className="ww-wcard-fav" aria-label="Bewaren"
-          onClick={(e) => { e.stopPropagation(); setFav(!fav); }}>
-          <Icon name="heart" size={18} fill={fav} style={fav ? { color: tokens.color.coral } : undefined} />
+        <span className="ww-wcard-badges">
+          {w.badge && <Badge kind={w.badge} />}
+          {w.spots != null && w.spots <= 3 && <Badge kind="spots" />}
+        </span>
+        <button
+          className="ww-wcard-fav"
+          data-active={fav ? "true" : "false"}
+          aria-label={fav ? "Verwijderen uit favorieten" : "Toevoegen aan favorieten"}
+          onClick={(e) => { e.stopPropagation(); setFav(!fav); }}
+        >
+          <Icon name="heart" size={18} fill={fav} />
         </button>
       </a>
       <div className="ww-wcard-body">
         <h3><a onClick={() => go({ name: "workshop", workshop: w })}>{w.title}</a></h3>
-        <p className="ww-meta">
+        <p className="ww-wcard-meta">
           {(showKm ? w.area : w.city)} · {w.duration}{showKm && w.km ? ` · ${w.km}` : ""}
+          {w.groupSize ? ` · max. ${w.groupSize} personen` : ""}
         </p>
         <div className="ww-wcard-foot">
           <Rating value={w.rating} count={w.count} />
-          <span className="ww-price" style={{ textAlign: "right" }}>
-            <span>vanaf</span><b>{"\u20AC"}{w.price}</b>
+          <span className="ww-price">
+            <span>vanaf</span>
+            <b>{"\u20AC"}{w.price}</b>
           </span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function ArticleCard({ article, go }) {
+  return (
+    <article className="ww-acard" onClick={() => go({ name: "article", article })}>
+      <div className="ww-acard-img">
+        <Photo icon={article.icon} ratio="16/10" />
+      </div>
+      <div className="ww-acard-body">
+        <span className="ww-eyebrow">{article.cat}</span>
+        <h3>{article.title}</h3>
+        <p>{article.excerpt}</p>
+        <div className="ww-acard-foot">
+          <span>{article.read}</span>
+          <span>{article.date}</span>
         </div>
       </div>
     </article>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/components/ThemeProvider";
 import { tokens } from "@/lib/tokens";
 import { P } from "@/lib/icons";
 
@@ -37,17 +38,17 @@ export function Logo({ size = 32, mono = false }) {
 }
 
 export const Wordmark = ({ size = 19, light }) => (
-  <span className="ww-logo-wm" style={{ fontSize: size, color: light ? "#fff" : undefined }}>
-    <b style={light ? { color: "#fff" } : undefined}>wicked</b> workshops
+  <span className={`ww-logo-wm${light ? " ww-logo-wm--light" : ""}`} style={{ fontSize: size }}>
+    <b>wicked</b> workshops
   </span>
 );
 
 /* ===========================================================================
    Primitieven
    =========================================================================== */
-export const Button = ({ variant = "primary", size, block, icon, iconRight, children, ...rest }) => (
+export const Button = ({ variant = "primary", size, block, icon, iconRight, className = "", children, ...rest }) => (
   <button
-    className={`ww-btn ww-btn--${variant}${block ? " ww-btn--block" : ""}${size ? ` ww-btn--${size}` : ""}`}
+    className={`ww-btn ww-btn--${variant}${block ? " ww-btn--block" : ""}${size ? ` ww-btn--${size}` : ""}${className ? ` ${className}` : ""}`}
     {...rest}>
     {icon && <Icon name={icon} size={size === "sm" ? 16 : 18} />}
     {children}
@@ -55,8 +56,8 @@ export const Button = ({ variant = "primary", size, block, icon, iconRight, chil
   </button>
 );
 
-export const Chip = ({ on, soft, children, ...rest }) => (
-  <button className={`ww-chip${soft ? " ww-chip--soft" : ""}`} data-on={on ? "true" : "false"} {...rest}>
+export const Chip = ({ on, soft, className = "", children, ...rest }) => (
+  <button className={`ww-chip${soft ? " ww-chip--soft" : ""}${className ? ` ${className}` : ""}`} data-on={on ? "true" : "false"} {...rest}>
     {children}
   </button>
 );
@@ -65,6 +66,7 @@ export const BADGE = {
   top_rated: ["ww-badge--top", "Topbeoordeeld"],
   new: ["ww-badge--new", "Nieuw"],
   almost_full: ["ww-badge--full", "Bijna vol"],
+  spots: ["ww-badge--spots", "Nog 2 plaatsen"],
   verified: ["ww-badge--verified", "Geverifieerd"],
   live: ["ww-badge--live", "Gepubliceerd"],
   draft: ["ww-badge--draft", "Concept"],
@@ -72,7 +74,7 @@ export const BADGE = {
 };
 
 export const Badge = ({ kind, children }) => {
-  const [cls, label] = BADGE[kind] || ["ww-badge--top", children];
+  const [cls, label] = (kind && BADGE[kind]) || ["ww-badge--top", children];
   return (
     <span className={`ww-badge ${cls}`}>
       {kind === "verified" && <Icon name="shield" size={13} />}{children || label}
@@ -116,3 +118,19 @@ export const Switch = ({ on, onChange, title, note }) => (
 );
 
 export const Optional = () => <span className="ww-opt">optioneel</span>;
+
+export function ThemeToggle({ className = "" }) {
+  const { theme, setTheme, resolved } = useTheme();
+  const next = resolved === "dark" ? "light" : "dark";
+  const label = resolved === "dark" ? "Licht thema" : "Donker thema";
+  return (
+    <button
+      className={`ww-iconbtn${className ? ` ${className}` : ""}`}
+      aria-label={label}
+      title={label}
+      onClick={() => setTheme(next)}
+    >
+      <Icon name={resolved === "dark" ? "sun" : "moon"} size={20} />
+    </button>
+  );
+}

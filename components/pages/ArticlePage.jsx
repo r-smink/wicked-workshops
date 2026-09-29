@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import { ARTICLES, ART_SECTIONS, ART_FAQ } from "@/lib/mock-data";
 import { Icon, Star, Button, Photo, Avatar } from "@/components/ui";
+import { WorkshopCard } from "@/components/cards";
 
-export default function ArticlePage({
-  article = ARTICLES[0],
-}) {
+const RELATED_WORKSHOPS = [
+  { slug: "kaarsen-gieten-met-droogbloemen", title: "Kaarsen gieten met droogbloemen", city: "Rotterdam", duration: "2 uur", rating: 4.9, count: 42, price: 32, badge: "top_rated", icon: "flower" },
+  { slug: "geuren-mengen-en-zelf-gieten", title: "Geuren mengen en zelf gieten", city: "Utrecht", duration: "2,5 uur", rating: 4.8, count: 18, price: 38, icon: "spa" },
+  { slug: "kaars-en-houder-allebei-zelf", title: "Kaars en houder, allebei zelf", city: "Groningen", duration: "3 uur", rating: 4.7, count: 29, price: 49, badge: "new", icon: "hammer" },
+  { slug: "kaarsen-maken-met-vriendinnen", title: "Kaarsen maken met vriendinnen", city: "Rotterdam", duration: "2 uur", rating: 4.9, count: 65, price: 34, icon: "heart" },
+];
+
+export default function ArticlePage({ article = ARTICLES[0] }) {
   const go = useGo();
   const [openFaq, setOpenFaq] = useState(0);
   const [tocOpen, setTocOpen] = useState(false);
@@ -20,28 +25,18 @@ export default function ArticlePage({
     <div className="ww-wrap">
       <nav className="ww-crumbs" aria-label="Kruimelpad">
         <a onClick={() => go({ name: "home" })}>Home</a><span>/</span>
+        <a onClick={() => go({ name: "blog" })}>Inspiratie</a><span>/</span>
         <a onClick={() => go({ name: "blog" })}>{article.cat}</a><span>/</span>
-        <span style={{ color: tokens.color.ink }}>{article.title}</span>
+        <span style={{ color: "var(--ww-text-primary)" }}>{article.title}</span>
       </nav>
 
       <div className="ww-art">
         <article>
-          <span className="ww-chip ww-chip--soft" style={{ pointerEvents: "none" }}>{article.cat}</span>
-          <h1>{article.title}</h1>
-          <div className="ww-byline">
-            <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <Avatar name="Lisa Wicked" /> Lisa van Wicked
-            </span>
-            <span>{article.date}</span>
-            <span>{article.read}</span>
-            <button className="ww-chip" style={{ marginLeft: "auto" }}><Icon name="share" size={15} /> Delen</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <span className="ww-chip ww-chip--soft" style={{ pointerEvents: "none" }}>{article.cat}</span>
+            <span style={{ fontSize: 13, color: "var(--ww-text-secondary)" }}>{article.date} · {article.read}</span>
           </div>
-
-          {article.hero && (
-            <div className="ww-art-hero">
-              <img src={article.hero} alt={article.title} />
-            </div>
-          )}
+          <h1>{article.title}</h1>
 
           {article.short_answer && (
             <section className="ww-answer">
@@ -55,6 +50,28 @@ export default function ArticlePage({
           ) : (
             <div className="ww-prose">
               <p>{article.excerpt}</p>
+              <h2 id="benodigd">Wat je nodig hebt</h2>
+              <ul>
+                <li>Sojawas of paraffine, afhankelijk van het resultaat dat je wilt.</li>
+                <li>Een geschikte pot en een thermometer, want temperatuur bepaalt alles.</li>
+                <li>Lont met houder, het hart van elke kaars.</li>
+                <li>Een beetje geduld en een goed werkblad, want knoeien hoort erbij.</li>
+              </ul>
+              <div className="ww-quote-block">
+                "Het mengen van de geur duurt langer dan het gieten, en dat is precies de bedoeling."
+              </div>
+              <h2 id="thuis">Zelf doen of een workshop?</h2>
+              <p>
+                Materialen voor thuis kosten al gauw meer dan een workshop. Je deelt de kosten van de instructie en de
+                materialen met de groep, en je krijgt er tips bij die je thuis niet snel ontdekt. Bovendien is het een
+                stuk gezelliger.
+              </p>
+            </div>
+          )}
+
+          {article.hero && (
+            <div className="ww-art-hero">
+              <img src={article.hero} alt={article.title} />
             </div>
           )}
 
@@ -62,33 +79,12 @@ export default function ArticlePage({
             <Avatar name="Lisa Wicked" size={52} />
             <div>
               <strong style={{ fontSize: 16 }}>Lisa van Wicked</strong>
-              <p className="ww-meta" style={{ marginTop: 6 }}>
+              <p style={{ marginTop: 6, fontSize: 14, color: "var(--ww-text-secondary)" }}>
                 Schrijft over workshops en uitjes, en probeerde er zelf al meer dan veertig.
                 Favoriet tot nu toe: glasblazen.
               </p>
             </div>
           </div>
-
-          <div className="ww-news">
-            <h2 style={{ fontSize: 24 }}>De leukste workshops in je mail</h2>
-            <p>Elke maand nieuwe workshops en ideeen voor je volgende uitje. Geen spam, beloofd.</p>
-            <div className="ww-news-form">
-              <input className="ww-input" type="email" placeholder="jouw@email.nl" aria-label="E-mailadres" />
-              <Button variant="coral">Aanmelden</Button>
-            </div>
-          </div>
-
-          <section className="ww-section" style={{ paddingBottom: 0 }}>
-            <div className="ww-band ww-band--cloud ww-band-split">
-              <div>
-                <h2>Zin gekregen?</h2>
-                <p>Vind een workshop bij jou in de buurt en sta binnenkort zelf aan de slag.</p>
-              </div>
-              <Button variant="primary" size="lg" onClick={() => go({ name: "listing" })}>
-                Bekijk workshops
-              </Button>
-            </div>
-          </section>
         </article>
 
         <aside>
@@ -96,7 +92,7 @@ export default function ArticlePage({
             <h3 style={{ marginBottom: 0 }}>
               <button className="ww-toc-toggle" onClick={() => setTocOpen(!tocOpen)} aria-expanded={tocOpen}>
                 In dit artikel
-                <Icon name="down" size={17} style={{ color: tokens.color.brand,
+                <Icon name="down" size={17} style={{ color: "var(--ww-brand)",
                   transform: tocOpen ? "rotate(180deg)" : "none", transition: "transform .15s ease" }} />
               </button>
               <span className="ww-sr-desktop">In dit artikel</span>
@@ -108,29 +104,24 @@ export default function ArticlePage({
             </div>
           </nav>
 
-          {article.related && article.related.length > 0 && (
-            <div className="ww-sidecard">
-              <h3>Liever leren van een chef?</h3>
-              {article.related.map(([t, m, p, ic]) => (
-                <a className="ww-mini" key={t} onClick={() => go({ name: "listing" })}>
-                  <Photo icon={ic} style={{ width: 64, height: 56, borderRadius: 12, flex: "none" }} />
-                  <span style={{ flex: 1 }}>
-                    <strong>{t}</strong>
-                    <span style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}><Star size={12} />{m}</span>
-                  </span>
-                  <span style={{ textAlign: "right", flex: "none" }}>
-                    <b style={{ fontFamily: tokens.font.display, fontSize: 17 }}>{"\u20AC"}{p}</b>
-                    <span style={{ display: "block", fontSize: 11.5, color: tokens.color.slate }}>p.p.</span>
-                  </span>
-                </a>
-              ))}
+          <div className="ww-sidecard">
+            <h3>Geschreven door</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <Avatar name="Lisa Wicked" size={48} />
+              <div>
+                <strong>Lisa van Wicked</strong>
+                <p style={{ fontSize: 12.5, color: "var(--ww-text-secondary)", margin: 0 }}>Redactie</p>
+              </div>
             </div>
-          )}
+            <p style={{ fontSize: 13.5, color: "var(--ww-text-secondary)", marginBottom: 12 }}>
+              Schrijft over workshops en uitjes, en probeerde er zelf al meer dan veertig.
+            </p>
+          </div>
 
-          <div className="ww-sidecard" style={{ background: tokens.color.softCoral, border: 0 }}>
-            <h3>Workshop cadeau geven?</h3>
-            <p style={{ color: tokens.color.ink, opacity: .72 }}>De ontvanger kiest zelf datum en workshop.</p>
-            <Button variant="coral" block icon="gift" onClick={() => go({ name: "giftcard" })}>Naar de cadeaubon</Button>
+          <div className="ww-sidecard ww-sidecard--coral">
+            <h3>Liever meteen doen?</h3>
+            <p>Zoek kaarsenworkshops bij jou in de buurt en boek direct.</p>
+            <Button variant="primary" block icon="search" onClick={() => go({ name: "listing" })}>Kaarsenworkshops bekijken</Button>
           </div>
         </aside>
       </div>
@@ -154,18 +145,13 @@ export default function ArticlePage({
       )}
 
       <section className="ww-section">
-        <div className="ww-shead"><h2>Lees ook</h2>
-          <a onClick={() => go({ name: "blog" })}>Alle artikelen <Icon name="right" size={14} /></a></div>
-        <div className="ww-snap ww-snap--narrow" style={{ display: "grid", gap: 18, gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))" }}>
-          {ARTICLES.filter((a) => a.slug !== article.slug).slice(0, 3).map((a) => (
-            <article className="ww-card" key={a.title} style={{ overflow: "hidden" }}>
-              <Photo icon={a.icon} style={{ aspectRatio: "16/9" }} />
-              <div style={{ padding: 16 }}>
-                <span className="ww-eyebrow">{a.cat}</span>
-                <h3 style={{ fontSize: 17, margin: "8px 0 8px" }}>{a.title}</h3>
-                <p className="ww-meta">{a.read}</p>
-              </div>
-            </article>
+        <div className="ww-shead">
+          <h2>Workshops bij dit artikel</h2>
+          <a onClick={() => go({ name: "listing" })}>Alle 74 <Icon name="right" size={14} /></a>
+        </div>
+        <div className="ww-grid ww-grid--4 ww-snap">
+          {RELATED_WORKSHOPS.map((w) => (
+            <WorkshopCard key={w.slug} w={w} go={go} />
           ))}
         </div>
       </section>

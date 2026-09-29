@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import { CATEGORIES, LISTING, FILTER_GROUPS } from "@/lib/mock-data";
-import { Icon, Button, Chip, Star, Photo } from "@/components/ui";
+import { Icon, Button, Chip, Star } from "@/components/ui";
 import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
 import Map from "@/components/Map";
@@ -76,8 +75,7 @@ function FilterDrawer({ open, onClose, active, setActive, price, setPrice, count
 export default function ListingPage({ category, listing = LISTING, filterGroups = FILTER_GROUPS }) {
   const go = useGo();
   const [open, setOpen] = useState(false);
-  const [mapView, setMapView] = useState(false);
-  const [active, setActive] = useState({});
+  const [active, setActive] = useState({ snel: ["Kleine groep"] });
   const [price, setPrice] = useState(120);
   const [hover, setHover] = useState(null);
   const [sort, setSort] = useState("Aanbevolen");
@@ -91,161 +89,192 @@ export default function ListingPage({ category, listing = LISTING, filterGroups 
   }));
   const mapKey = markers.map((m) => m.slug).join(",");
 
-  const quick = ["Vandaag", "Kleine groep", "Topbeoordeeld", "Gratis annuleren", "Direct boekbaar"];
+  const quick = [
+    { label: "Alle filters", icon: "sliders", all: true },
+    { label: "Utrecht", active: true },
+    { label: "Dit weekend", active: true },
+    { label: "Kleine groep", active: true },
+    { label: "Topbeoordeeld" },
+    { label: "Gratis annuleren" },
+    { label: "Direct boekbaar" },
+  ];
+
+  const moreFilters = ["Met vrienden", "Vrijgezellenfeest", "Kinderfeestje", "Teamuitje", "Nooit eerder gedaan", "Vrijdagmiddag vrij", "Onder \u20AC30", "Binnen een uur reizen"];
 
   return (
     <>
-      <div className="ww-wrap">
-        <nav className="ww-crumbs" aria-label="Kruimelpad">
-          <a onClick={() => go({ name: "home" })}>Home</a><span>/</span>
-          <a>{cat.name}</a><span>/</span><span>Utrecht</span>
-        </nav>
-      </div>
+      <section className="ww-lp-header">
+        <div className="ww-wrap">
+          <nav className="ww-crumbs" aria-label="Kruimelpad" style={{ paddingTop: 0, color: "rgba(255,255,255,.65)" }}>
+            <a onClick={() => go({ name: "home" })}>Home</a><span>/</span>
+            <a>{cat.name}</a><span>/</span><span>Utrecht</span>
+          </nav>
+          <h1>{cat.name} in Utrecht</h1>
+          <p>
+            Van sushi rollen tot Italiaans koken met een chef. In Utrecht staan {results.length} {cat.name.toLowerCase()} online,
+            van thuiskoks die net beginnen tot studio's die hier al jaren lesgeven. Je boekt direct en betaalt geen bookingkosten.
+          </p>
+          <div className="ww-lp-meta">
+            <span><Icon name="book" size={14} /> {results.length} workshops</span>
+            <span><Icon name="star" size={14} /> gemiddeld 4,7 · 1.204 reviews</span>
+            <span><Icon name="check" size={14} /> Bookingkosten {"\u20AC"}0, altijd</span>
+          </div>
+        </div>
+      </section>
 
       <div className="ww-filterbar">
         <div className="ww-wrap ww-filterbar-in">
-          <button className="ww-fbtn" onClick={() => setOpen(true)}>
-            <Icon name="sliders" size={18} /> Alle filters
-            {activeCount > 0 && <span className="ww-fcount">{activeCount}</span>}
-          </button>
-          <span className="ww-viewtoggle" role="group" aria-label="Weergave">
-            <button data-on={!mapView ? "true" : "false"} onClick={() => setMapView(false)}>Lijst</button>
-            <button data-on={mapView ? "true" : "false"} onClick={() => setMapView(true)}>Kaart</button>
-          </span>
           {quick.map((q) => (
-            <Chip key={q} on={(active.snel || []).includes(q)}
-              onClick={() => setActive((p) => {
-                const cur = p.snel || [];
-                const next = cur.includes(q) ? cur.filter((x) => x !== q) : [...cur, q];
-                const copy = { ...p };
-                if (next.length) copy.snel = next; else delete copy.snel;
-                return copy;
-              })}>
-              {q}
-            </Chip>
+            q.all ? (
+              <button key={q.label} className="ww-fbtn" onClick={() => setOpen(true)}>
+                <Icon name={q.icon} size={18} /> {q.label}
+                {activeCount > 0 && <span className="ww-fcount">{activeCount}</span>}
+              </button>
+            ) : (
+              <Chip key={q.label} on={q.active || (active.snel || []).includes(q.label)}
+                onClick={() => {
+                  if (q.active) return;
+                  setActive((p) => {
+                    const cur = p.snel || [];
+                    const next = cur.includes(q.label) ? cur.filter((x) => x !== q.label) : [...cur, q.label];
+                    const copy = { ...p };
+                    if (next.length) copy.snel = next; else delete copy.snel;
+                    return copy;
+                  });
+                }}>
+                {q.label}
+              </Chip>
+            )
           ))}
+
+          <span className="ww-viewtoggle" role="group" aria-label="Weergave">
+            <button data-on="true">Lijst</button>
+            <button data-on="false">Kaart</button>
+          </span>
+
+          <select className="ww-chip" style={{ height: 42, paddingRight: 10, marginLeft: "auto" }}
+            value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sorteren">
+            {["Aanbevolen", "Prijs oplopend", "Prijs aflopend", "Beoordeling", "Afstand", "Nieuw"].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       <div className="ww-wrap">
-        <div className="ww-results-head">
-          <div>
-            <h1>Kookworkshops in Utrecht</h1>
-            <p>
-              Van sushi rollen tot Italiaans koken met een chef. Boek een kookworkshop in Utrecht
-              voor een date, met vrienden of als teamuitje, en bepaal zelf je datum.
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span className="ww-meta" style={{ fontWeight: 700, color: tokens.color.ink }}>
-              {results.length} resultaten
-            </span>
-            <select className="ww-chip" style={{ height: 42, paddingRight: 10 }}
-              value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sorteren">
-              {["Aanbevolen", "Prijs oplopend", "Prijs aflopend", "Beoordeling", "Afstand", "Nieuw"].map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         <div className="ww-listing">
           <div>
-            <div className="ww-grid" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "var(--ww-text-primary)" }}>
+                {results.length} workshops in Utrecht
+              </span>
+              {activeCount > 0 && (
+                <button className="ww-btn ww-btn--ghost ww-btn--sm" onClick={() => setActive({})}>
+                  Filter wissen <Icon name="right" size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className="ww-listing-grid">
               {results.map((w) => (
                 <div key={w.slug} onMouseEnter={() => setHover(w.slug)} onMouseLeave={() => setHover(null)}>
                   <WorkshopCard w={w} go={go} showKm />
                 </div>
               ))}
             </div>
+
             {results.length === 0 && (
               <div className="ww-card" style={{ padding: 28, textAlign: "center" }}>
                 <h3 style={{ fontSize: 19, marginBottom: 8 }}>Geen workshops binnen dit budget</h3>
-                <p className="ww-meta" style={{ marginBottom: 16 }}>
+                <p className="ww-wcard-meta" style={{ marginBottom: 16 }}>
                   Verhoog je maximumprijs of laat je verrassen met iets anders in Utrecht.
                 </p>
                 <Button variant="outline" onClick={() => setPrice(120)}>Prijsfilter wissen</Button>
               </div>
             )}
+
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
+              <Button variant="outline" size="lg">Meer laden</Button>
+            </div>
+
+            <p className="ww-note" style={{ marginTop: 18 }}>
+              Aanbod en aantallen zijn voorbeelddata.
+            </p>
           </div>
 
-          <Map
-            key={mapKey}
-            markers={markers}
-            activeSlug={hover}
-            onSelect={(slug) => setHover(slug)}
-            className="ww-map"
-          />
+          <aside className="ww-map-side">
+            <Map
+              key={mapKey}
+              markers={markers}
+              activeSlug={hover}
+              onSelect={(slug) => setHover(slug)}
+              className="ww-map"
+            />
+            <div className="ww-map-cta">
+              <Button variant="inverse" size="sm">Open de kaart</Button>
+            </div>
+            <div className="ww-surprise-card">
+              <strong>Verras me</strong>
+              <p>Een workshop uit deze {results.length}, door ons gekozen.</p>
+            </div>
+          </aside>
         </div>
 
-        <section className="ww-seo-text">
-          <h2>Over kookworkshops in Utrecht</h2>
-          <ReadMore>
-          <p>
-            Utrecht heeft een bruisende foodscene, en dat zie je terug in het brede aanbod aan
-            kookworkshops. Of je nu voor het eerst achter het fornuis staat of je techniek wilt
-            aanscherpen, er is voor elk niveau iets te vinden.
-          </p>
-          <p>
-            Kies een keuken die bij je past, van Italiaans en Frans tot Thais en Japans, en leer koken
-            van ervaren chefs en enthousiaste thuiskoks. Veel workshops zijn geschikt als teamuitje of
-            vrijgezellenfeest, en je kunt bij de meeste je eigen datum kiezen.
-          </p>
-          </ReadMore>
-          <div className="ww-band ww-band--ink ww-band-split" style={{ margin: "24px 0 8px" }}>
+        <section className="ww-section ww-section--ink" style={{ borderRadius: "var(--ww-radius-xl)", marginTop: 40 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, marginBottom: 18 }}>
             <div>
-              <h2 style={{ fontSize: 24 }}>Kan je niet kiezen?</h2>
-              <p>Laat je verrassen met een kookworkshop die bij je past.</p>
+              <h2 style={{ color: "#fff" }}>Waar je het nog niet?</h2>
+              <p style={{ color: "rgba(255,255,255,.7)" }}>Kies op gelegenheid in plaats van op categorie.</p>
             </div>
-            <Button variant="coral" onClick={() => go({ name: "workshop" })}>Verras me</Button>
+            <Button variant="outline" style={{ borderColor: "rgba(255,255,255,.3)", color: "#fff" }}>Cadeaubon</Button>
+          </div>
+          <div className="ww-tagpick">
+            {moreFilters.map((f) => (
+              <Chip key={f} onClick={() => {}} style={{ background: "rgba(255,255,255,.12)", borderColor: "rgba(255,255,255,.15)", color: "#fff" }}>{f}</Chip>
+            ))}
+          </div>
+        </section>
+
+        <section className="ww-seo-text">
+          <div className="ww-seo-grid">
+            <div>
+              <h2>Een {cat.name.toLowerCase()} in Utrecht kiezen</h2>
+              <ReadMore>
+                <p>
+                  Utrecht heeft een bruisende scene, en dat zie je terug in het brede aanbod aan {cat.name.toLowerCase()}.
+                  Of je nu voor het eerst meedoet of je techniek wilt aanscherpen, er is voor elk niveau iets te vinden.
+                </p>
+                <p>
+                  Kies een workshop die bij je past en leer van ervaren aanbieders. Veel workshops zijn geschikt als
+                  teamuitje of vrijgezellenfeest, en je kunt bij de meeste je eigen datum kiezen.
+                </p>
+              </ReadMore>
+            </div>
+            <div>
+              <h3 style={{ fontSize: 18, marginBottom: 12 }}>Veelgestelde vragen</h3>
+              <div className="ww-faq-list">
+                {[
+                  ["Kan ik met een dieetwens mee?", "Bijna elke workshop wel. Op de workshop-pagina staat welke wensen de aanbieder kan accommoderen."],
+                  ["Tot wanneer kan ik annuleren?", "Dat verschilt per aanbieder. Gemiddeld kun je tot 48 uur van tevoren gratis annuleren."],
+                  ["Is een kookworkshop geschikt voor beginners?", "Zeker. De meeste workshops zijn juist opgezet voor mensen zonder ervaring."],
+                ].map(([q, a]) => (
+                  <details className="ww-faq-item" key={q}>
+                    <summary className="ww-faq-q">{q}<Icon name="down" size={18} style={{ flex: "none" }} /></summary>
+                    <p className="ww-faq-a">{a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <h3 style={{ fontSize: 17, margin: "22px 0 10px" }}>Ook interessant</h3>
+          <h3 style={{ fontSize: 17, margin: "30px 0 12px" }}>Ook interessant</h3>
           <div className="ww-links">
-            {["Kookworkshops Amsterdam", "Sushi workshops", "BBQ workshops", "Cocktailworkshops Utrecht", "Teamuitjes Utrecht", "Workshops in Utrecht"].map((l) => (
+            {[`${cat.name} Amsterdam`, "Sushi workshops", "BBQ workshops", `Cocktailworkshops Utrecht`, "Teamuitjes Utrecht", "Workshops in Utrecht"].map((l) => (
               <Chip key={l} soft onClick={() => go({ name: "listing" })}>{l}</Chip>
             ))}
           </div>
         </section>
       </div>
-
-      {mapView && (
-        <div className="ww-mapfs" role="dialog" aria-label="Kaartweergave">
-          <div className="ww-mapfs-top">
-            <button className="ww-iconbtn" aria-label="Terug naar de lijst" onClick={() => setMapView(false)}>
-              <Icon name="left" />
-            </button>
-            <strong style={{ fontSize: 15 }}>{results.length} workshops in Utrecht</strong>
-            <Button variant="primary" size="sm" style={{ marginLeft: "auto" }} onClick={() => setMapView(false)}>
-              Lijst
-            </Button>
-          </div>
-          <Map
-            key={mapKey}
-            markers={markers}
-            activeSlug={hover}
-            onSelect={(slug) => setHover(slug)}
-            style={{ position: "absolute", inset: 0 }}
-          />
-          <div className="ww-mapfs-cards">
-            {results.map((w) => (
-              <button className="ww-mcard" key={w.slug} onClick={() => go({ name: "workshop", workshop: w })}>
-                <Photo icon={w.icon} />
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <strong style={{ fontSize: 14.5, display: "block", lineHeight: 1.3 }}>{w.title}</strong>
-                  <span className="ww-meta" style={{ fontSize: 12.5, display: "flex", alignItems: "center", gap: 4 }}>
-                    <Star size={12} />{String(w.rating).replace(".", ",")} ({w.count}) · {w.duration}
-                  </span>
-                </span>
-                <span style={{ textAlign: "right", flex: "none" }}>
-                  <b style={{ fontFamily: tokens.font.display, fontSize: 17 }}>{"\u20AC"}{w.price}</b>
-                  <span style={{ display: "block", fontSize: 11, color: tokens.color.slate }}>p.p.</span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <FilterDrawer open={open} onClose={() => setOpen(false)} active={active} setActive={setActive}
         price={price} setPrice={setPrice} count={results.length} />
