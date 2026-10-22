@@ -233,6 +233,11 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
                     onClick={handleRegister}>
                     {loading ? "Account aanmaken..." : "Account aanmaken"}
                   </Button>
+                  <p className="ww-hint" style={{ textAlign: "center", marginTop: 12 }}>
+                    Met een account ga je akkoord met onze <a href="/voorwaarden" target="_blank" rel="noopener">voorwaarden</a>.
+                    Lees in de <a href="/privacy" target="_blank" rel="noopener">privacyverklaring</a> wat we met je gegevens doen.
+                    Je moet minimaal 16 jaar zijn.
+                  </p>
                   <p className="ww-meta" style={{ textAlign: "center", marginTop: 18 }}>
                     Al een account?{" "}
                     <a style={{ color: tokens.color.brand, fontWeight: 700, cursor: "pointer" }}
@@ -263,7 +268,10 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
                       </Field>
                       <label className="ww-check" style={{ margin: "4px 0 22px" }}>
                         <input type="checkbox" checked={form.terms} onChange={setCheck("terms")} />
-                        Ik ga akkoord met de voorwaarden voor workshopgevers.
+                        <span>
+                          Ik ga akkoord met de <a href="/voorwaarden-workshopgevers" target="_blank" rel="noopener">voorwaarden voor workshopgevers</a> en
+                          heb de <a href="/privacy" target="_blank" rel="noopener">privacyverklaring</a> gelezen.
+                        </span>
                       </label>
                     </>
                   )}

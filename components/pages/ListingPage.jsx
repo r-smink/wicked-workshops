@@ -261,7 +261,7 @@ export default function ListingPage({ category, listing: sourceListing = LISTING
               <div className="ww-faq-list">
                 {[
                   ["Kan ik met een dieetwens mee?", "Bijna elke workshop wel. Op de workshop-pagina staat welke wensen de aanbieder kan accommoderen."],
-                  ["Tot wanneer kan ik annuleren?", "Dat verschilt per aanbieder. Gemiddeld kun je tot 48 uur van tevoren gratis annuleren."],
+                  ["Tot wanneer kan ik annuleren?", "Dat verschilt per workshop en staat bij elke workshop onder 'Praktisch'. Bij veel workshops kun je tot 48 uur van tevoren gratis annuleren. Gaat een workshop niet door, dan krijg je altijd je geld terug."],
                   ["Is een kookworkshop geschikt voor beginners?", "Zeker. De meeste workshops zijn juist opgezet voor mensen zonder ervaring."],
                 ].map(([q, a]) => (
                   <details className="ww-faq-item" key={q}>

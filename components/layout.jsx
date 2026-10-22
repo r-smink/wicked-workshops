@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useGo } from "@/lib/use-go";
 import { useAuth } from "@/lib/use-auth";
+import { useConsent } from "@/components/CookieConsent";
 import { CATEGORIES, OCCASIONS, MOBILE_CITIES } from "@/lib/mock-data";
 import { Icon, Logo, Wordmark, Button, Chip, Avatar, ThemeToggle } from "@/components/ui";
 
@@ -321,6 +322,7 @@ export function BottomNav({ route }) {
 export function Footer() {
   const go = useGo();
   const { user } = useAuth();
+  const { openSettings } = useConsent();
   const footerMenu = useMenu("footer");
 
   const pageLinks = footerMenu.length
@@ -373,9 +375,9 @@ export function Footer() {
         <div className="ww-foot-bot">
           <span>&copy; 2026 Wicked Workshops</span>
           <div style={{ display: "flex", gap: 16 }}>
-            <a>Algemene voorwaarden</a>
-            <a>Privacy</a>
-            <a>Cookies</a>
+            <a onClick={() => go({ name: "page", slug: "voorwaarden" })}>Algemene voorwaarden</a>
+            <a onClick={() => go({ name: "page", slug: "privacy" })}>Privacy</a>
+            <a onClick={openSettings}>Cookie-instellingen</a>
           </div>
           <span>Bookingkosten &euro;0, altijd</span>
         </div>

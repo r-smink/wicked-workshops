@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PublicLayout from "@/components/PublicLayout";
-import { getBookingByCode } from "@/lib/directus";
+import { getBookingByCode, bookingLocation } from "@/lib/directus";
+import { cancellationLong } from "@/lib/cancellation";
 import { mollieGetPayment, mollieCheckoutUrl, isMollieConfigured } from "@/lib/mollie";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,9 @@ export default async function Page({ searchParams }) {
 
   const workshopTitle = booking?.workshop?.title || "je workshop";
   const when = sessionLabel(booking?.session?.starts_at);
+  /* Het exacte lesadres alleen voor bevestigde deelnemers. */
+  const location = booking?.status === "confirmed" ? bookingLocation(booking) : null;
+  const deadline = booking?.cancellation_deadline ? sessionLabel(booking.cancellation_deadline) : "";
 
   return (
     <PublicLayout>
@@ -77,6 +81,28 @@ export default async function Page({ searchParams }) {
                 De boeking voor <strong>{workshopTitle}</strong> is geannuleerd of verlopen.
               </p>
             </>
+          )}
+
+          {location && (
+            <div className="ww-sidecard" style={{ marginTop: 20 }}>
+              <h3>Waar</h3>
+              {location.name && <p style={{ fontWeight: 700, margin: "0 0 2px" }}>{location.name}</p>}
+              <p style={{ margin: 0 }}>
+                {location.address}
+                {(location.postal_code || location.city) && <br />}
+                {[location.postal_code, location.city].filter(Boolean).join(" ")}
+              </p>
+              <p className="ww-meta" style={{ marginTop: 10, fontSize: 13 }}>
+                Dit adres is alleen voor deelnemers. Deel het niet verder.
+              </p>
+            </div>
+          )}
+
+          {booking?.status === "confirmed" && booking.workshop?.cancellation_policy && (
+            <p style={{ marginTop: 14, fontSize: 14.5 }}>
+              Annuleren: {cancellationLong(booking.workshop.cancellation_policy).toLowerCase()}
+              {deadline ? ` (kosteloos tot ${deadline.charAt(0).toLowerCase() + deadline.slice(1)})` : ""}.
+            </p>
           )}
 
           {booking && (

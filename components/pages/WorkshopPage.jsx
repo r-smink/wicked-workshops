@@ -9,6 +9,7 @@ import { Icon, Star, Button, Chip, Badge, Rating, Photo, Avatar } from "@/compon
 import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
 import Map from "@/components/Map";
+import { cancellationShort, cancellationLong } from "@/lib/cancellation";
 
 function formatPrice(n) {
   if (n == null || isNaN(n)) return "0";
@@ -129,7 +130,7 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
 
           <div style={{ marginTop: 16 }}>
             <Button variant="primary" size="lg" block disabled={busy || !canBook} onClick={handleBook}>
-              {busy ? "Bezig..." : instant ? `Boek voor €${formatPrice(price * people)}` : "Vraag aan"}
+              {busy ? "Bezig..." : instant ? `Boek en betaal €${formatPrice(price * people)}` : "Vraag aan"}
             </Button>
           </div>
           <p style={{ fontSize: 12.5, color: tokens.color.slate, textAlign: "center", marginTop: 10 }}>
@@ -137,13 +138,18 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
               ? "Direct boeken en betalen via iDEAL of creditcard"
               : "Je betaalt nog niets — eerst bevestigt de aanbieder"}
           </p>
+          <p style={{ fontSize: 12, color: tokens.color.slate, textAlign: "center", marginTop: 8, lineHeight: 1.5 }}>
+            Door te boeken ga je akkoord met de <a href="/voorwaarden" target="_blank" rel="noopener">boekingsvoorwaarden</a> en
+            het annuleringsbeleid van deze workshop. Omdat de workshop op een vaste datum is, geldt er geen
+            herroepingsrecht van 14 dagen. Lees ook onze <a href="/privacy" target="_blank" rel="noopener">privacyverklaring</a>.
+          </p>
         </>
       )}
 
       <ul className="ww-trust">
         {["shield", "check", "chat"].map((i, idx) => (
           <li key={i}><Icon name={i} size={17} />
-            {idx === 0 ? (workshop.cancellation?.includes("48") ? "Gratis annuleren tot 48 uur vooraf" : "Gratis annuleren tot 48 uur vooraf")
+            {idx === 0 ? cancellationShort(workshop.cancellation_policy)
               : idx === 1 ? "Veilig betalen via Wicked" : `Direct contact met ${workshop.provider?.display_name?.split(" ")[0] || "aanbieder"}`}
           </li>
         ))}
@@ -166,9 +172,9 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
 
   const cityLabel = w.city ? (w.area ? `${w.city}, ${w.area}` : w.city) : "Utrecht";
   const prov = w.provider || {};
-  const provLocation = w.location_name || (w.location_inherits_provider ? prov.location_name : null) || w.location_name;
-  const provAddress = w.address || (w.location_inherits_provider ? prov.address : null) || w.address;
-  const locationTitle = provLocation || w.location_name || `${w.area || ""}, ${w.city || ""}`;
+  /* Publiek tonen we alleen de plaats (en buurt). Het exacte lesadres
+     krijgen alleen deelnemers te zien, in hun boekingsbevestiging. */
+  const placeLabel = [w.area, w.city].filter(Boolean).join(", ") || "Locatie";
 
   const hasReviews = Array.isArray(reviews) && reviews.length > 0;
   const hasFaq = Array.isArray(faq) && faq.length > 0;
@@ -293,10 +299,9 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
 
             <section className="ww-block">
               <h2>Locatie</h2>
-              <p style={{ fontWeight: 700, marginBottom: 4 }}>{locationTitle}</p>
+              <p style={{ fontWeight: 700, marginBottom: 4 }}>{placeLabel}</p>
               <p className="ww-meta">
-                {provAddress || "Exact adres na boeking"}
-                {w.address_visibility === "after_booking" && !provAddress && " · exact adres na boeking"}
+                Het exacte adres staat in je boekingsbevestiging. De kaart toont de omgeving bij benadering.
               </p>
               {w.lat != null && w.lng != null ? (
                 <Map
@@ -373,7 +378,7 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
                   <div className="ww-prac">
                     <span style={{ color: tokens.color.brand }}><Icon name="shield" size={22} /></span>
                     <strong>Annuleren</strong>
-                    <p>{w.cancellation_policy === "flexible_48h" ? "Gratis tot 48 uur vooraf" : w.cancellation_policy === "moderate_7d" ? "Gratis tot 7 dagen vooraf" : "Geen annulering mogelijk"}</p>
+                    <p>{cancellationLong(w.cancellation_policy)}</p>
                   </div>
                 )}
                 {w.instant_bookable !== undefined && (

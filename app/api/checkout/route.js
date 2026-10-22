@@ -5,6 +5,7 @@ import {
   getSessionForCheckout,
 } from "@/lib/directus";
 import { mollieCreatePayment, mollieCheckoutUrl, isMollieConfigured } from "@/lib/mollie";
+import { cancellationDeadline } from "@/lib/cancellation";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,8 @@ export async function POST(request) {
     customer: user?.id || null,
     payment_status: instant ? "open" : null,
     hold_expires_at: instant ? new Date(Date.now() + 30 * 60 * 1000).toISOString() : null,
+    /* Vastleggen welk annuleringsbeleid gold op het moment van boeken. */
+    cancellation_deadline: cancellationDeadline(workshop.cancellation_policy, session.starts_at),
   });
 
   if (!booking) {

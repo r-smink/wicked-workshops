@@ -316,7 +316,10 @@ export default function ProviderProfileForm({
             </div>
             <label className="ww-check" style={{ marginTop: 18 }}>
               <input type="checkbox" checked={f.terms} onChange={(e) => put("terms", e.target.checked)} />
-              Ik ga akkoord met de voorwaarden voor workshopgevers en met 15 procent commissie per boeking.
+              <span>
+                Ik ga akkoord met de <a href="/voorwaarden-workshopgevers" target="_blank" rel="noopener">voorwaarden voor workshopgevers</a> en
+                met 15 procent commissie per boeking.
+              </span>
             </label>
           </section>
         </div>

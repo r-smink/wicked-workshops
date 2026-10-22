@@ -54,6 +54,15 @@ export async function POST(request) {
     return NextResponse.json({ error: "Geen toegang tot deze boeking" }, { status: 403 });
   }
 
+  /* Betaaltermijn: 7 dagen, maar nooit later dan 2 uur voor aanvang. */
+  const startsAt = typeof booking.session === "object" ? booking.session?.starts_at : null;
+  const weekFromNow = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  const latest = startsAt ? new Date(startsAt).getTime() - 2 * 60 * 60 * 1000 : weekFromNow;
+  const holdUntil = Math.min(weekFromNow, latest);
+  if (holdUntil <= Date.now()) {
+    return NextResponse.json({ error: "Deze workshop begint te snel om de aanvraag nog te bevestigen" }, { status: 409 });
+  }
+
   const workshop = typeof booking.workshop === "object" ? booking.workshop : null;
   const description = `${workshop?.title || "Workshop"} · ${booking.booking_code}`;
 
@@ -74,7 +83,7 @@ export async function POST(request) {
     status: "awaiting_payment",
     payment_id: payment.id,
     payment_status: "open",
-    hold_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    hold_expires_at: new Date(holdUntil).toISOString(),
   });
 
   return NextResponse.json({ ok: true, checkoutUrl });

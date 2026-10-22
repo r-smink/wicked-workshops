@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getAccessToken, directusMe } from "@/lib/auth";
 import { directusFetch, directusUpdate } from "@/lib/directus";
+import { encryptField } from "@/lib/field-crypto";
+
+/* Versie van de voorwaarden voor workshopgevers. Ophogen bij elke
+   inhoudelijke wijziging; het akkoord wordt per versie vastgelegd. */
+const PROVIDER_TERMS_VERSION = "2026-10-concept";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +13,12 @@ export const dynamic = "force-dynamic";
    conservatief: alleen velden waarvan we zeker zijn dat ze in de
    providers-collectie bestaan. Persoonsgegevens gaan naar directus_users. */
 function formToProvider(body, existingProvider) {
+  const iban = body.iban ? String(body.iban).replace(/s+/g, "").toUpperCase() : null;
+  const prev = existingProvider?.details || {};
+  /* Tijdstip en versie van het akkoord bewaren als bewijs. Een eerder
+     akkoord op dezelfde versie blijft staan. */
+  const termsAccepted = Boolean(body.terms);
+  const sameVersion = prev.terms_version === PROVIDER_TERMS_VERSION && prev.terms_accepted_at;
   const details = {
     ...(existingProvider?.details || {}),
     phone: body.phone || null,
@@ -17,9 +28,11 @@ function formToProvider(body, existingProvider) {
     kor: body.kor ?? null,
     website: body.website || null,
     instagram: body.instagram || null,
-    iban: body.iban || null,
+    iban: iban ? encryptField(iban) : null,
     account_holder: body.account_holder || null,
     terms: body.terms ?? null,
+    terms_version: termsAccepted ? PROVIDER_TERMS_VERSION : null,
+    terms_accepted_at: termsAccepted ? (sameVersion ? prev.terms_accepted_at : new Date().toISOString()) : null,
     billing_street: body.street || null,
     billing_house_number: body.house_number || null,
     billing_addition: body.addition || null,
@@ -63,7 +76,7 @@ function formToProvider(body, existingProvider) {
       : (body.active_since || null),
     accepts_groups: body.accepts_groups ?? true,
     max_group_size: body.max_group_size ? Number(body.max_group_size) : null,
-    payout_iban_last4: body.iban ? body.iban.slice(-4) : null,
+    payout_iban_last4: iban ? iban.slice(-4) : null,
     details,
   };
   /* Alleen city meesturen als het een geldige UUID is */

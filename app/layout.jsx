@@ -1,9 +1,9 @@
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { GoogleTagManager } from '@next/third-parties/google';
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { DemoModeProvider } from "@/components/DemoModeProvider";
+import { CookieConsentProvider } from "@/components/CookieConsent";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://wickedworkshops.nl";
 
@@ -45,17 +45,41 @@ const themeScript = `
   })();
 `;
 
+/* Google Consent Mode v2: alles wat niet noodzakelijk is staat standaard
+   uit, vóórdat GTM (pas na toestemming, zie CookieConsent) laadt. Een
+   eerder gemaakte keuze wordt meteen toegepast. */
+const consentScript = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    analytics_storage: 'denied', functionality_storage: 'granted', security_storage: 'granted',
+    wait_for_update: 500
+  });
+  try {
+    var c = JSON.parse(localStorage.getItem('ww-consent') || 'null');
+    if (c) gtag('consent', 'update', {
+      analytics_storage: c.analytics ? 'granted' : 'denied',
+      ad_storage: c.marketing ? 'granted' : 'denied',
+      ad_user_data: c.marketing ? 'granted' : 'denied',
+      ad_personalization: c.marketing ? 'granted' : 'denied'
+    });
+  } catch (e) {}
+`;
+
 export default function RootLayout({ children }) {
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: consentScript }} />
       </head>
-      <GoogleTagManager gtmId="GTM-NM694S6Z" />
       <body className="ww">
         <ThemeProvider>
           <DemoModeProvider>
-            {children}
+            <CookieConsentProvider>
+              {children}
+            </CookieConsentProvider>
           </DemoModeProvider>
         </ThemeProvider>
         <Analytics />

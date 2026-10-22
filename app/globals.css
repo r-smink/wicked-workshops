@@ -931,3 +931,12 @@ html.dark .ww-savebar { background: rgba(22,19,38,.95); }
 
 .ww-block:last-child { border-bottom: 0; }
 
+
+/* ---------- cookietoestemming ---------- */
+.ww-consent { position: fixed; z-index: 90; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); max-width: 440px; background: var(--ww-surface-elevated); border: 1px solid var(--ww-border); border-radius: var(--ww-radius-lg); box-shadow: var(--ww-shadow-lift); padding: 20px; color: var(--ww-text-primary); }
+.ww-consent h3 { font-size: 17px; margin: 0 0 8px; }
+.ww-consent p { font-size: 14px; line-height: 1.5; color: var(--ww-text-secondary); margin: 0; }
+.ww-consent p a { color: var(--ww-brand); font-weight: 700; }
+.ww-consent-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.ww-consent-actions .ww-btn { flex: 1 1 auto; }
+@media (max-width: 1023px) { .ww-consent { bottom: calc(84px + env(safe-area-inset-bottom)); } }

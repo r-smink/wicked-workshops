@@ -144,7 +144,7 @@ export default function ProviderPage({ workshops = MARCO_WORKSHOPS, reviews = MA
             </div>
             <Button variant="primary" block icon="chat">Stel een vraag</Button>
             <ul className="ww-trust" style={{ marginTop: 16 }}>
-              {[["shield", "Boeken en betalen via Wicked"], ["calendar", "Gratis annuleren tot 48 uur vooraf"],
+              {[["shield", "Boeken en betalen via Wicked"], ["calendar", "Annuleringsbeleid per workshop vooraf duidelijk"],
                 ["check", "Alleen reviews van echte deelnemers"]].map(([i, t]) => (
                 <li key={t}><Icon name={i} size={17} />{t}</li>
               ))}

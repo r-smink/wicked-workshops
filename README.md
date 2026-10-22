@@ -90,6 +90,7 @@ Zodra je Directus koppelt, zet je ze in Vercel onder **Settings > Environment Va
 | `DIRECTUS_STATIC_TOKEN` | Server-side lezen | Alleen server, nooit `NEXT_PUBLIC_` |
 | `REVALIDATE_SECRET` | Beveiligt de revalidatie-webhook | Alleen server |
 | `MOLLIE_API_KEY` | Betalingen, fase 2 | Alleen server |
+| `FIELD_ENCRYPTION_KEY` | Versleutelt het IBAN van workshopgevers (32 bytes, base64). Lokaal en op Vercel dezelfde waarde, anders zijn opgeslagen IBAN's niet meer te lezen | Alleen server |
 
 Alles wat met `NEXT_PUBLIC_` begint komt in de browser terecht. Zet daar dus nooit een token in.
 
