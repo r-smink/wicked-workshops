@@ -756,7 +756,7 @@ const FALLBACK_CITIES = [
 ];
 
 export async function getCities() {
-  const data = await directusFetch(`/items/cities?fields=id,slug,name&limit=50`);
+  const data = await directusFetch(`/items/cities?filter[status]=published&sort=-is_top,sort,name&fields=id,slug,name&limit=50`);
   if (data && data.length) {
     return data.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
   }

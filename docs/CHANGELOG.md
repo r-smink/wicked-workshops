@@ -62,7 +62,9 @@ Per fase een korte demo-notitie (docs/13).
 
 **Bekend**
 
-- Productie is nog niet aangeraakt. Daar staan 0 workshops, 0 aanmeldingen, 0 datums, 15 plaatsen en 2 gebruikers. De werkwijze staat in `directus/README.md`.
+- Productie gemigreerd op 26 oktober 2026 (migratie 001 en seed). `schema:diff` gaf daarna geen verschillen. De publieke rechten van de bestaande site (pagina's, artikelen, plaatspagina's, redirects, bestanden, formulieren) staan nu in `seed/access.mjs`. De rollen Customer, Provider en Editor en hun policies zijn niet aangeraakt.
+- De extensie `ww-guards` staat nog niet op productie: Directus daar installeert extensies uit de marketplace. Zolang niemand de rol Member of Team heeft, maakt dat niets uit; uiterlijk in fase 3 moet ze erop.
+- Productie heeft nu 2502 plaatsen, waarvan 15 gepubliceerd. `getCities()` filtert daarom op `status = published`.
 - De bestaande site bepaalt "workshopgever" nog via de rol Provider en registreert met de rollen Customer en Provider. Na de migratie op productie moet dat via de `providers`-rij en de rol Member (fase 3).
 - De oude wizard van de site schrijft annuleerwaarden als `flexible_48h`; na de migratie op productie verwijst het veld naar `basis`, `soepel` of `vast`.
 - Geen foto's in de demo-seed.

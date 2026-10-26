@@ -52,9 +52,9 @@ npm run verify              # bouwt een schone Directus uit de code (poort 8056)
 
 Het live schema bestond al voor de publieke site. Waar docs/03 hetzelfde begrip anders noemt, blijft de live naam en vertaalt `web/lib/directus/model.ts` (bijvoorbeeld `places` = `cities`, `live` = `published`, `saved_workshops` = `favorites`). De volledige lijst staat bovenaan dat bestand. Wat ontbrak is toegevoegd door `schema/migrations/001-datamodel-docs03.mjs`.
 
-## Naar productie (nog niet gedaan)
+## Naar productie
 
-Alleen na akkoord. De scripts weigeren een ander doel dan localhost zonder `--ja-ik-weet-het`.
+Op 26 oktober 2026 gedraaid: migratie 001 en de seed. Daarna gaf `schema:diff` geen verschillen. De extensie `ww-guards` staat nog niet op productie (zie hieronder). Alleen na akkoord. De scripts weigeren een ander doel dan localhost zonder `--ja-ik-weet-het`.
 
 ```bash
 # 1. Bekijk wat er zou veranderen (past niets toe)
