@@ -125,6 +125,26 @@ async function setChoices(collection, field, choices, extra = {}) {
   console.log(`Keuzes ${collection}.${field} bijgewerkt (${choices.length})`);
 }
 
+async function patch(what, url, body) {
+  const { ok, status, data } = await api(url, { method: "PATCH", body: JSON.stringify(body) });
+  if (!ok) fail(what, status, data);
+  console.log(`${what} bijgewerkt`);
+}
+
+/* Toon blokken in Directus met hun naam ("Paginakop · Zo werkt...")
+   in plaats van hun id: in de lijst op een pagina, in relaties en in de
+   collectie page_blocks zelf. */
+async function setupBlockLabels(types) {
+  const template = "{{type}} · {{title}}";
+  await patch("Weergave page_blocks.type", "/fields/page_blocks/type", {
+    meta: { display: "labels", display_options: { choices: types, format: false } },
+  });
+  await patch("Weergavesjabloon page_blocks", "/collections/page_blocks", { meta: { display_template: template } });
+  await patch("Bloklijst pages.blocks", "/fields/pages/blocks", {
+    meta: { options: { template, enableSelect: false } },
+  });
+}
+
 async function createRelation(body) {
   const existing = await api(`/relations/${body.collection}/${body.field}`);
   if (existing.ok) {
@@ -152,6 +172,7 @@ async function setupPages() {
 async function setupPageBlocks() {
   const types = [...BLOCK_TYPES.legacy, ...BLOCK_TYPES.builder].map(({ value, text }) => ({ value, text }));
   await setChoices("page_blocks", "type", types);
+  await setupBlockLabels(types);
 
   await setChoices("page_blocks", "style", [
     { text: "Standaard", value: "default" },

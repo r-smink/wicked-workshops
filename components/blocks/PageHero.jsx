@@ -52,23 +52,27 @@ function DarkHero({ block, crumbs, search }) {
   return (
     <section id={block.anchor || undefined} className={`ww-hero wb-hero-dark${block.image ? " wb-hero-dark--photo" : ""}`} {...blockAttr(block, "type,variant,title,body,image,cta_label,cta_to")}>
       <div className="ww-hero-bg" aria-hidden="true">{bg ? <img src={bg} alt="" /> : <div />}</div>
-      <div className="ww-wrap ww-hero-in">
-        <Crumbs items={crumbs} light />
-        {block.eyebrow && <p className="ww-eyebrow">{block.eyebrow}</p>}
-        <h1 {...blockAttr(block, "title", "popover")}>{block.title}</h1>
-        {block.body && <p {...blockAttr(block, "body", "popover")}>{block.body}</p>}
-        {search ? (
-          <form className="ww-hero-search" role="search" onSubmit={submit}>
-            <Icon name="search" size={20} style={{ color: "var(--ww-brand)", flex: "none" }} />
-            <input value={q} onChange={(e) => setQ(e.target.value)}
-              placeholder="Zoek een plaats, workshop of aanbieder"
-              aria-label="Zoek een plaats, workshop of aanbieder" />
-            <button className="ww-hero-search-btn" type="submit">{block.cta_label || "Zoeken"}</button>
-          </form>
-        ) : (
-          <Actions block={{ ...block, style: "ink" }} center />
-        )}
-        <Stats items={block.items} light />
+      {/* Twee lagen: .ww-hero-in zet padding als shorthand en zou de
+          zijmarge van .ww-wrap anders op 0 zetten. */}
+      <div className="ww-wrap">
+        <div className="ww-hero-in">
+          <Crumbs items={crumbs} light />
+          {block.eyebrow && <p className="ww-eyebrow">{block.eyebrow}</p>}
+          <h1 {...blockAttr(block, "title", "popover")}>{block.title}</h1>
+          {block.body && <p {...blockAttr(block, "body", "popover")}>{block.body}</p>}
+          {search ? (
+            <form className="ww-hero-search" role="search" onSubmit={submit}>
+              <Icon name="search" size={20} style={{ color: "var(--ww-brand)", flex: "none" }} />
+              <input value={q} onChange={(e) => setQ(e.target.value)}
+                placeholder="Zoek een plaats, workshop of aanbieder"
+                aria-label="Zoek een plaats, workshop of aanbieder" />
+              <button className="ww-hero-search-btn" type="submit">{block.cta_label || "Zoeken"}</button>
+            </form>
+          ) : (
+            <Actions block={{ ...block, style: "ink" }} center />
+          )}
+          <Stats items={block.items} light />
+        </div>
       </div>
     </section>
   );
