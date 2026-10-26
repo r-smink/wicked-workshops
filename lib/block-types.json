@@ -1,0 +1,67 @@
+{
+  "_note": "Bloktypes van de page builder. Gedeeld door scripts/setup-page-builder.js (keuzelijst in Directus) en components/blocks/BlockRenderer.jsx. De eerste veertien zijn de oorspronkelijke contentblokken uit StaticPage; de rest komt uit wicked-workshops-export.json, ontdubbeld van 69 exporttypes naar generieke blokken.",
+  "legacy": [
+    { "value": "hero", "text": "Hero (eenvoudig)" },
+    { "value": "text", "text": "Tekst" },
+    { "value": "text_image", "text": "Tekst + afbeelding" },
+    { "value": "two_columns", "text": "Twee kolommen" },
+    { "value": "steps", "text": "Stappen" },
+    { "value": "ticks", "text": "Vinkjes" },
+    { "value": "features", "text": "Features / USP's" },
+    { "value": "quotes", "text": "Quotes" },
+    { "value": "cards", "text": "Cards" },
+    { "value": "cta", "text": "Call-to-action" },
+    { "value": "image_banner", "text": "Afbeelding banner" },
+    { "value": "gallery", "text": "Galerij" },
+    { "value": "faq", "text": "FAQ" },
+    { "value": "video", "text": "Video" }
+  ],
+  "builder": [
+    { "value": "page_hero", "text": "Paginakop (hero)", "variants": ["split", "overlay", "centered", "search"], "export": ["home_hero", "cat_hero", "detail_hero", "aanbieder_hero", "maker_hero", "hulp_hero", "account_hero", "locatie_team_outing", "maker_team_outing", "account_section_2", "detail_section_1"] },
+    { "value": "workshop_list", "text": "Workshops (kaarten of datums)", "variants": ["grid", "rail", "dates", "agenda"], "sources": ["featured", "upcoming", "context", "category", "manual"], "export": ["home_featured_workshops", "home_agenda", "cat_categories (lijst)", "aanbieder_section_3", "aanbieder_agenda", "detail_agenda", "account_related"] },
+    { "value": "category_grid", "text": "Categorieën", "variants": ["tiles", "list", "rail"], "export": ["home_categories"] },
+    { "value": "city_grid", "text": "Plaatsen", "export": ["home_locations (steden)", "home_closing_cta"] },
+    { "value": "venue_list", "text": "Ruimtes (locatie gezocht)", "sources": ["venues", "manual"], "export": ["locatie_categories (ruimtes)", "home_locations (ruimtes)", "maker_locations"] },
+    { "value": "steps_rail", "text": "Stappen met beeld of tijd", "variants": ["numbered", "timeline", "cards"], "export": ["home_how_it_works", "home_pilot_banner (stappen)", "maker_section_2", "hulp_section_3", "hulp_section_6", "detail_section_3", "detail_section_4"] },
+    { "value": "threshold_explainer", "text": "Doorgaan-drempel uitleg", "variants": ["timeline", "interactive", "legend"], "export": ["home_threshold_explainer", "maker_threshold_explainer", "hulp_threshold_explainer", "home_how_it_works", "cat_categories (zo lees je de kaart)"] },
+    { "value": "pilot_banner", "text": "Pilotmelding", "export": ["home_pilot_banner", "hulp_pilot_banner"] },
+    { "value": "feature_split", "text": "Tekst + beeld + cijfers", "variants": ["image-right", "image-left"], "export": ["home_team_outing", "home_become_host", "home_gift_card", "detail_become_host", "detail_section_10", "maker_venue_search", "aanbieder_section_4", "aanbieder_section_5", "hulp_section_6"] },
+    { "value": "link_cards", "text": "Ingangen (kaarten met link)", "export": ["home_venue_search", "maker_section_5", "account_section_3", "locatie_team_outing (twee deuren)"] },
+    { "value": "review_list", "text": "Reviews", "variants": ["grid", "single"], "sources": ["manual", "context", "latest"], "export": ["home_reviews", "detail_section_8", "aanbieder_section_5"] },
+    { "value": "faq_list", "text": "Veelgestelde vragen (gegroepeerd)", "export": ["maker_faq", "hulp_section_7", "detail_section_9", "cat_categories (vragen)", "locatie_categories (vragen)"] },
+    { "value": "pricing_example", "text": "Rekenvoorbeeld / bon", "export": ["maker_section_3", "maker_pricing_receipt"] },
+    { "value": "cancellation_policy", "text": "Annuleren en verzetten", "export": ["detail_section_7", "hulp_section_5", "hulp_section_4"] },
+    { "value": "form", "text": "Formulier", "export": ["hulp_section_8", "maker_section_6", "locatie_categories (formulieren)", "aanbieder_section_6"] },
+    { "value": "link_columns", "text": "Verder kijken (linkkolommen)", "export": ["cat_categories (verder kijken)"] },
+    { "value": "cta_band", "text": "Afsluitende band", "export": ["home_closing_cta", "aanbieder_closing_cta", "locatie_closing_cta", "home_team_outing (band)"] },
+    { "value": "page_core", "text": "Pagina-inhoud (vast scherm)", "export": ["detail_section_2..9", "cat_categories (filters/kaart)", "aanbieder_section_2", "account_hero (formulier)"] }
+  ],
+  "sources": [
+    { "value": "featured", "text": "Uitgelicht (workshops.featured)" },
+    { "value": "upcoming", "text": "Eerstvolgende datums" },
+    { "value": "context", "text": "Hoort bij deze pagina (categorie, aanbieder of workshop)" },
+    { "value": "category", "text": "Gekozen categorie en/of plaats" },
+    { "value": "manual", "text": "Handmatig gekozen / ingevuld" },
+    { "value": "latest", "text": "Nieuwste" },
+    { "value": "venues", "text": "Gepubliceerde ruimtes" }
+  ],
+  "forms": [
+    { "value": "contact", "text": "Contact (hulp)" },
+    { "value": "maker_signup", "text": "Aanmelden als workshopgever" },
+    { "value": "venue_search", "text": "Ons team zoekt een ruimte mee" },
+    { "value": "venue_offer", "text": "Ik heb een ruimte" },
+    { "value": "follow", "text": "Volg deze aanbieder" },
+    { "value": "business", "text": "Teamuitje aanvragen" }
+  ],
+  "page_types": [
+    { "value": "content", "text": "Contentpagina" },
+    { "value": "home", "text": "Homepage" },
+    { "value": "cat", "text": "Sjabloon: categorie" },
+    { "value": "detail", "text": "Sjabloon: workshop" },
+    { "value": "aanbieder", "text": "Sjabloon: aanbieder" },
+    { "value": "account", "text": "Sjabloon: inloggen" },
+    { "value": "maker", "text": "Word workshopgever" },
+    { "value": "locatie", "text": "Locatie gezocht" },
+    { "value": "hulp", "text": "Hulp en contact" }
+  ]
+}

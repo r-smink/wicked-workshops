@@ -1,5 +1,6 @@
 import PublicLayout from "@/components/PublicLayout";
 import ProviderPage from "@/components/pages/ProviderPage";
+import { Templated } from "@/components/BuilderPage";
 import { getProvider, getProviderWorkshops, getProviderReviews } from "@/lib/directus";
 
 export const revalidate = 60;
@@ -13,7 +14,9 @@ export default async function Page({ params }) {
   ]);
   return (
     <PublicLayout>
-      <ProviderPage workshops={workshops} reviews={reviews} />
+      <Templated pageType="aanbieder" ctx={{ provider }}>
+        <ProviderPage workshops={workshops} reviews={reviews} />
+      </Templated>
     </PublicLayout>
   );
 }

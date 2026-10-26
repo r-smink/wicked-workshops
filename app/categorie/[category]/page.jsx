@@ -1,5 +1,6 @@
 import PublicLayout from "@/components/PublicLayout";
 import ListingPage from "@/components/pages/ListingPage";
+import { Templated } from "@/components/BuilderPage";
 import { getCategory, getListing } from "@/lib/directus";
 
 export const revalidate = 60;
@@ -12,7 +13,9 @@ export default async function Page({ params }) {
   ]);
   return (
     <PublicLayout>
-      <ListingPage category={cat} listing={listing} />
+      <Templated pageType="cat" ctx={{ category: cat }}>
+        <ListingPage category={cat} listing={listing} />
+      </Templated>
     </PublicLayout>
   );
 }

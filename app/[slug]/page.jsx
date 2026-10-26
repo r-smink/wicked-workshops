@@ -3,6 +3,7 @@ import PublicLayout from "@/components/PublicLayout";
 import StaticPage from "@/components/pages/StaticPage";
 import VisualEditing from "@/components/VisualEditing";
 import { getContentPage, getContentPageSlugs, getSeoPage, getSeoPageSlugs } from "@/lib/directus";
+import { resolveBlocks } from "@/lib/page-builder";
 
 export const revalidate = 60;
 
@@ -32,8 +33,10 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { slug } = await params;
-  const page = (await getContentPage(slug)) || (await getSeoPage(slug));
-  if (!page) notFound();
+  const found = (await getContentPage(slug)) || (await getSeoPage(slug));
+  if (!found) notFound();
+  /* Page builder-blokken (workshops, reviews, ...) halen hun data hier op. */
+  const page = found.blocks?.length ? { ...found, blocks: await resolveBlocks(found.blocks) } : found;
   return (
     <PublicLayout>
       <StaticPage page={page} />
