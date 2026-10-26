@@ -1,0 +1,244 @@
+/* Alleen de regels voor #p-aflow-a (concept A). In productie: vervang "#p-aflow-a" door een wrapper-klasse of CSS Module. */
+/* ============================================================
+   A: De doorloop
+   ============================================================ */
+#p-aflow-a .scherm-label{margin-bottom:22px}
+
+#p-aflow-a .aflow-a-voortgang{list-style:none;margin:0 0 22px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:420px}
+
+#p-aflow-a .aflow-a-voortgang li{display:grid;gap:7px;font-size:13px;font-weight:700;color:var(--text-3)}
+
+#p-aflow-a .aflow-a-voortgang li::before{content:"";height:5px;border-radius:5px;background:var(--border)}
+
+#p-aflow-a .aflow-a-voortgang li.is-klaar{color:var(--text-2)}
+
+#p-aflow-a .aflow-a-voortgang li.is-klaar::before{background:var(--brand-ink)}
+
+#p-aflow-a .aflow-a-voortgang li.is-nu{color:var(--brand-ink)}
+
+#p-aflow-a .aflow-a-voortgang li.is-nu::before{background:var(--purple)}
+
+#p-aflow-a .aflow-a-lead{font-size:clamp(16px,1.35cqi,18.5px);color:var(--text-2);margin-top:14px;max-width:48ch;line-height:1.55}
+
+#p-aflow-a .aflow-a-klein{font-size:13px;color:var(--text-3);line-height:1.5}
+
+#p-aflow-a .aflow-a-klein a, #p-aflow-a .aflow-a-welkom-voet a, #p-aflow-a .aflow-a-hulp a{color:var(--brand-ink);font-weight:700}
+
+/* scherm 1 */
+#p-aflow-a .aflow-a-s1{padding-bottom:clamp(36px,4cqi,60px)}
+
+#p-aflow-a .aflow-a-split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(26px,4cqi,80px);padding-left:var(--gutter);align-items:stretch}
+
+#p-aflow-a .aflow-a-split-txt{padding-block:6px 10px;max-width:640px}
+
+#p-aflow-a .aflow-a-split h1{font-size:clamp(34px,4.6cqi,64px);font-weight:800;font-variation-settings:"wdth" 94;line-height:1;max-width:14ch}
+
+#p-aflow-a .aflow-a-form{display:grid;gap:14px;margin-top:26px;max-width:480px}
+
+#p-aflow-a .aflow-a-wwrij{display:flex;gap:0;position:relative}
+
+#p-aflow-a .aflow-a-wwrij input{padding-right:74px}
+
+#p-aflow-a .aflow-a-toon{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:var(--surface-2);color:var(--brand-ink);font-weight:700;font-size:13px;border-radius:8px;padding:6px 10px;cursor:pointer}
+
+#p-aflow-a .aflow-a-form .btn{justify-self:start}
+
+#p-aflow-a .aflow-a-split-beeld{margin:0;border-radius:var(--r-xl) 0 0 var(--r-xl);overflow:hidden;min-height:clamp(420px,46cqi,660px)}
+
+#p-aflow-a .aflow-a-split-beeld img{width:100%;height:100%;object-fit:cover;object-position:62% 40%}
+
+#p-aflow-a .aflow-a-wanneer{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:clamp(30px,3.4cqi,48px) 0 0;border-top:1px solid var(--border)}
+
+#p-aflow-a .aflow-a-wanneer > div{padding:18px 22px 0 0}
+
+#p-aflow-a .aflow-a-wanneer > div + div{padding-left:22px;border-left:1px solid var(--border)}
+
+#p-aflow-a .aflow-a-wanneer dt{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:18px;letter-spacing:-.01em}
+
+#p-aflow-a .aflow-a-wanneer dd{margin:6px 0 0;font-size:15px;color:var(--text-2);line-height:1.5;max-width:40ch}
+
+/* scherm 2 */
+#p-aflow-a .aflow-a-smal{max-width:760px}
+
+#p-aflow-a .aflow-a-check{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:clamp(22px,2.6cqi,34px);box-shadow:var(--shadow)}
+
+#p-aflow-a .aflow-a-envelop{color:var(--brand)}
+
+#p-aflow-a .aflow-a-check h2{font-size:clamp(26px,2.8cqi,36px);font-weight:700}
+
+#p-aflow-a .aflow-a-check p{font-size:16px;color:var(--text-2);margin-top:10px;max-width:50ch}
+
+#p-aflow-a .aflow-a-check p b{color:var(--text)}
+
+#p-aflow-a .aflow-a-hulp{margin:16px 0 0;padding:14px 0 0;border-top:1px solid var(--border);list-style:none;display:grid;gap:6px;font-size:14.5px;color:var(--text-2)}
+
+/* scherm 3 */
+#p-aflow-a .aflow-a-mailrij{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(24px,4cqi,72px);align-items:center}
+
+#p-aflow-a .aflow-a-mail{max-width:640px}
+
+#p-aflow-a .aflow-a-mailuitleg h2{font-size:clamp(26px,3cqi,40px);font-weight:700;max-width:16ch}
+
+#p-aflow-a .aflow-a-mailuitleg > p:not(.noot){font-size:16.5px;color:var(--text-2);margin-top:12px;max-width:42ch}
+
+/* scherm 4 */
+#p-aflow-a .aflow-a-welkom{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(24px,3.6cqi,64px);align-items:start}
+
+#p-aflow-a .aflow-a-welkom-kop h2{font-size:clamp(30px,3.6cqi,48px);font-weight:800;font-variation-settings:"wdth" 94}
+
+#p-aflow-a .aflow-a-welkom-kop > p{font-size:17px;color:var(--text-2);margin-top:10px}
+
+#p-aflow-a .aflow-a-naam{margin-top:26px;max-width:420px}
+
+#p-aflow-a .aflow-a-plek{border:0;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+
+#p-aflow-a .aflow-a-plek legend{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(21px,2cqi,26px);letter-spacing:-.015em;margin-bottom:14px;padding:0}
+
+#p-aflow-a .aflow-a-optie{position:relative;display:grid;grid-template-rows:auto 1fr;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:border-color .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease)}
+
+#p-aflow-a .aflow-a-optie:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:var(--brand)}
+
+#p-aflow-a .aflow-a-optie input{position:absolute;top:14px;left:14px;width:22px;height:22px;accent-color:var(--purple);margin:0;z-index:1}
+
+#p-aflow-a .aflow-a-optie img{width:100%;aspect-ratio:16/10;object-fit:cover}
+
+#p-aflow-a .aflow-a-optie:has(input:checked){border-color:var(--purple);box-shadow:0 0 0 2px var(--purple)}
+
+#p-aflow-a .aflow-a-optie-txt{display:grid;gap:4px;padding:14px 16px 16px}
+
+#p-aflow-a .aflow-a-optie-txt b{font-size:17px}
+
+#p-aflow-a .aflow-a-optie-txt small{font-size:14px;color:var(--text-2);line-height:1.45}
+
+#p-aflow-a .aflow-a-optie-kaal{grid-column:1/-1;grid-template-rows:auto;grid-template-columns:auto minmax(0,1fr);align-items:center}
+
+#p-aflow-a .aflow-a-optie-kaal input{position:static;margin-left:16px}
+
+#p-aflow-a .aflow-a-optie-kaal .aflow-a-optie-txt{padding:14px 16px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+
+#p-aflow-a .aflow-a-welkom-voet{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:18px 32px;padding-top:20px;border-top:1px solid var(--border)}
+
+#p-aflow-a .aflow-a-welkom-voet p{font-size:14.5px;color:var(--text-2);max-width:72ch;line-height:1.5}
+
+#p-aflow-a .aflow-a-welkom-voet .btn{flex-shrink:0}
+
+/* scherm 5 */
+#p-aflow-a .aflow-a-start{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(26px,4cqi,80px);align-items:start}
+
+#p-aflow-a .aflow-a-start h2{font-size:clamp(30px,3.8cqi,52px);font-weight:800;font-variation-settings:"wdth" 94;max-width:17ch}
+
+#p-aflow-a .aflow-a-baan{list-style:none;margin:30px 0 0;padding:0;display:grid;gap:0}
+
+#p-aflow-a .aflow-a-baan li{position:relative;padding:0 0 22px 40px;display:grid;gap:3px}
+
+#p-aflow-a .aflow-a-baan li::before{content:"";position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;border:2.5px solid var(--brand);background:var(--surface-2)}
+
+#p-aflow-a .aflow-a-baan li::after{content:"";position:absolute;left:12px;top:24px;bottom:2px;width:2px;background:#D9CDEE}
+
+#p-aflow-a .aflow-a-baan li:last-child::after{display:none}
+
+#p-aflow-a .aflow-a-baan li.is-nu::before{background:var(--purple)}
+
+#p-aflow-a .aflow-a-baan b{font-size:17.5px;font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.01em}
+
+#p-aflow-a .aflow-a-baan span{font-size:15px;color:var(--text-2);max-width:52ch;line-height:1.5}
+
+#p-aflow-a .aflow-a-start-knop{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;margin-top:10px}
+
+#p-aflow-a .aflow-a-start-zij{display:grid;gap:14px}
+
+#p-aflow-a .aflow-a-start-zij figure{margin:0;border-radius:var(--r-xl);overflow:hidden;aspect-ratio:3/2}
+
+#p-aflow-a .aflow-a-start-zij img{width:100%;height:100%;object-fit:cover}
+
+#p-aflow-a .aflow-a-zijblok{background:var(--surface);border-radius:var(--r-lg);padding:16px 18px}
+
+#p-aflow-a .aflow-a-zijblok h3{font-size:17px;font-weight:700}
+
+#p-aflow-a .aflow-a-zijblok p{font-size:14.5px;color:var(--text-2);margin-top:6px;line-height:1.5}
+
+/* scherm 6 */
+#p-aflow-a .aflow-a-login{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:clamp(26px,5cqi,96px);align-items:start}
+
+#p-aflow-a .aflow-a-loginform{display:grid;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:clamp(22px,2.6cqi,32px);box-shadow:var(--shadow)}
+
+#p-aflow-a .aflow-a-loginform h2{font-size:clamp(28px,3cqi,38px);font-weight:800}
+
+#p-aflow-a .aflow-a-vergeten{font-size:14px;font-weight:700;color:var(--brand-ink);justify-self:start}
+
+#p-aflow-a .aflow-a-daarna h3{font-size:clamp(21px,2.1cqi,27px);font-weight:700;max-width:22ch}
+
+#p-aflow-a .aflow-a-verder{margin-top:16px;background:var(--surface-2);border-radius:var(--r-lg);padding:18px 20px;display:grid;gap:6px;max-width:460px;--text-2:#66627C}
+
+#p-aflow-a .aflow-a-verder-titel{font-weight:800;font-size:17px}
+
+#p-aflow-a .aflow-a-verder p{font-size:14.5px;color:var(--text-2)}
+
+#p-aflow-a .aflow-a-stapjes{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:6px 0 4px}
+
+#p-aflow-a .aflow-a-stapjes i{height:6px;border-radius:6px;background:#D9CDEE}
+
+#p-aflow-a .aflow-a-stapjes i.is-klaar{background:var(--purple)}
+
+/* scherm 7 */
+#p-aflow-a .aflow-a-h2{font-size:clamp(28px,3.2cqi,42px);font-weight:700;margin-bottom:22px}
+
+#p-aflow-a .aflow-a-vergetenrij{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+
+#p-aflow-a .aflow-a-paneel{display:grid;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px}
+
+#p-aflow-a .aflow-a-paneel h3{font-size:20px;font-weight:700}
+
+#p-aflow-a .aflow-a-paneel .btn{justify-self:start}
+
+#p-aflow-a .aflow-a-paneel-van{font-size:13px;font-weight:700;color:var(--text-3)}
+
+#p-aflow-a .aflow-a-minimail{padding:20px 0 0;gap:0}
+
+#p-aflow-a .aflow-a-minimail .aflow-a-paneel-van{padding:0 20px 12px}
+
+#p-aflow-a .aflow-a-minimail .aflow-mail-body{padding:16px 20px 20px}
+
+#p-aflow-a .aflow-a-verlopen{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px}
+
+#p-aflow-a .aflow-a-verlopen > svg{color:var(--brand)}
+
+#p-aflow-a .aflow-a-verlopen h3{font-size:18px;font-weight:700}
+
+#p-aflow-a .aflow-a-verlopen p{font-size:14.5px;color:var(--text-2);margin-top:3px}
+
+
+
+@container stage (max-width: 1080px){
+#p-aflow-a .aflow-a-vergetenrij{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#p-aflow-a .aflow-a-minimail{grid-column:1/-1;grid-row:2}
+#p-aflow-a .aflow-a-welkom{grid-template-columns:1fr}
+}
+
+
+@container stage (max-width: 860px){
+#p-aflow-a .aflow-a-split{grid-template-columns:1fr;padding-inline:var(--gutter)}
+#p-aflow-a .aflow-a-split-beeld{order:-1;min-height:0;aspect-ratio:4/3;border-radius:var(--r-xl)}
+#p-aflow-a .aflow-a-wanneer{grid-template-columns:1fr}
+#p-aflow-a .aflow-a-wanneer > div{padding:14px 0}
+#p-aflow-a .aflow-a-wanneer > div + div{padding-left:0;border-left:0;border-top:1px solid var(--border)}
+#p-aflow-a .aflow-a-mailrij, #p-aflow-a .aflow-a-start, #p-aflow-a .aflow-a-login{grid-template-columns:1fr}
+#p-aflow-a .aflow-a-start-zij figure{display:none}
+#p-aflow-a .aflow-a-welkom-voet{flex-direction:column;align-items:stretch}
+#p-aflow-a .aflow-a-vergetenrij{grid-template-columns:1fr}
+#p-aflow-a .aflow-a-minimail{grid-row:auto}
+#p-aflow-a .aflow-a-verlopen{grid-template-columns:auto minmax(0,1fr)}
+#p-aflow-a .aflow-a-verlopen .btn{grid-column:1/-1;justify-self:start}
+}
+
+
+@container stage (max-width: 560px){
+#p-aflow-a .aflow-a-plek{grid-template-columns:1fr}
+#p-aflow-a .aflow-a-optie{grid-template-rows:auto;grid-template-columns:110px minmax(0,1fr)}
+#p-aflow-a .aflow-a-optie img{aspect-ratio:auto;height:100%}
+#p-aflow-a .aflow-a-optie-kaal{grid-template-columns:auto minmax(0,1fr)}
+#p-aflow-a .aflow-a-check{grid-template-columns:1fr;gap:12px}
+#p-aflow-a .aflow-a-envelop{width:42px;height:42px}
+#p-aflow-a .aflow-social{grid-template-columns:1fr}
+#p-aflow-a .aflow-a-mail .aflow-mail-kop div{grid-template-columns:76px minmax(0,1fr)}
+}

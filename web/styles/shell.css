@@ -1,0 +1,447 @@
+/* GEGENEREERD door scripts/build-shell-css.mjs uit
+   reference/css/00-shared-design-system.css. Niet met de hand wijzigen;
+   aanvullingen staan in styles/shell-extra.css. */
+
+/* ---- logo, knoppen, tekstlink (referentie r. 174-247) ---- */
+/* ============================================================
+   Logo
+   ============================================================ */
+.logo{display:inline-flex;align-items:center;gap:11px;text-decoration:none;flex-shrink:0}
+
+.logo svg{width:33px;height:32px;overflow:visible;flex-shrink:0}
+
+.wm{display:grid;line-height:1}
+
+.wm-a{
+  font-family:var(--font-head);
+  font-weight:800;font-size:22px;letter-spacing:-.03em;
+  color:var(--brand-ink);position:relative;
+}
+
+/* De handgetekende streep onder "wicked" als achtergrond in plaats van een
+   losse SVG. Als los element kroop hij over het woord heen. */
+.wm-a::after{
+  content:"";position:absolute;left:0;right:-3px;bottom:-7px;height:6px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 8' preserveAspectRatio='none'%3E%3Cpath d='M2 5.6 C 16 1.8, 30 6.6, 46 3.6 S 76 1.6, 90 4.8' fill='none' stroke='%23FF5C6E' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/100% 100%;
+}
+
+.wm-b{
+  font-size:9.5px;font-weight:600;letter-spacing:.34em;
+  color:var(--text-2);text-transform:none;margin-top:8px;
+}
+
+.logo-row{flex-direction:row;align-items:baseline;gap:7px}
+
+.logo-row .wm{display:flex;align-items:baseline;gap:6px}
+
+.logo-row .wm-b{margin-top:0;font-size:17px;letter-spacing:-.02em;font-weight:700;color:var(--text);font-family:var(--font-head)}
+
+/* ============================================================
+   Knoppen
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  height:50px;padding:0 24px;border-radius:14px;border:0;
+  background:var(--purple);color:#fff;
+  font-weight:700;font-size:15.5px;text-decoration:none;cursor:pointer;
+  transition:background .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+  box-shadow:0 1px 2px rgba(86,32,176,.2), 0 10px 22px -12px rgba(86,32,176,.7);
+}
+
+.btn:hover{background:var(--purple-deep);transform:translateY(-2px)}
+
+/* Knoppen in Wicked Purple: wit op coral haalt 3,00:1, wit op paars 7,03:1.
+   De brand guide wijst paars ook aan voor knoppen, coral voor highlights. */
+.btn-coral{background:var(--purple);color:#fff}
+
+.btn-coral:hover{background:var(--purple-deep)}
+
+.btn-line{
+  background:transparent;color:var(--text);
+  border:1.5px solid var(--border);box-shadow:none;
+}
+
+.btn-line:hover{background:var(--surface-2);border-color:var(--brand);color:var(--brand-ink);transform:translateY(-2px)}
+
+.btn-sm{height:42px;padding:0 18px;font-size:14.5px;border-radius:12px}
+
+.btn-on-band{background:#fff;color:var(--ink)}
+
+.btn-on-band:hover{background:var(--cloud);color:var(--purple-deep)}
+
+.tlink{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--brand-ink);font-weight:700;font-size:15px;text-decoration:none;
+}
+
+.tlink svg{transition:transform .2s var(--ease)}
+
+.tlink:hover svg{transform:translateX(4px)}
+
+/* ---- sterren en badges (referentie r. 249-269) ---- */
+/* ============================================================
+   Sterren en badges
+   ============================================================ */
+.stars{color:var(--sun);letter-spacing:.06em;font-size:14px;line-height:1}
+
+.rate{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--text)}
+
+.rate small{color:var(--text-3);font-weight:500}
+
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 11px;border-radius:var(--r-pill);
+  font-size:12px;font-weight:700;letter-spacing:.005em;
+  background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(27,22,48,.14);
+}
+
+.badge-coral{background:#fff;color:var(--coral-deep);box-shadow:0 2px 8px rgba(27,22,48,.14)}
+
+.badge-purple{background:var(--purple);color:#fff;box-shadow:none}
+
+.badge-cloud{background:var(--surface-2);color:var(--brand-ink);box-shadow:none}
+
+/* ---- aankondiging, header, menu (referentie r. 271-317) ---- */
+/* ============================================================
+   Gedeelde schil: aankondiging + header
+   ============================================================ */
+.announce{
+  background:var(--ink);color:#EFE9FA;
+  font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:9px var(--gutter);text-align:center;
+}
+
+.announce b{color:#fff}
+
+.announce svg{flex-shrink:0;color:var(--coral)}
+
+.head{
+  position:relative;z-index:40;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0 var(--gutter);
+  display:flex;align-items:center;gap:clamp(12px,2cqi,30px);
+  height:76px;
+}
+
+.nav{display:flex;align-items:center;gap:2px;margin-right:auto}
+
+.nav a, .nav button{
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  padding:9px 13px;border-radius:11px;border:0;background:transparent;
+  font-size:15.5px;font-weight:600;color:var(--text);text-decoration:none;cursor:pointer;
+  position:relative;transition:color .18s var(--ease), background .18s var(--ease);
+}
+
+.nav a::after, .nav button::after{
+  content:"";position:absolute;left:13px;right:13px;bottom:4px;height:2px;
+  background:var(--coral);border-radius:2px;
+  transform:scaleX(0);transform-origin:left;transition:transform .22s var(--ease);
+}
+
+.nav a:hover, .nav button:hover{color:var(--brand-ink)}
+
+.nav a:hover::after, .nav button:hover::after{transform:scaleX(1)}
+
+.nav svg{color:var(--brand);flex-shrink:0}
+
+.head-end{display:flex;align-items:center;gap:10px;flex-shrink:0}
+
+.burger{display:none;border:1.5px solid var(--border);background:transparent;border-radius:11px;width:46px;height:46px;align-items:center;justify-content:center;cursor:pointer}
+
+/* ---- secties, workshopkaart, rail (referentie r. 319-378) ---- */
+/* ============================================================
+   Gedeelde secties
+   ============================================================ */
+.sec{padding-block:clamp(48px,6.5cqi,96px)}
+
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(24px,3cqi,40px)}
+
+.sec-head h2{font-size:clamp(27px,3.5cqi,46px);font-weight:700}
+
+.sec-head p{color:var(--text-2);font-size:16px;max-width:52ch;margin-top:10px}
+
+.sec-lead{max-width:60ch}
+
+/* workshopkaart, gedeeld */
+.wk{
+  display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);overflow:hidden;text-decoration:none;
+  transition:transform .22s var(--ease), box-shadow .22s var(--ease), border-color .22s var(--ease);
+}
+
+.wk:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:var(--brand)}
+
+.wk-img{position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:var(--surface-2)}
+
+.wk-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease)}
+
+.wk:hover .wk-img img{transform:scale(1.04)}
+
+.wk-tag{position:absolute;top:12px;left:12px}
+
+.wk-heart{
+  position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.92);display:grid;place-items:center;color:var(--ink);
+  box-shadow:0 2px 8px rgba(27,22,48,.18);
+}
+
+.wk-body{padding:16px 17px 17px;display:flex;flex-direction:column;gap:6px;flex:1}
+
+.wk-body h3{font-size:18px;font-weight:700;line-height:1.24}
+
+.wk-meta{font-size:13.5px;color:var(--text-2)}
+
+.wk-foot{margin-top:auto;padding-top:13px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+
+.wk-price{text-align:right;line-height:1.1}
+
+.wk-price small{display:block;font-size:11.5px;color:var(--text-3);font-weight:600}
+
+.wk-price b{font-size:19px;font-weight:800;font-family:var(--font-head);font-variant-numeric:tabular-nums}
+
+/* rail die rechts uit beeld loopt */
+.rail{
+  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(258px,1fr);
+  gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding-inline:var(--gutter);padding-block:6px 18px;margin-inline:0;
+  scrollbar-width:thin;
+}
+
+.rail > *{scroll-snap-align:start}
+
+/* ---- footer (referentie r. 380-404) ---- */
+/* footer, gedeeld */
+.foot{background:var(--ink);color:#C9C2E4;padding:clamp(44px,5cqi,68px) var(--gutter) 30px}
+
+.foot .logo svg{width:38px;height:37px}
+
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:34px}
+
+.foot h3{color:#fff;font-size:15px;font-weight:700;margin-bottom:14px;font-family:var(--font-body);letter-spacing:0}
+
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+
+.foot a{color:#C9C2E4;text-decoration:none;font-size:14.5px}
+
+.foot a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+
+.foot-intro{font-size:14.5px;max-width:34ch;margin-top:14px;color:#A79FCC}
+
+.foot-bar{
+  margin-top:34px;padding-top:20px;border-top:1px solid rgba(255,255,255,.12);
+  display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:#8F88B4;
+}
+
+.foot .wm-a{color:#fff}
+
+.foot .wm-b{color:#A79FCC}
+
+/* ---- zoekveld in de header (referentie r. 419-438) ---- */
+/* zoekveld in de header, voor concept 2 en voor de samengevoegde pagina */
+.head-search{
+  flex:0 1 270px;min-width:0;display:flex;align-items:center;gap:10px;
+  background:var(--surface-2);border:1px solid transparent;
+  border-radius:var(--r-pill);padding:0 8px 0 16px;height:46px;
+  transition:border-color .18s var(--ease), background .18s var(--ease);
+}
+
+.head-search:focus-within{border-color:var(--brand);background:var(--surface)}
+
+.head-search input{
+  flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:14.5px;color:var(--text);outline:none;
+}
+
+.head-search input::placeholder{color:var(--text-3)}
+
+.head-search button{
+  border:0;background:var(--purple);color:#fff;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;flex-shrink:0;
+}
+
+/* ---- containerbreedtes (referentie r. 442-487) ---- */
+/* ============================================================
+   Containerbreedtes. cqi zodat de telefoonweergave echt meet.
+   ============================================================ */
+/* De band tussen 860 en 1200px is waar een flexheader stilletjes overloopt:
+   menu, logo en twee knoppen passen net niet meer naast elkaar. */
+@container stage (max-width: 1340px){
+.head{gap:6px;padding-inline:clamp(14px,2.6cqi,32px)}
+.nav a, .nav button{padding:8px 9px;font-size:14.5px;gap:6px}
+.nav svg{width:17px;height:17px}
+.head-end{gap:7px}
+.btn-sm{padding:0 14px;font-size:14px}
+}
+
+
+
+/* De header klapt eerder dicht dan de rest van de pagina: gemeten passen logo,
+   zoekveld, vijf menu-items en twee knoppen pas samen boven de 1200px. */
+@container stage (max-width: 1200px){
+.nav{display:none}
+.burger{display:flex}
+}
+
+
+
+@container stage (max-width: 860px){
+.head{height:68px;gap:10px}
+.nav{display:none}
+.burger{display:flex}
+.head-end .btn-line{display:none}
+.foot-grid{grid-template-columns:1fr 1fr;gap:28px}
+}
+
+
+
+@container stage (max-width: 560px){
+.announce{font-size:12px;padding-block:8px}
+.announce .hide-sm{display:none}
+.sec{padding-block:40px}
+.sec-head{flex-direction:column;align-items:flex-start;gap:12px}
+.foot-grid{grid-template-columns:1fr 1fr;gap:22px 18px}
+.foot-grid > div:first-child{grid-column:span 2}
+.foot h3{margin-bottom:10px}
+.foot ul{gap:7px}
+.foot a{font-size:14px}
+.rail{grid-auto-columns:minmax(232px,1fr)}
+}
+
+/* ---- megamenu en breedtes (referentie r. 495-589) ---- */
+/* ---- megamenu ---------------------------------------------- */
+.head{position:relative}
+
+.mm{
+  position:absolute;left:0;right:0;top:100%;z-index:60;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  box-shadow:0 18px 40px -18px rgba(27,22,48,.3);
+  padding:clamp(18px,2.4cqi,32px) var(--gutter);
+}
+
+.mm[hidden]{display:none}
+
+.mm-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,248px);gap:clamp(22px,3cqi,52px);align-items:start}
+
+.mm-cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;align-content:start}
+
+.mm-cat{
+  display:flex;align-items:center;gap:11px;padding:8px 9px;
+  border-radius:12px;text-decoration:none;
+  transition:background .15s var(--ease);
+}
+
+.mm-cat:hover{background:var(--surface-2)}
+
+.mm-th{width:42px;height:42px;border-radius:11px;overflow:hidden;flex-shrink:0;background:var(--surface-2)}
+
+.mm-th img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease)}
+
+.mm-cat:hover .mm-th img{transform:scale(1.1)}
+
+.mm-cat b{display:block;font-size:14.5px;font-weight:700;line-height:1.25;color:var(--text)}
+
+.mm-cat span{font-size:12px;color:var(--text-3);font-weight:600;font-variant-numeric:tabular-nums}
+
+.mm-side{border-left:1px solid var(--border);padding-left:clamp(18px,2.4cqi,34px)}
+
+.mm-kop{font-size:12.5px;font-weight:700;color:var(--text-2);margin-bottom:11px}
+
+.mm-side ul{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:7px}
+
+.mm-side a{
+  display:inline-block;padding:6px 12px;border-radius:var(--r-pill);
+  border:1px solid var(--border);font-size:13.5px;font-weight:600;
+  color:var(--text-2);text-decoration:none;transition:all .15s var(--ease);
+}
+
+.mm-side a:hover{border-color:var(--purple);color:var(--brand-ink);background:var(--surface-2)}
+
+.mm-verras{
+  display:flex;align-items:center;gap:11px;padding:13px;border-radius:var(--r-md);
+  background:var(--surface-2);text-decoration:none;
+}
+
+.mm-verras:hover{background:var(--cloud)}
+
+.mm-verras svg{color:var(--coral);flex-shrink:0}
+
+.mm-verras b{display:block;font-size:14.5px;font-weight:700;color:var(--text)}
+
+.mm-verras span{font-size:12.5px;color:var(--text-2)}
+
+
+
+/* ============================================================
+   Breedtes
+   ============================================================ */
+/* Logo, zoekveld, vijf menu-items en twee knoppen passen pas samen vanaf
+   circa 1500px. Daaronder krimpt het zoekveld tot het vergrootglas. */
+@container stage (max-width: 1500px){
+.head-search{flex:0 0 52px;padding:0 6px 0 12px}
+.head-search input, .head-search button{display:none}
+}
+
+
+@container stage (max-width: 1200px){
+.mm-cats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+
+@container stage (max-width: 1080px){
+/* Het zoekveld krimpt tot het vergrootglas voordat de balk breekt. */
+}
+
+
+@container stage (max-width: 1200px){
+.mm{display:none}
+}
+
+
+@container stage (max-width: 860px){
+.head{flex-wrap:wrap;height:auto;padding-block:11px;row-gap:10px}
+.head-search{order:3;flex:1 1 100%;height:44px;padding:0 8px 0 16px}
+.head-search button{display:grid}
+.head-search input{display:block}
+}
+
+/* ---- keuzechip (referentie r. 623-636) ---- */
+.fchip{
+  flex-shrink:0;border:1.5px solid var(--border);background:transparent;
+  padding:8px 15px;border-radius:var(--r-pill);font-size:14px;font-weight:600;
+  color:var(--text-2);cursor:pointer;transition:all .15s var(--ease);
+  display:inline-flex;align-items:center;gap:7px;
+}
+
+.fchip:hover{border-color:var(--brand);color:var(--brand-ink)}
+
+.fchip[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff}
+
+.fchip-hoofd{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.fchip-hoofd:hover{background:var(--band-2);border-color:var(--band-2);color:#fff}
+
+/* ---- ingelogde header (referentie r. 895-905) ---- */
+/* ---- ingelogde header (ronde 2) ---- */
+.head-acc{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:15px;color:var(--text);text-decoration:none;padding:4px 6px 4px 4px;border-radius:999px}
+
+.head-acc:hover .head-acc-t{text-decoration:underline;text-underline-offset:3px}
+
+.head-av{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800}
+
+
+@container stage (max-width: 860px){
+.head-acc-t{display:none}
+}
+
+/* ---- horizontaal logo (referentie r. 936-944) ---- */
+/* ---- logo uit Merk/logo/, horizontale variant ---- */
+.logo .logo-h{width:auto;height:30px;overflow:visible;display:block}
+
+.foot .logo .logo-h{width:auto;height:34px}
+
+
+@container stage (max-width: 860px){
+.logo .logo-h{height:24px}
+}

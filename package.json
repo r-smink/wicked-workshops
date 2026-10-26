@@ -1,24 +1,14 @@
 {
   "name": "wicked-workshops",
-  "version": "0.1.0",
   "private": true,
+  "description": "Monorepo: web/ (Next.js) en directus/ (Directus, lokaal zonder Docker). Deze scripts zijn alleen doorverwijzingen.",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@directus/visual-editing": "^2.1.0",
-    "@next/third-parties": "^15.1.11",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0",
-    "next": "15.1.11",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "eslint": "^9",
-    "eslint-config-next": "15.1.6"
+    "dev:web": "npm --prefix web run dev",
+    "dev:directus": "npm --prefix directus run dev",
+    "migrate": "npm --prefix directus run migrate",
+    "seed": "npm --prefix directus run seed",
+    "seed:demo": "npm --prefix directus run seed:demo",
+    "directus:types": "npm --prefix web run directus:types",
+    "test:permissions": "npm --prefix directus run test:permissions"
   }
 }

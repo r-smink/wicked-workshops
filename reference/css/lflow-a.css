@@ -1,0 +1,195 @@
+/* Alleen de regels voor #p-lflow-a (concept A). In productie: vervang "#p-lflow-a" door een wrapper-klasse of CSS Module. */
+/* ============================================================
+   CONCEPT A: Het formulier
+   ============================================================ */
+#p-lflow-a .lflow-a-intro{padding-block:28px 0}
+
+#p-lflow-a .lflow-a-scherm{padding-block:clamp(36px,4.5cqi,64px)}
+
+#p-lflow-a .lflow-a-tint{background:var(--surface-2)}
+
+#p-lflow-a .lflow-a-h2{font-size:clamp(24px,2.4cqi,32px);font-weight:700;margin-bottom:18px}
+
+#p-lflow-a h3{letter-spacing:0}
+
+#p-lflow-a .lflow-a-aan{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,440px);gap:clamp(28px,5cqi,80px);align-items:start}
+
+#p-lflow-a .lflow-a-aan-t h1{font-size:clamp(32px,4cqi,56px);font-weight:800;line-height:1.03;max-width:16ch}
+
+#p-lflow-a .lflow-a-lead{margin-top:14px;font-size:17px;color:var(--text-2);max-width:52ch}
+
+#p-lflow-a .lflow-a-wie{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+
+#p-lflow-a .lflow-a-wie > div{border-radius:var(--r-lg);padding:18px 20px;display:grid;gap:10px;align-content:start}
+
+#p-lflow-a .lflow-a-wie > div:first-child{background:var(--surface-2)}
+
+#p-lflow-a .lflow-a-wie > div:last-child{border:1.5px dashed var(--border)}
+
+#p-lflow-a .lflow-a-wie h2{font-family:"Plus Jakarta Sans",sans-serif;font-size:16px;font-weight:700;letter-spacing:0}
+
+#p-lflow-a .lflow-a-wie ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:14.5px}
+
+#p-lflow-a .lflow-a-wie li{display:flex;gap:9px;align-items:flex-start}
+
+#p-lflow-a .lflow-a-wie li svg{color:var(--brand);flex-shrink:0;margin-top:1px}
+
+#p-lflow-a .lflow-a-zelf li{color:var(--text-2)}
+
+#p-lflow-a .lflow-a-zelf li::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid var(--text-3);margin:7px 5px 0 4px;flex-shrink:0}
+
+#p-lflow-a .lflow-a-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--shadow-lift);padding:clamp(20px,2.6cqi,32px);display:grid;gap:14px}
+
+#p-lflow-a .lflow-a-kaart h2{font-size:24px;font-weight:700}
+
+#p-lflow-a .lflow-a-kaart > .btn{width:100%}
+
+#p-lflow-a .lflow-a-klein{font-size:14px;color:var(--text-2);text-align:center}
+
+#p-lflow-a .lflow-a-klein a{color:var(--brand-ink);font-weight:700}
+
+/* opstellen */
+#p-lflow-a .lflow-a-opstel{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:clamp(24px,4cqi,64px);align-items:start}
+
+#p-lflow-a .lflow-a-form{display:grid;gap:18px}
+
+#p-lflow-a .lflow-a-form fieldset{margin:0;min-width:0;border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px 22px;display:grid;gap:14px;background:var(--surface)}
+
+#p-lflow-a .lflow-a-form legend{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;color:var(--text);padding:0 8px;margin-left:-8px}
+
+#p-lflow-a .lflow-a-nr{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--brand-ink);font-size:13.5px;font-weight:800}
+
+#p-lflow-a .lflow-a-twee{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+
+#p-lflow-a .lflow-a-soort, #p-lflow-a .lflow-a-voorz{display:flex;flex-wrap:wrap;gap:8px}
+
+#p-lflow-a .lflow-a-vlabel{flex-basis:100%;font-size:13.5px;font-weight:700;color:var(--text-2)}
+
+#p-lflow-a .lflow-a-kort input{max-width:120px}
+
+#p-lflow-a .lflow-a-fotos{display:grid;grid-template-columns:1.6fr repeat(3,minmax(0,1fr));gap:10px}
+
+#p-lflow-a .lflow-a-fotos figure{margin:0;position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:4/3}
+
+#p-lflow-a .lflow-a-fotos img{width:100%;height:100%;object-fit:cover;display:block}
+
+#p-lflow-a .lflow-a-fotos figcaption{position:absolute;left:8px;bottom:8px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:var(--r-pill);background:var(--surface);color:var(--text)}
+
+#p-lflow-a .lflow-a-leeg{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed #CFC6E3;border-radius:var(--r-md);
+  background:#FBF9FE;font:inherit;font-size:13px;font-weight:700;color:var(--brand-ink);cursor:pointer;min-height:96px;padding:8px;text-align:center
+}
+
+#p-lflow-a .lflow-a-leeg:hover{background:var(--surface-2)}
+
+#p-lflow-a .lflow-a-tip{display:block}
+
+#p-lflow-a .lflow-a-form-voet{display:flex;gap:10px;flex-wrap:wrap}
+
+#p-lflow-a .lflow-a-mee{position:sticky;top:76px;display:grid;gap:10px}
+
+#p-lflow-a .lflow-a-mee-label{font-size:13.5px;font-weight:700;color:var(--text-3)}
+
+/* advertentie */
+#p-lflow-a .lflow-a-gelukt{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;color:var(--text);margin-bottom:16px}
+
+#p-lflow-a .lflow-a-gelukt svg{color:var(--purple)}
+
+#p-lflow-a .lflow-a-adv{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--surface);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow)}
+
+#p-lflow-a .lflow-a-adv-foto{width:100%;height:100%;min-height:360px;object-fit:cover;display:block}
+
+#p-lflow-a .lflow-a-adv-in{padding:clamp(22px,3cqi,40px);display:grid;gap:14px;align-content:start}
+
+#p-lflow-a .lflow-a-adv-in h2{font-size:clamp(26px,2.8cqi,36px);font-weight:700;line-height:1.1}
+
+#p-lflow-a .lflow-a-adv-in > p:not(.lflow-plaats):not(.lflow-feiten){font-size:15.5px;color:var(--text-2)}
+
+#p-lflow-a .lflow-a-adv-in h3{font-family:"Plus Jakarta Sans",sans-serif;font-size:15px;font-weight:700;margin-top:6px}
+
+#p-lflow-a .lflow-a-adv-voet{display:grid;gap:10px;justify-items:start;padding-top:16px;margin-top:4px;border-top:1px solid var(--border)}
+
+#p-lflow-a .lflow-a-adv-voet p{font-size:13.5px;color:var(--text-3)}
+
+/* beheren */
+#p-lflow-a .lflow-a-beheer{display:grid;gap:12px;max-width:1040px}
+
+#p-lflow-a .lflow-a-rij{
+  display:grid;grid-template-columns:96px minmax(0,1fr) auto auto auto;gap:12px 22px;align-items:center;
+  padding:12px 18px 12px 12px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface)
+}
+
+#p-lflow-a .lflow-a-rij > img{width:96px;height:72px;border-radius:12px;object-fit:cover}
+
+#p-lflow-a .lflow-a-rij-t{display:grid;gap:3px}
+
+#p-lflow-a .lflow-a-rij-t b{font-size:16px}
+
+#p-lflow-a .lflow-a-rij-t span{font-size:13.5px;color:var(--text-2)}
+
+#p-lflow-a .lflow-a-wegknop{background:none;border:0;padding:6px 0;cursor:pointer;font:inherit;font-size:14.5px;font-weight:600;color:#A4283A;text-decoration:underline;text-underline-offset:3px;justify-self:start}
+
+#p-lflow-a .lflow-a-weg-in{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:14px 16px;border-radius:var(--r-md);background:#FFF1EA}
+
+#p-lflow-a .lflow-a-weg-in p{font-size:14.5px;color:var(--text-2);max-width:62ch}
+
+#p-lflow-a .lflow-a-weg-in p b{color:var(--text)}
+
+#p-lflow-a .lflow-a-weg-in div{display:flex;gap:8px;flex-wrap:wrap}
+
+#p-lflow-a .lflow-a-nog{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border:1.5px dashed #CFC6E3;border-radius:var(--r-lg);font-weight:700;color:var(--brand-ink);text-decoration:none}
+
+#p-lflow-a .lflow-a-nog:hover{background:var(--surface-2)}
+
+/* terug inloggen */
+#p-lflow-a .lflow-a-terug{display:grid;grid-template-columns:minmax(0,440px) minmax(0,380px);gap:20px;align-items:start}
+
+#p-lflow-a .lflow-a-vergeten{box-shadow:none;background:var(--surface-2);border-color:transparent;align-content:start}
+
+#p-lflow-a .lflow-a-vergeten p{font-size:15px;color:var(--text-2)}
+
+#p-lflow-a .lflow-a-verstuurd{display:flex;gap:9px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--surface)}
+
+#p-lflow-a .lflow-a-verstuurd svg{color:var(--purple);flex-shrink:0;margin-top:2px}
+
+
+
+@container stage (max-width: 1180px){
+#p-lflow-a .lflow-a-opstel{grid-template-columns:minmax(0,1fr) 280px}
+}
+
+
+@container stage (max-width: 1000px){
+#p-lflow-a .lflow-a-aan, #p-lflow-a .lflow-a-adv, #p-lflow-a .lflow-a-terug{grid-template-columns:1fr}
+#p-lflow-a .lflow-a-aan .lflow-a-kaart{max-width:480px}
+#p-lflow-a .lflow-a-adv-foto{min-height:0;aspect-ratio:16/9;height:auto}
+#p-lflow-a .lflow-a-rij{grid-template-columns:96px minmax(0,1fr) auto}
+#p-lflow-a .lflow-a-rij .lflow-schakel{grid-column:2}
+#p-lflow-a .lflow-a-rij > .btn{grid-column:3;grid-row:1}
+#p-lflow-a .lflow-a-wegknop{grid-column:3;justify-self:end}
+}
+
+
+@container stage (max-width: 860px){
+#p-lflow-a .lflow-a-opstel{grid-template-columns:1fr}
+#p-lflow-a .lflow-a-mee{position:static;order:-1;max-width:420px}
+#p-lflow-a .lflow-a-wie{grid-template-columns:1fr}
+}
+
+
+@container stage (max-width: 560px){
+#p-lflow-a .lflow-a-form fieldset{padding:16px 14px 18px}
+#p-lflow-a .lflow-a-twee{grid-template-columns:1fr}
+#p-lflow-a .lflow-a-fotos{grid-template-columns:repeat(3,minmax(0,1fr))}
+#p-lflow-a .lflow-a-fotos figure{grid-column:1 / -1;aspect-ratio:16/9}
+#p-lflow-a .lflow-a-leeg{min-height:84px;font-size:12px}
+#p-lflow-a .lflow-a-form-voet .btn{width:100%}
+#p-lflow-a .lflow-a-rij{grid-template-columns:72px minmax(0,1fr);padding:12px}
+#p-lflow-a .lflow-a-rij > img{width:72px;height:60px}
+#p-lflow-a .lflow-a-rij .lflow-schakel{grid-column:1 / -1}
+#p-lflow-a .lflow-a-rij > .btn{justify-self:start;grid-column:1 / -1;grid-row:auto}
+#p-lflow-a .lflow-a-wegknop{grid-column:1 / -1;justify-self:start}
+#p-lflow-a .lflow-a-weg-in div{width:100%}
+#p-lflow-a .lflow-week{margin-left:-4px;max-width:none}
+#p-lflow-a .lflow-a-kaart{padding:20px 16px}
+}

@@ -1,0 +1,30 @@
+{
+  "name": "wicked-workshops-directus",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "schema:apply": "node scripts/schema.mjs apply",
+    "schema:snapshot": "node scripts/schema.mjs snapshot",
+    "schema:diff": "node scripts/schema.mjs diff",
+    "migrate": "node scripts/migrate.mjs",
+    "seed": "node seed/seed.mjs",
+    "seed:demo": "node seed/seed.mjs --demo",
+    "test:permissions": "vitest run tests/permissions.test.mjs",
+    "test": "vitest run tests/guards.test.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "node": "22.23.4",
+    "vitest": "3.2.7"
+  },
+  "dependencies": {
+    "directus": "11.17.4",
+    "embedded-postgres": "16.14.0-beta.17",
+    "yaml": "2.9.1"
+  }
+}

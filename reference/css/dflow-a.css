@@ -1,0 +1,168 @@
+/* Alleen de regels voor #p-dflow-a (concept A). In productie: vervang "#p-dflow-a" door een wrapper-klasse of CSS Module. */
+/* ============================================================
+   dflow A: Pagina voor pagina (wachtwoord)
+   ============================================================ */
+#p-dflow-a .dflow-a-s{background:var(--bg)}
+
+#p-dflow-a .dflow-a-s.on-tint{background:var(--surface-2)}
+
+#p-dflow-a .scherm + .scherm{border-top:0}
+
+#p-dflow-a .dflow-a-twee{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(28px,4.5cqi,72px);align-items:start}
+
+#p-dflow-a .dflow-a-twee-gelijk{grid-template-columns:1fr 1fr}
+
+#p-dflow-a .dflow-a-twee-mail{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center}
+
+#p-dflow-a .dflow-a-omgekeerd{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+
+#p-dflow-a .dflow-a-drie{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;align-items:start}
+
+#p-dflow-a .dflow-a-smal{max-width:560px}
+
+#p-dflow-a .dflow-a-bevestiging{display:grid;gap:18px;align-content:start}
+
+#p-dflow-a .dflow-a-bevestiging h1{font-size:clamp(34px,4cqi,54px);line-height:1.04;max-width:16ch}
+
+#p-dflow-a .dflow-a-lead{font-size:17.5px;color:var(--text-2);line-height:1.55;max-width:50ch;text-wrap:pretty}
+
+#p-dflow-a .dflow-a-stand{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:14.5px;color:var(--text-2);max-width:60ch}
+
+#p-dflow-a .bizform{border:1px solid var(--border)}
+
+#p-dflow-a .bizform h2{font-size:24px}
+
+#p-dflow-a .bizform .btn{justify-self:start}
+
+#p-dflow-a .dflow-a-aanbod{box-shadow:var(--shadow-lift);border-color:transparent}
+
+#p-dflow-a .dflow-a-uitleg{font-size:15px;color:var(--text-2);line-height:1.55}
+
+#p-dflow-a .dflow-a-vast{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:11px 14px;border-radius:var(--r-md);background:var(--surface-2);font-size:15px}
+
+#p-dflow-a .dflow-a-vast span{font-size:13px;font-weight:700;color:var(--text-2);flex-basis:100%}
+
+#p-dflow-a .dflow-a-vast em{display:inline-flex;align-items:center;gap:4px;font-style:normal;font-size:13px;font-weight:700;color:var(--brand-ink)}
+
+#p-dflow-a .dflow-a-toon{display:flex;gap:8px}
+
+#p-dflow-a .dflow-a-toon input{flex:1;min-width:0}
+
+#p-dflow-a .dflow-a-toon button{flex-shrink:0;border:1.5px solid var(--border);background:var(--surface);border-radius:var(--r-md);padding:0 14px;font:inherit;font-size:14px;font-weight:700;color:var(--brand-ink);cursor:pointer}
+
+#p-dflow-a .dflow-a-toon button:hover{border-color:var(--brand)}
+
+#p-dflow-a .dflow-a-wacht,#p-dflow-a .dflow-a-verlopen{display:grid;gap:14px;align-content:start;max-width:520px}
+
+#p-dflow-a .dflow-a-envelop{color:var(--purple)}
+
+#p-dflow-a .dflow-a-wacht h2,#p-dflow-a .dflow-a-verlopen h2,#p-dflow-a .dflow-a-zijtekst h2,#p-dflow-a .dflow-a-welkom h2{font-size:clamp(26px,2.8cqi,36px);line-height:1.08}
+
+#p-dflow-a .dflow-a-wacht p,#p-dflow-a .dflow-a-verlopen p,#p-dflow-a .dflow-a-zijtekst p,#p-dflow-a .dflow-a-welkom p{font-size:16px;color:var(--text-2);line-height:1.55;text-wrap:pretty}
+
+#p-dflow-a .dflow-a-klein{font-size:14px!important}
+
+#p-dflow-a .dflow-a-klein a{font-weight:700;color:var(--brand-ink)}
+
+#p-dflow-a .dflow-a-zijtekst{display:grid;gap:12px;align-content:center;max-width:460px}
+
+#p-dflow-a .dflow-a-s4 .dflow-a-zijtekst{align-self:center}
+
+#p-dflow-a .dflow-a-zijtekst h3{font-size:20px}
+
+#p-dflow-a .dflow-a-erin{display:grid;justify-items:start;gap:4px;padding:16px 18px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--border)}
+
+#p-dflow-a .dflow-a-erin b{font-size:16px;color:var(--text)}
+
+#p-dflow-a .dflow-a-erin span:not(.dflow-stand){font-size:15px;color:var(--text-2);margin-bottom:4px}
+
+#p-dflow-a .dflow-a-binnen{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(28px,4.5cqi,72px);align-items:center}
+
+#p-dflow-a .dflow-a-welkom{display:grid;gap:14px;align-content:start;max-width:520px}
+
+#p-dflow-a .dflow-a-voorproef{display:grid;gap:12px;padding:0 0 22px;border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);text-decoration:none;color:inherit;overflow:hidden;transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
+
+#p-dflow-a .dflow-a-voorproef:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+
+#p-dflow-a .dflow-a-vp-balk{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);font-weight:700;font-size:14.5px}
+
+#p-dflow-a .dflow-a-vp-kaart{display:grid;grid-template-columns:84px 1fr;gap:16px;margin:8px 18px 0;padding:14px;border-radius:var(--r-md);background:var(--surface-2)}
+
+#p-dflow-a .dflow-a-vp-datum{display:grid;place-items:center;align-content:center;border-radius:var(--r-sm);background:var(--surface);font-size:13px;font-weight:700;color:var(--text-2);line-height:1.1}
+
+#p-dflow-a .dflow-a-vp-datum b{font-family:"Bricolage Grotesque",sans-serif;font-size:32px;color:var(--text)}
+
+#p-dflow-a .dflow-a-vp-tekst{display:grid;gap:6px;justify-items:start}
+
+#p-dflow-a .dflow-a-vp-tekst b{font-size:16px}
+
+#p-dflow-a .dflow-a-vp-tekst > span:not(.dflow-stand):not(.dflow-a-vp-stoel){font-size:14.5px;color:var(--text-2)}
+
+#p-dflow-a .dflow-a-vp-stoel{display:inline-flex;gap:4px}
+
+#p-dflow-a .dflow-a-vp-stoel i{width:12px;height:12px;border-radius:50%;border:1.5px solid #CFC6E3}
+
+#p-dflow-a .dflow-a-vp-stoel i.v{background:var(--purple);border-color:var(--purple)}
+
+#p-dflow-a .dflow-a-vp-stoel i.n{border:1.5px dashed var(--purple)}
+
+#p-dflow-a .dflow-a-vp-rij{height:14px;margin:0 18px;border-radius:7px;background:var(--surface-2);width:62%}
+
+#p-dflow-a .dflow-a-vp-rij-kort{width:38%}
+
+#p-dflow-a .dflow-a-waarom{display:grid;gap:12px;align-content:start}
+
+#p-dflow-a .dflow-a-waarom img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:var(--r-xl);display:block}
+
+#p-dflow-a .dflow-a-waarom h3{font-size:22px;margin-top:6px}
+
+#p-dflow-a .dflow-a-waarom ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:15.5px;color:var(--text-2)}
+
+#p-dflow-a .dflow-a-waarom p{font-size:15px;color:var(--text-2)}
+
+#p-dflow-a .dflow-a-rij{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px}
+
+#p-dflow-a .bizform .dflow-a-check{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--text-2)}
+
+#p-dflow-a .bizform .dflow-a-check input{width:18px;height:18px;padding:0;accent-color:var(--purple);flex-shrink:0}
+
+#p-dflow-a .dflow-a-fout input[aria-invalid="true"]{border-color:var(--coral-deep);background:var(--surface)}
+
+#p-dflow-a .dflow-a-opnieuw{display:grid;gap:6px}
+
+#p-dflow-a .dflow-a-opnieuw label{font-size:14px;font-weight:700}
+
+#p-dflow-a .dflow-a-opnieuw > span{display:flex;gap:10px}
+
+#p-dflow-a .dflow-a-opnieuw input{flex:1;min-width:0;height:50px;font:inherit;font-size:15.5px;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:0 15px}
+
+#p-dflow-a .dflow-a-opnieuw input:focus{border-color:var(--purple);outline:none}
+
+#p-dflow-a .dflow-a-opnieuw .btn{flex-shrink:0}
+
+#p-dflow-a .dflow-a-vervolg{display:grid;gap:16px;align-content:start;padding:clamp(22px,2.4cqi,32px);border-radius:var(--r-xl);background:var(--surface-2)}
+
+#p-dflow-a .dflow-a-vervolg h3{font-size:20px}
+
+
+
+@container stage (max-width: 1180px){
+#p-dflow-a .dflow-a-drie{grid-template-columns:1fr 1fr}
+#p-dflow-a .dflow-a-drie .dflow-mail{grid-column:1 / -1;order:-1;max-width:640px}
+}
+
+
+@container stage (max-width: 860px){
+#p-dflow-a .dflow-a-twee,#p-dflow-a .dflow-a-twee-gelijk,#p-dflow-a .dflow-a-twee-mail,#p-dflow-a .dflow-a-omgekeerd,#p-dflow-a .dflow-a-binnen{grid-template-columns:1fr}
+#p-dflow-a .dflow-a-drie{grid-template-columns:1fr}
+#p-dflow-a .dflow-a-drie .dflow-mail{order:0}
+#p-dflow-a .dflow-a-omgekeerd .dflow-a-zijtekst{order:-1}
+}
+
+
+@container stage (max-width: 560px){
+#p-dflow-a .dflow-a-bevestiging h1{font-size:32px}
+#p-dflow-a .dflow-a-opnieuw > span{flex-direction:column}
+#p-dflow-a .dflow-a-opnieuw input{flex:none;width:100%}
+#p-dflow-a .dflow-a-vp-kaart{grid-template-columns:64px 1fr;gap:12px}
+}

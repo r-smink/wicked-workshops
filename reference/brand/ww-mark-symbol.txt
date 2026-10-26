@@ -1,0 +1,6 @@
+<symbol id="ww-mark" viewBox="110 955 36.3 35.4">
+      <g fill="none" stroke-width="4.55" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="112.5,964.19 121.97,974.43 126.23,965.22 134.53,971.07 137.61,957.46" stroke="var(--mark-1)"/>
+        <polyline points="118.89,988.04 121.97,974.43 130.27,980.28 134.53,971.07 144,981.31" stroke="var(--mark-2)"/>
+      </g>
+    </symbol>

@@ -1,4 +1,31 @@
-# Wicked Workshops - front-end prototype
+# Wicked Workshops
+
+Monorepo met de site en de achterkant. Lees voor de bouw van de achterkant eerst `CLAUDE.md` en `docs/`; de fasering staat in `docs/13-bouwvolgorde.md`, de voortgang in `docs/CHANGELOG.md`.
+
+| Map | Wat |
+|---|---|
+| `web/` | Next.js (App Router). Vercel: zet **Root Directory** op `web`. |
+| `directus/` | Lokale Directus 11.17.4 met ingebouwde PostgreSQL en Mailpit (geen Docker), plus schema, migraties, seeds, extensie en rechtentest als code. Zie `directus/README.md`. |
+| `reference/` | Het gekozen ontwerp, read-only. |
+| `docs/` | Specificaties per onderdeel. |
+
+```bash
+# site
+cd web && npm install && npm run dev        # http://localhost:3000
+npm run lint && npm run typecheck && npm test && npm run test:e2e
+
+# achterkant (geen Docker nodig)
+cd directus && npm ci && npm run setup      # eenmalig
+npm run dev                                 # Directus :8055, Mailpit :8025
+npm run schema:apply && npm run seed:demo   # eerste keer, in een tweede terminal
+npm run test:permissions                    # rechtenmatrix uit docs/03
+```
+
+De rest van dit bestand beschrijft de eerdere voorkant-ronde. Paden daarin zijn nu relatief aan `web/`.
+
+---
+
+# Voorkant (eerdere ronde)
 
 Next.js 15 project met het volledige prototype: tien schermen op een gedeelde basis, klaar om te deployen naar Vercel.
 
