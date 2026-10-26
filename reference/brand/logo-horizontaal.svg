@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="110 955 261 37">
+  <polyline points="112.5,964.19 121.97,974.43 126.23,965.22 134.53,971.07 137.61,957.46" fill="none" stroke="#6C2BD9" stroke-width="4.55" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="118.89,988.04 121.97,974.43 130.27,980.28 134.53,971.07 144,981.31" fill="none" stroke="#FF5C6E" stroke-width="4.55" stroke-linecap="round" stroke-linejoin="round"/>
+  <text y="979.9" font-family="'Bricolage Grotesque', sans-serif" font-size="21.25"><tspan x="168.3" textLength="76.4" lengthAdjust="spacing" font-weight="800" fill="#6C2BD9">wicked</tspan><tspan x="250.6" font-weight="800" fill="#1B1630">workshops</tspan></text>
+  <path d="M169.19 988.5 C184.05 985.69 200.86 990.19 216.37 987.38 C229.29 985.69 237.05 986.81 242.87 987.94" fill="none" stroke="#FF5C6E" stroke-width="2.41" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,81 @@
+# Lokale achterkant: Directus, PostgreSQL en Mailpit.
+#
+#   cp directus/.env.example directus/.env    (en vul de geheimen in)
+#   docker compose -f directus/docker-compose.yml up -d
+#
+#   Directus  http://localhost:8055
+#   Mailpit   http://localhost:8025  (alle mail van Directus komt hier binnen)
+#
+# Directus-versie gelijk aan productie (directus.wickedworkshops.nl draait
+# 11.17.4), zodat schema-snapshots tussen beide uitwisselbaar zijn.
+
+name: wicked-workshops
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-directus}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?zet DB_PASSWORD in directus/.env}
+      POSTGRES_DB: ${DB_DATABASE:-directus}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-directus} -d ${DB_DATABASE:-directus}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # webinterface
+      - "1025:1025" # SMTP
+
+  directus:
+    image: directus/directus:11.17.4
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    ports:
+      - "8055:8055"
+    volumes:
+      - uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+      - ./schema:/directus/schema
+    environment:
+      KEY: ${DIRECTUS_KEY:?zet DIRECTUS_KEY in directus/.env}
+      SECRET: ${DIRECTUS_SECRET:?zet DIRECTUS_SECRET in directus/.env}
+      PUBLIC_URL: http://localhost:8055
+
+      DB_CLIENT: pg
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-directus}
+      DB_USER: ${DB_USER:-directus}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?zet ADMIN_PASSWORD in directus/.env}
+
+      EMAIL_TRANSPORT: smtp
+      EMAIL_FROM: ${MAIL_FROM:-Wicked Workshops <noreply@wickedworkshops.test>}
+      EMAIL_SMTP_HOST: mailpit
+      EMAIL_SMTP_PORT: 1025
+      EMAIL_SMTP_IGNORE_TLS: "true"
+
+      # De Next.js-app praat server-side met Directus; de browser alleen voor uploads.
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: http://localhost:3000
+
+      CACHE_ENABLED: "false"
+      TELEMETRY: "false"
+
+volumes:
+  db-data:
+  uploads:
