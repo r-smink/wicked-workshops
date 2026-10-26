@@ -46,3 +46,32 @@ jobs:
             web/test-results/visual
             web/test-results/playwright
           retention-days: 7
+
+  directus:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: directus
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: directus/package-lock.json
+
+      - run: npm ci
+      - run: npm run setup
+      - run: npm test
+
+      # Schone Directus uit snapshot.yaml, migraties, extensie en seed,
+      # daarna de rechtenmatrix uit docs/03.
+      - run: npm run verify
+
+      - name: Typen gelijk aan het schema
+        working-directory: web
+        run: |
+          npm ci
+          npm run directus:types
+          git diff --exit-code -- lib/directus/types.ts

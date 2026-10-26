@@ -20,3 +20,7 @@ yarn-error.log*
 # tests
 /web/test-results
 /web/playwright-report
+
+# lokale Directus (directus/)
+/directus/.data
+/directus/uploads

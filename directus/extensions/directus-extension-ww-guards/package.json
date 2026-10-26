@@ -1,0 +1,13 @@
+{
+  "name": "directus-extension-ww-guards",
+  "version": "1.0.0",
+  "description": "Regels die Directus-rechten niet kunnen uitdrukken: eigenaarschap bij aanmaken, statusovergangen, vergrendelde datums.",
+  "type": "module",
+  "private": true,
+  "directus:extension": {
+    "type": "hook",
+    "path": "index.mjs",
+    "source": "index.mjs",
+    "host": "^11.0.0"
+  }
+}

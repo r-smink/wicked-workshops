@@ -8,6 +8,24 @@
    =========================================================================== */
 
 export const CANCELLATION_POLICIES = {
+  /* Sleutels uit cancellation_policies (docs/03). De echte teksten staan
+     in Directus; deze korte vormen zijn voor plekken zonder die data. */
+  basis: {
+    short: "Gratis annuleren tot 48 uur vooraf",
+    long: "Gratis tot 48 uur vooraf",
+    hoursBefore: 48,
+  },
+  soepel: {
+    short: "Gratis annuleren tot 24 uur vooraf",
+    long: "Gratis tot 24 uur vooraf",
+    hoursBefore: 24,
+  },
+  vast: {
+    short: "Gratis annuleren tot 7 dagen vooraf",
+    long: "Gratis tot 7 dagen vooraf",
+    hoursBefore: 7 * 24,
+  },
+  /* Oude sleutels van de publieke site, tot de data in productie is omgezet. */
   flexible_48h: {
     short: "Gratis annuleren tot 48 uur vooraf",
     long: "Gratis tot 48 uur vooraf",

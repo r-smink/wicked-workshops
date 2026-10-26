@@ -5,7 +5,7 @@ Monorepo met de site en de achterkant. Lees voor de bouw van de achterkant eerst
 | Map | Wat |
 |---|---|
 | `web/` | Next.js (App Router). Vercel: zet **Root Directory** op `web`. |
-| `directus/` | Docker Compose met Directus, PostgreSQL en Mailpit, plus schema, seeds en extensies als code. |
+| `directus/` | Lokale Directus 11.17.4 met ingebouwde PostgreSQL en Mailpit (geen Docker), plus schema, migraties, seeds, extensie en rechtentest als code. Zie `directus/README.md`. |
 | `reference/` | Het gekozen ontwerp, read-only. |
 | `docs/` | Specificaties per onderdeel. |
 
@@ -14,9 +14,11 @@ Monorepo met de site en de achterkant. Lees voor de bouw van de achterkant eerst
 cd web && npm install && npm run dev        # http://localhost:3000
 npm run lint && npm run typecheck && npm test && npm run test:e2e
 
-# achterkant (Docker nodig)
-cp directus/.env.example directus/.env      # vul de geheimen in
-docker compose -f directus/docker-compose.yml up -d
+# achterkant (geen Docker nodig)
+cd directus && npm ci && npm run setup      # eenmalig
+npm run dev                                 # Directus :8055, Mailpit :8025
+npm run schema:apply && npm run seed:demo   # eerste keer, in een tweede terminal
+npm run test:permissions                    # rechtenmatrix uit docs/03
 ```
 
 De rest van dit bestand beschrijft de eerdere voorkant-ronde. Paden daarin zijn nu relatief aan `web/`.

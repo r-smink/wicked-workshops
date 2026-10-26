@@ -14,7 +14,7 @@ Verantwoordelijken in de annotaties: **Rick** (back-end, werkt techniek en logic
 | Eerst bevestigen of meteen binnen | Eerst bevestigen (gekozen in het ontwerp). |
 | Wachtwoord van ruimte-eigenaar (10 tekens) tegenover 8 | Overal minimaal 8. |
 | Verwijderen van een account met open aanmeldingen | Blokkeren zolang er toekomstige bevestigde aanmeldingen zijn, met uitleg en link naar Gepland. Verwijderen daarna: persoonsgegevens verwijderen, afgeronde aanmeldingen en reviews anonimiseren. Geeta bevestigt. |
-| Auth-implementatie (Directus-native of eigen route handlers) | Kies in fase 1 en leg hier vast. |
+| Auth-implementatie (Directus-native of eigen route handlers) | **Gekozen in fase 1: eigen route handlers in Next.js, met Directus als gebruikersbron.** Wachtwoord controleren en access- en refresh-tokens uitgeven doet Directus (`/auth/login`, `/auth/refresh`); de app bewaart ze in httpOnly-cookies (`04`). Account maken, bevestigen, wachtwoord vergeten en "alleen nog een wachtwoord kiezen" lopen via eigen route handlers: die maken de Directus-gebruiker aan met het systeemtoken en gebruiken een eigen tokentabel (`auth_tokens`: gebruiker of e-mailadres, doel, sha256-hash van het token, `intent`, verloopt, gebruikt). Waarom: eigen mailtemplates in `mail/`, `intent` op de token, eenmalige links met de termijnen hierboven, koppelen van gastaanmeldingen na bevestigen, gelijke foutmelding en responstijd, rate limiting per IP en adres. Directus' eigen registratie en wachtwoordmail staan uit. Omzetbaar: de handlers zitten achter `lib/auth/`; terug naar Directus-native raakt alleen die map. |
 
 ## Datums en aanmeldingen
 
