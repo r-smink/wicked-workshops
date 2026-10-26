@@ -4,6 +4,7 @@ import { useState } from "react";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import { Icon, Star, Button, Avatar } from "@/components/ui";
+import { BLOCKS } from "@/components/blocks/registry";
 
 /* ===========================================================================
    StaticPage — gedeelde renderer voor statische contentpagina's.
@@ -387,7 +388,7 @@ function BlockVideo({ block }) {
   );
 }
 
-function renderBlock(block, i) {
+export function renderBlock(block, i) {
   if (!block) return null;
   switch (block.type) {
     case "hero":
@@ -418,8 +419,12 @@ function renderBlock(block, i) {
       return <BlockFaq key={block.id || i} block={block} />;
     case "video":
       return <BlockVideo key={block.id || i} block={block} />;
-    default:
+    default: {
+      /* Page builder-blokken (components/blocks) werken ook op contentpagina's. */
+      const Block = BLOCKS[block.type];
+      if (Block) return <Block key={block.id || i} block={block} />;
       return <BlockText key={block.id || i} block={block} />;
+    }
   }
 }
 

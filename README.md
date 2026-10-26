@@ -137,6 +137,23 @@ De praktische volgorde:
 
 Pas na stap 5 heeft server rendering echt zin. Zolang alles vaste data is, maakt het voor SEO geen verschil.
 
+## Visual page builder
+
+De bouwblokken uit `wicked-workshops-export.json` (8 paginatypes, 3 concepten, 69 bloktypes) zijn ontdubbeld tot 18 generieke blokken in `components/blocks/`. Welk exporttype bij welk blok hoort, staat in `lib/block-types.json`.
+
+| Onderdeel | Waar |
+|---|---|
+| Schema in Directus (velden, M2M, `form_submissions`) | `node scripts/setup-page-builder.js` (idempotent, `--no-seed` voor alleen schema) |
+| Startinhoud per paginatype | `lib/page-templates.json` |
+| Laden, terugval en data per blok | `lib/page-builder.js` |
+| Renderer | `components/blocks/BlockRenderer.jsx` |
+| Stand van een datum (doorgaan-drempel) | `lib/session-standing.js` |
+
+- `/hulp`, `/word-workshopgever` en `/locatie-gezocht` tonen de gepubliceerde pagina uit Directus, of anders de startinhoud.
+- Home, categorie, workshop, aanbieder en inloggen gebruiken een sjabloon (`page_type`) zodra dat in Directus gepubliceerd is. Het vaste scherm (boeken, filters, kaart) staat daarin als blok "Pagina-inhoud". Zonder gepubliceerd sjabloon verandert er niets.
+- Het script zet alle sjablonen als **concept** neer. Publiceren gaat direct live, want lokaal en Vercel lezen dezelfde Directus.
+- Foto's voor de sjablonen staan in `public/pages/` (zie `BRONNEN.md` daar). Na een wijziging in de sjablonen bouwt `node scripts/setup-page-builder.js --sync-drafts` de pagina's die nog concept zijn opnieuw op; gepubliceerde pagina's blijven staan.
+
 ## Vragen die vaak terugkomen
 
 **Waarom staat alles in één bestand?**

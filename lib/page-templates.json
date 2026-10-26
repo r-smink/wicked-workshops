@@ -1,0 +1,930 @@
+{
+  "_note": "Startinhoud per paginatype, samengesteld uit wicked-workshops-export.json (vooral concept A, aangevuld met B en C). scripts/setup-page-builder.js zet deze als concept in Directus; lib/page-builder.js gebruikt ze als terugval zolang er geen gepubliceerde versie is. Verzonnen reviews en voorbeeldruimtes uit de export zijn bewust weggelaten: die blokken lezen echte data. {{category}}, {{city}}, {{workshop}} en {{provider}} worden per pagina ingevuld.",
+  "templates": [
+    {
+      "slug": "home",
+      "page_type": "home",
+      "title": "Homepage",
+      "seo_title": "Wicked Workshops - vind iets wicked om te doen",
+      "seo_description": "Workshops en uitjes bij jou in de buurt, op datum. Bij elke datum zie je hoeveel plekken er nog zijn en of hij zeker doorgaat.",
+      "blocks": [
+        {
+          "type": "page_hero",
+          "variant": "search",
+          "title": "Workshops en uitjes om iets wicked te doen",
+          "body": "Van gevestigde kookstudio's tot de buurman die de beste zuurdesem van de stad bakt. Bij ons mag allebei, ook zonder btw-nummer en ook in een dorp waar verder niets te boeken valt.",
+          "cta_label": "Zoeken",
+          "cta_to": "/zoeken",
+          "image": "/pages/ambacht.jpg",
+          "image_alt": "Handen aan het werk aan een werkbank"
+        },
+        {
+          "type": "workshop_list",
+          "variant": "grid",
+          "source": "featured",
+          "item_limit": 4,
+          "title": "Onze paradepaardjes",
+          "body": "Workshops die onze redactie zelf heeft uitgekozen. Bij elke workshop zie je de eerstvolgende datum en hoeveel mensen zich al hebben aangemeld.",
+          "cta_label": "Alle workshops",
+          "cta_to": "/zoeken"
+        },
+        {
+          "type": "category_grid",
+          "variant": "tiles",
+          "title": "Waar heb je zin in?",
+          "body": "Van een middag met je handen in de klei tot een boswandeling met een gids.",
+          "cta_label": "Alles bekijken",
+          "cta_to": "/zoeken"
+        },
+        {
+          "type": "city_grid",
+          "item_limit": 4,
+          "title": "Dichtbij is ook gewoon leuk",
+          "body": "Een plaats krijgt pas een eigen pagina zodra er genoeg aanbod staat om er iets te kiezen te hebben.",
+          "cta_label": "Alle plaatsen",
+          "cta_to": "/zoeken"
+        },
+        {
+          "type": "steps_rail",
+          "variant": "cards",
+          "style": "cloud",
+          "title": "Van idee naar zaterdagmiddag",
+          "body": "Drie stappen, allemaal online. Bij elke datum zie je hoeveel plekken er nog zijn en of hij zeker doorgaat.",
+          "items": [
+            {
+              "title": "Kies iets leuks",
+              "body": "Filter op plek, datum, groepsgrootte en budget. Je ziet meteen hoeveel plekken er bij elke datum nog vrij zijn.",
+              "image": "/pages/fotografie2.jpg",
+              "image_alt": "Fotograaf werkt met een reflectiescherm voor een groep"
+            },
+            {
+              "title": "Meld je aan",
+              "body": "Kies een datum en met hoeveel je komt, en je plek staat vast. Wat er geldt als je toch niet kunt, staat bij elke workshop.",
+              "note": "Tijdens de pilot betaal je niets. Betalen via de site kan op zijn vroegst vanaf januari 2027.",
+              "image": "/pages/koken3.jpg",
+              "image_alt": "Deelnemers koken samen aan een werkbank"
+            },
+            {
+              "title": "En dan gaan",
+              "body": "Heeft een datum een minimum, dan hoor je uiterlijk op het beslismoment of hij doorgaat. Zo niet, dan krijg je een andere datum aangeboden. Zo ja: kom langs, maak iets en laat daarna weten hoe het was.",
+              "image": "/pages/samen.jpg",
+              "image_alt": "Een groep lacht samen aan tafel"
+            }
+          ]
+        },
+        {
+          "type": "threshold_explainer",
+          "variant": "timeline",
+          "title": "Wanneer gaat een datum door?",
+          "body": "Sommige workshops hebben een minimum aantal deelnemers nodig. De workshopgever kiest dat aantal zelf, en ook het moment waarop de stand telt. Tot dat moment kun je je gewoon aanmelden.",
+          "cta_label": "Meer over doorgaan en annuleren",
+          "cta_to": "/hulp#doorgaan",
+          "settings": {
+            "example": {
+              "title": "Italiaans koken, zaterdag 15:00",
+              "capacity": 8,
+              "min": 4,
+              "taken": 3,
+              "decision": "vr 22:00"
+            }
+          },
+          "items": [
+            {
+              "label": "Nu",
+              "text": "3 van de 4 aanmeldingen binnen. Nog één nodig.",
+              "status": "open"
+            },
+            {
+              "label": "Beslismoment",
+              "text": "Zijn er dan 4 of meer, dan gaat hij door. Ook als er daarna iemand afhaakt.",
+              "status": "goes_ahead"
+            },
+            {
+              "label": "Niet gehaald",
+              "text": "Je krijgt een andere datum aangeboden.",
+              "status": "cancelled"
+            }
+          ]
+        },
+        {
+          "type": "feature_split",
+          "variant": "image-right",
+          "title": "Een teamuitje in de buurt van jullie kantoor",
+          "body": "Vertel ons de groepsgrootte, het budget en de plaats. Binnen één werkdag hoor je van ons, met aanbod in de buurt van jullie kantoor. Een teamuitje plannen we met jullie samen, dus daar hoeft niemand op een minimum te wachten.",
+          "items": [
+            {
+              "value": "10 tot 20",
+              "label": "personen per groep"
+            },
+            {
+              "value": "1 werkdag",
+              "label": "tot een reactie"
+            },
+            {
+              "value": "€0",
+              "label": "boekingskosten voor de deelnemers"
+            }
+          ],
+          "cta_label": "Vraag een voorstel",
+          "cta_to": "/bedrijven",
+          "image_alt": "Een groep zit op de grond rond een schildersezel tijdens een creatieve workshop",
+          "image": "/pages/schilderen2.jpg"
+        },
+        {
+          "type": "review_list",
+          "variant": "grid",
+          "source": "latest",
+          "item_limit": 3,
+          "title": "Wat deelnemers zeggen",
+          "body": "Een review kan pas nadat de workshop is geweest, dus je leest alleen mensen die er waren."
+        },
+        {
+          "type": "feature_split",
+          "variant": "image-left",
+          "style": "ink",
+          "title": "Jij kunt iets wat anderen willen leren",
+          "body": "Geen btw-nummer nodig om te beginnen, wel een korte check voordat je workshop live gaat. Per datum kies jij hoeveel mensen er minimaal nodig zijn en tot wanneer.",
+          "items": [
+            {
+              "value": "€0",
+              "label": "vaste kosten"
+            },
+            {
+              "value": "6",
+              "label": "stappen tot je workshop klaarstaat"
+            },
+            {
+              "value": "9 tot 20%",
+              "label": "commissie per categorie, zodra betalen via de site start"
+            }
+          ],
+          "cta_label": "Word workshopgever",
+          "cta_to": "/word-workshopgever",
+          "cta_secondary_label": "Locatie gezocht",
+          "cta_secondary_to": "/locatie-gezocht",
+          "image_alt": "Iemand schuurt met gehoorbescherming een werkstuk in een houtwerkplaats",
+          "image": "/pages/repair2.jpg"
+        },
+        {
+          "type": "feature_split",
+          "variant": "image-right",
+          "title": "Geef een middag in plaats van een ding",
+          "body": "Met de Wicked cadeaubon kiest de ontvanger zelf de workshop en de datum. Je stuurt hem direct per mail.",
+          "cta_label": "Bekijk de cadeaubon",
+          "cta_to": "/cadeaubon",
+          "image_alt": "Werktafel met zelfgemaakte kaarsen en droogbloemen",
+          "image": "/pages/kaarsen2.jpg"
+        },
+        {
+          "type": "cta_band",
+          "style": "ink",
+          "title": "Van Sluis tot Delfzijl",
+          "body": "Kijk op de kaart wat er bij jou in de buurt staat, of blader gewoon door het hele aanbod heen.",
+          "cta_label": "Bekijk alle workshops",
+          "cta_to": "/zoeken",
+          "cta_secondary_label": "Zoek op plaats",
+          "cta_secondary_to": "/zoeken?view=map"
+        }
+      ]
+    },
+    {
+      "slug": "sjabloon-categorie",
+      "page_type": "cat",
+      "title": "Sjabloon: categoriepagina",
+      "seo_title": "{{category}} workshops",
+      "seo_description": "Alle {{category}} workshops op datum, de eerstvolgende bovenaan.",
+      "blocks": [
+        {
+          "type": "page_core"
+        },
+        {
+          "type": "threshold_explainer",
+          "variant": "legend",
+          "style": "cloud",
+          "title": "Zo lees je de kaart",
+          "body": "Onderaan elke kaart staat de eerstvolgende datum als een rij stippen. Elke stip is een plek: gevuld is aangemeld, open is nog vrij. Het streepje is het minimum. Zijn de stippen ervoor vol, dan gaat de datum door.",
+          "settings": {
+            "example": {
+              "title": "Voorbeeld",
+              "capacity": 8,
+              "min": 4,
+              "taken": 3,
+              "decision": "vr 22:00"
+            }
+          }
+        },
+        {
+          "type": "faq_list",
+          "title": "Veelgestelde vragen",
+          "items": [
+            {
+              "question": "Wat betekent \"3 van 4 nodig\"?",
+              "answer": "Dat de workshopgever minimaal vier deelnemers nodig heeft en er nu drie zijn aangemeld. Je kunt je gewoon aanmelden. Je krijgt vooraf een herinnering, en uiterlijk op het beslismoment hoor je of hij doorgaat."
+            },
+            {
+              "question": "En als het minimum niet gehaald wordt?",
+              "answer": "Dan gaat die datum niet door en krijg je een andere datum aangeboden."
+            },
+            {
+              "question": "Betaal ik nu al?",
+              "answer": "Nee. Tijdens de pilot betaal je niets, en je plek staat vast zodra je je aanmeldt. Betalen via de site kan op zijn vroegst vanaf januari 2027."
+            },
+            {
+              "question": "Kan ik met mijn team komen?",
+              "answer": "Met een team of collega's plannen we de datum samen, dus daar speelt geen minimum. Binnen één werkdag hoor je van ons."
+            }
+          ]
+        },
+        {
+          "type": "link_columns",
+          "title": "Verder kijken",
+          "items": [
+            {
+              "title": "Meer ontdekken",
+              "links": [
+                {
+                  "label": "Alle workshops",
+                  "to": "/zoeken"
+                },
+                {
+                  "label": "Inspiratie",
+                  "to": "/inspiratie"
+                },
+                {
+                  "label": "Cadeaubon",
+                  "to": "/cadeaubon"
+                }
+              ]
+            },
+            {
+              "title": "Zelf lesgeven?",
+              "links": [
+                {
+                  "label": "Word workshopgever",
+                  "to": "/word-workshopgever"
+                },
+                {
+                  "label": "Een ruimte zoeken of aanbieden",
+                  "to": "/locatie-gezocht"
+                },
+                {
+                  "label": "Teamuitje aanvragen",
+                  "to": "/bedrijven"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "sjabloon-workshop",
+      "page_type": "detail",
+      "title": "Sjabloon: workshoppagina",
+      "blocks": [
+        {
+          "type": "page_core"
+        },
+        {
+          "type": "threshold_explainer",
+          "variant": "legend",
+          "title": "Wanneer gaat een datum door?",
+          "body": "Per datum staat wanneer hij doorgaat. Is het minimum er uiterlijk op het beslismoment, dan gaat hij door en blijft dat zo. Is het er niet, dan bieden we je een andere datum aan."
+        },
+        {
+          "type": "feature_split",
+          "variant": "image-left",
+          "style": "cloud",
+          "title": "Met 10 tot 20 collega's?",
+          "body": "Vertel ons wat je zoekt, dan zoeken wij een workshop die past. Je hoort binnen één werkdag van ons. Het minimum per datum geldt niet voor bedrijfsuitjes.",
+          "cta_label": "Vraag een teamuitje aan",
+          "cta_to": "/bedrijven",
+          "image_alt": "Een groep vrienden schept samen eten op aan een lange tafel",
+          "image": "/pages/cat-tafel.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "sjabloon-aanbieder",
+      "page_type": "aanbieder",
+      "title": "Sjabloon: aanbiederpagina",
+      "blocks": [
+        {
+          "type": "page_core"
+        },
+        {
+          "type": "form",
+          "form": "follow",
+          "style": "cloud",
+          "title": "Volg {{provider}}",
+          "body": "Je krijgt een mail als {{provider}} een nieuwe datum of workshop toevoegt. Meer niet, en opzeggen kan met een klik.",
+          "settings": {
+            "button": "Volg"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "sjabloon-inloggen",
+      "page_type": "account",
+      "title": "Sjabloon: inloggen",
+      "blocks": [
+        {
+          "type": "page_core"
+        },
+        {
+          "type": "link_cards",
+          "title": "Wat je aan een account hebt",
+          "items": [
+            {
+              "title": "Als je meedoet",
+              "body": "Je ziet je aanmeldingen terug, met de stand van elke datum. Je krijgt bericht als je workshop doorgaat, en een herinnering voor het beslismoment.",
+              "image_alt": "Een stel vormt samen een kom aan de draaischijf",
+              "image": "/pages/ontdek-date.jpg"
+            },
+            {
+              "title": "Als je workshops geeft",
+              "body": "Je zet je workshop in zes stappen in elkaar en bewaart hem tussendoor als concept. Per datum zie je hoeveel mensen zich hebben aangemeld.",
+              "cta_label": "Lees hoe het werkt",
+              "cta_to": "/word-workshopgever",
+              "image_alt": "Een workshopgever in schort staat achter zijn werkbank in een keramiekatelier",
+              "image": "/pages/maker-atelier.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "word-workshopgever",
+      "page_type": "maker",
+      "title": "Word workshopgever",
+      "seo_title": "Word workshopgever, ook zonder eigen bedrijf",
+      "seo_description": "Geef je eerste workshop op Wicked Workshops. Geen btw-nummer nodig, geen vaste kosten, en per datum bepaal je zelf wanneer hij doorgaat.",
+      "blocks": [
+        {
+          "type": "page_hero",
+          "variant": "split",
+          "eyebrow": "Word workshopgever",
+          "title": "Geef je eerste workshop, ook zonder eigen bedrijf",
+          "body": "Je hebt geen btw-nummer nodig om te beginnen. Je maakt een account met alleen je e-mailadres en zet je workshop klaar in zes stappen. Voordat hij online gaat, kijkt ons team mee.",
+          "cta_label": "Begin met je e-mailadres",
+          "cta_to": "#start",
+          "cta_secondary_label": "Eerst lezen hoe het werkt",
+          "cta_secondary_to": "#pad",
+          "items": [
+            {
+              "value": "€0",
+              "label": "vaste kosten"
+            },
+            {
+              "value": "Ook",
+              "label": "als particulier"
+            },
+            {
+              "value": "Check",
+              "label": "door ons team voor livegang"
+            }
+          ],
+          "image_alt": "Een workshopgever legt met een deegroller in de hand iets uit aan een tafel met klei en gereedschap",
+          "settings": {
+            "breadcrumbs": [
+              {
+                "label": "Home",
+                "to": "/"
+              },
+              {
+                "label": "Word workshopgever"
+              }
+            ]
+          },
+          "image": "/pages/maker-les.jpg"
+        },
+        {
+          "type": "link_cards",
+          "title": "Met of zonder bedrijf, je workshop telt",
+          "body": "Geef je op zaterdag les aan je keukentafel, dan meld je je op dezelfde manier aan als iemand met een eigen studio. Het enige verschil is wat deelnemers bij je workshop lezen.",
+          "items": [
+            {
+              "title": "Zonder bedrijf",
+              "body": "Je geeft les naast je werk of studie, of je begint net. Een btw-nummer heb je niet nodig. Bij je workshop staat dat je als particulier aanbiedt.",
+              "note": "Wat deelnemers lezen: aangeboden door een particulier. Het consumentenrecht geldt niet.",
+              "image_alt": "Een vrouw helpt een meisje aan een kleine draaischijf",
+              "image": "/pages/maker-glas.jpg"
+            },
+            {
+              "title": "Met een bedrijf",
+              "body": "Je hebt een studio, atelier of kookschool. Bij je workshop staat dat je als ondernemer aanbiedt.",
+              "note": "Wat deelnemers lezen: aangeboden door een ondernemer.",
+              "image_alt": "Een man in schort staat achter zijn werkbank in een keramiekatelier",
+              "image": "/pages/maker-klei-les.jpg"
+            }
+          ]
+        },
+        {
+          "type": "steps_rail",
+          "variant": "numbered",
+          "style": "cloud",
+          "anchor": "pad",
+          "title": "Van idee tot je eerste datum",
+          "body": "Zes stappen in de wizard, en de gevoelige gegevens pas als je workshop klaarstaat.",
+          "items": [
+            {
+              "title": "Maak een account met je e-mailadres",
+              "body": "Meer hebben we in het begin niet nodig."
+            },
+            {
+              "title": "Stel je workshop op in zes stappen",
+              "body": "Je kunt tussendoor stoppen en je workshop als concept opslaan.",
+              "list": [
+                "Basis: titel, categorie, plaats",
+                "Inhoud: wat je doet en wat erbij zit",
+                "Praktisch: duur, plek en taal",
+                "Beeld: één tot zes foto's",
+                "Prijs en je annuleervoorwaarden",
+                "Datums: plekken, minimum, beslismoment"
+              ]
+            },
+            {
+              "title": "Heb je zelf een locatie, of heb je er een nodig?",
+              "body": "Die vraag stellen we in de wizard. Geen eigen ruimte? Op locatie gezocht staan keukens, ateliers en zalen die vaak leeg staan.",
+              "cta_label": "Kijk hoe locatie gezocht werkt",
+              "cta_to": "/locatie-gezocht"
+            },
+            {
+              "title": "Pas daarna je aanbiedersverklaring",
+              "body": "Staat je workshop klaar, dan vragen we wie je bent en waar je voor tekent. Niet eerder.",
+              "list": [
+                "Je naam, geboortedatum, adres, telefoonnummer en e-mailadres",
+                "Of je particulier bent of ondernemer, en als ondernemer je KvK-nummer en handelsnaam",
+                "Dat je 18 jaar of ouder bent",
+                "Dat je zorgt voor een veilige workshop, met je kwalificaties als die ertoe doen",
+                "Je rekeningnummer (IBAN)",
+                "Dat je incidenten aan ons meldt"
+              ]
+            },
+            {
+              "title": "Ons team kijkt mee",
+              "body": "Ons team bekijkt elke workshop voordat hij online gaat."
+            },
+            {
+              "title": "Je workshop staat online",
+              "body": "Deelnemers zien je datums, en jij ziet wie zich aanmeldt."
+            }
+          ],
+          "image": "/pages/maker-draaischijf.jpg",
+          "image_alt": "Een docent helpt een deelnemer aan de draaischijf"
+        },
+        {
+          "type": "pricing_example",
+          "title": "Je betaalt alleen als er geboekt wordt",
+          "body": "Geen abonnement en geen vaste kosten. Over wat je verkoopt, betaal je commissie. Die verschilt per categorie, tussen 9 en 20 procent: waar meer aanbod is en promoten meer kost, ligt hij hoger.",
+          "items": [
+            {
+              "group": "Je deelnemer betaalt",
+              "label": "Kleiworkshop, 2 × €45",
+              "value": "€90,00"
+            },
+            {
+              "group": "Je deelnemer betaalt",
+              "label": "Boekingskosten",
+              "value": "€0,00"
+            },
+            {
+              "group": "Je deelnemer betaalt",
+              "label": "Totaal",
+              "value": "€90,00",
+              "total": true
+            },
+            {
+              "group": "Jij krijgt",
+              "label": "Omzet",
+              "value": "€90,00"
+            },
+            {
+              "group": "Jij krijgt",
+              "label": "Commissie, 9 tot 20 procent",
+              "value": "€8,10 tot €18,00 eraf"
+            },
+            {
+              "group": "Jij krijgt",
+              "label": "Vaste kosten",
+              "value": "€0,00"
+            },
+            {
+              "group": "Jij krijgt",
+              "label": "Na afloop",
+              "value": "€72,00 tot €81,90",
+              "total": true
+            }
+          ],
+          "settings": {
+            "note": "Tijdens de pilot betaal je niets. Betalen via de site kan op zijn vroegst vanaf januari 2027. Rekenvoorbeeld: workshop en prijs zijn voorbeelddata."
+          }
+        },
+        {
+          "type": "threshold_explainer",
+          "variant": "interactive",
+          "title": "Jij bepaalt wanneer je workshop doorgaat",
+          "body": "Per datum zet je een maximum, en als je wilt een minimum en een beslismoment. Meld hieronder deelnemers aan of af en kijk wat deelnemers op de kaart zien.",
+          "settings": {
+            "example": {
+              "title": "Pasta maken, zaterdag 15:00",
+              "capacity": 8,
+              "min": 4,
+              "taken": 3,
+              "decision": "vr 22:00"
+            }
+          },
+          "items": [
+            {
+              "label": "Geen minimum ingesteld?",
+              "text": "Dan gaat je workshop altijd door."
+            },
+            {
+              "label": "Minimum niet gehaald?",
+              "text": "Dan gaat de datum niet door en bieden we je deelnemers een andere datum aan."
+            },
+            {
+              "label": "Bijna?",
+              "text": "Je krijgt een herinnering voor het beslismoment, en deelnemers kunnen de sessie delen om zelf mensen mee te nemen."
+            }
+          ]
+        },
+        {
+          "type": "faq_list",
+          "style": "cloud",
+          "title": "Vragen die je misschien hebt",
+          "body": "Staat je vraag er niet bij? Kijk bij hulp en contact.",
+          "cta_label": "Hulp en contact",
+          "cta_to": "/hulp",
+          "items": [
+            {
+              "question": "Heb ik een btw-nummer of eigen bedrijf nodig?",
+              "answer": "Nee. Je kunt ook als particulier workshops geven. Deelnemers zien bij je workshop dat je particulier bent. Of je particulier of ondernemer bent, geef je pas op in je aanbiedersverklaring, als je workshop klaarstaat."
+            },
+            {
+              "question": "Wat bekijkt jullie team voordat mijn workshop live gaat?",
+              "answer": "Ons team bekijkt elke workshop voordat hij online gaat."
+            },
+            {
+              "question": "Wat gebeurt er als ik zelf moet annuleren?",
+              "answer": "Bij de meeste workshops krijgen je deelnemers dan alles terug, plus een andere datum. Tijdens de pilot betaalt niemand, dus er hoeft niets terug."
+            },
+            {
+              "question": "Kan ik mijn workshop eerst als concept opslaan?",
+              "answer": "Ja. Je kunt in elke stap stoppen en later verder. Pas als je hem indient voor de check, kijkt ons team mee."
+            },
+            {
+              "question": "Ik heb geen eigen ruimte. Kan ik toch meedoen?",
+              "answer": "Ja. Op locatie gezocht staan ruimtes die vaak leeg staan, en je neemt zelf contact op met de eigenaar. Huur, sleutel en schoonmaak regel je rechtstreeks met de eigenaar; Wicked Workshops is daar geen partij in. Past er niets, dan kan ons team helpen zoeken."
+            }
+          ]
+        },
+        {
+          "type": "form",
+          "form": "maker_signup",
+          "anchor": "start",
+          "title": "Begin met alleen je e-mailadres",
+          "body": "Daarna start de wizard. Je hoeft niets in één keer af te maken.",
+          "cta_secondary_label": "Geen eigen ruimte? Bekijk locatie gezocht",
+          "cta_secondary_to": "/locatie-gezocht",
+          "image_alt": "Een man in schort staat achter zijn werkbank in een keramiekatelier",
+          "settings": {
+            "button": "Maak je account"
+          },
+          "image": "/pages/maker-atelier.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "locatie-gezocht",
+      "page_type": "locatie",
+      "title": "Locatie gezocht",
+      "seo_title": "Ruimte zoeken of ruimte bieden voor workshops",
+      "seo_description": "Keukens, ateliers en zalen die vaak leeg staan. Workshopgevers zien wat er is en wanneer, en nemen zelf contact op met de eigenaar.",
+      "blocks": [
+        {
+          "type": "page_hero",
+          "variant": "centered",
+          "title": "Ruimte zoeken of ruimte bieden",
+          "body": "Eigenaren zetten hier hun keuken, atelier of zaal neer als die vaak leeg staat. Workshopgevers zien wat er is en wanneer, en nemen zelf contact op met de eigenaar.",
+          "settings": {
+            "breadcrumbs": [
+              {
+                "label": "Home",
+                "to": "/"
+              },
+              {
+                "label": "Word workshopgever",
+                "to": "/word-workshopgever"
+              },
+              {
+                "label": "Locatie gezocht"
+              }
+            ]
+          }
+        },
+        {
+          "type": "link_cards",
+          "items": [
+            {
+              "title": "Je zoekt een ruimte",
+              "body": "Je hebt een workshop, maar geen keuken, atelier of zaal. Kijk welke ruimtes vaak leeg staan en neem contact op met de eigenaar.",
+              "cta_label": "Bekijk de ruimtes",
+              "cta_to": "#ruimtes",
+              "image_alt": "Een houten keuken met kookeiland en witte krukken",
+              "image": "/pages/locatie-keuken.jpg"
+            },
+            {
+              "title": "Je hebt een ruimte die leeg staat",
+              "body": "Een keuken die maandag dicht is, een atelier dat 's avonds leeg is. Zet hem erbij, dan zien workshopgevers hem en nemen ze zelf contact met je op.",
+              "cta_label": "Meld je ruimte aan",
+              "cta_to": "#aanmelden",
+              "image_alt": "Een lege hal met lange houten tafels en banken",
+              "image": "/pages/locatie-hal.jpg"
+            }
+          ]
+        },
+        {
+          "type": "venue_list",
+          "source": "venues",
+          "style": "cloud",
+          "anchor": "ruimtes",
+          "title": "Ruimtes die vaak leeg staan",
+          "body": "Per ruimte zie je wat er is, hoeveel mensen erin passen en wie je kunt mailen.",
+          "settings": {
+            "empty": "Er staan nog geen ruimtes online. Heb je er zelf een? Meld hem hieronder aan, of laat ons team meezoeken."
+          }
+        },
+        {
+          "type": "form",
+          "form": "venue_search",
+          "title": "Laat ons team meezoeken",
+          "body": "Niets dat past? Vertel waar je woont, hoe ver je wilt reizen en wat je workshop nodig heeft. We zoeken mee, maar kunnen niet beloven dat er een ruimte past.",
+          "settings": {
+            "button": "Vraag ons team om mee te zoeken"
+          }
+        },
+        {
+          "type": "form",
+          "form": "venue_offer",
+          "anchor": "aanmelden",
+          "style": "cloud",
+          "title": "Ik heb een ruimte",
+          "body": "Je hoeft nu nog niets vast te leggen. We mailen je wat we nodig hebben voor je advertentie, en gebruiken je e-mailadres alleen daarvoor.",
+          "settings": {
+            "button": "Meld je ruimte aan"
+          }
+        },
+        {
+          "type": "faq_list",
+          "title": "Wat je met de eigenaar regelt",
+          "body": "Wicked Workshops laat de ruimte zien. De afspraken maken jullie samen.",
+          "items": [
+            {
+              "question": "Wat kost een ruimte?",
+              "answer": "Dat regel je rechtstreeks met de eigenaar; Wicked Workshops is daar geen partij in. Vraag het als je contact opneemt."
+            },
+            {
+              "question": "Wie is aansprakelijk als er iets kapotgaat?",
+              "answer": "Dat regel je rechtstreeks met de eigenaar; Wicked Workshops is daar geen partij in. Spreek het af voordat de eerste workshop plaatsvindt."
+            },
+            {
+              "question": "Hoe gaat het met de sleutel en de schoonmaak?",
+              "answer": "Dat regel je rechtstreeks met de eigenaar; Wicked Workshops is daar geen partij in."
+            },
+            {
+              "question": "En als een workshop niet doorgaat?",
+              "answer": "Wat er dan met de huur gebeurt, regel je rechtstreeks met de eigenaar; Wicked Workshops is daar geen partij in."
+            },
+            {
+              "question": "Wat kost een advertentie voor mijn ruimte?",
+              "answer": "Of er een vaste fee voor je advertentie komt en hoe hoog die is, staat nog niet vast. Je hoort het voordat je iets betaalt."
+            }
+          ]
+        },
+        {
+          "type": "cta_band",
+          "style": "ink",
+          "title": "Nog geen workshop op Wicked?",
+          "body": "Je begint met alleen je e-mailadres en zet daarna je workshop klaar. Een ruimte zoeken kan hier, wanneer je wilt.",
+          "cta_label": "Word workshopgever",
+          "cta_to": "/word-workshopgever",
+          "cta_secondary_label": "Hulp en contact",
+          "cta_secondary_to": "/hulp"
+        }
+      ]
+    },
+    {
+      "slug": "hulp",
+      "page_type": "hulp",
+      "title": "Hulp en contact",
+      "seo_title": "Hulp: zo werkt meedoen en lesgeven",
+      "seo_description": "Hoe je een workshop vindt en boekt, wanneer een datum doorgaat en hoe je zelf een workshop aanmeldt.",
+      "blocks": [
+        {
+          "type": "page_hero",
+          "variant": "split",
+          "title": "Zo werkt meedoen en lesgeven bij Wicked Workshops",
+          "body": "Hoe je een workshop vindt en boekt, wanneer een datum doorgaat en hoe je zelf een workshop aanmeldt. Staat je vraag er niet bij? Onderaan stuur je ons een bericht.",
+          "cta_label": "Naar de veelgestelde vragen",
+          "cta_to": "#vragen",
+          "cta_secondary_label": "Stuur ons een bericht",
+          "cta_secondary_to": "#contact",
+          "image_alt": "Een workshopgever helpt een oudere deelnemer met zijn kleiwerk aan een tafel vol tegels",
+          "image": "/pages/inspiratie-keramiekles.jpg"
+        },
+        {
+          "type": "pilot_banner",
+          "title": "We beginnen klein, met een pilot",
+          "body": "Eerst testen we het platform met een kleine groep deelnemers en workshopgevers. Zo zien we wat goed gaat en wat beter kan, voordat er via Wicked Workshops betaald wordt.",
+          "items": [
+            {
+              "label": "Nu, tijdens de pilot",
+              "text": "Tijdens de pilot betaal je niets. Je plek staat vast zodra je je aanmeldt."
+            },
+            {
+              "label": "Daarna",
+              "text": "Betalen via de site kan op zijn vroegst vanaf januari 2027. Boekingskosten blijven €0, altijd."
+            }
+          ]
+        },
+        {
+          "type": "steps_rail",
+          "variant": "numbered",
+          "anchor": "meedoen",
+          "title": "Als je meedoet",
+          "body": "Van zoeken tot na afloop, in vier momenten.",
+          "items": [
+            {
+              "title": "Zoek op plaats, datum of wat je wilt doen",
+              "body": "Overzichten staan op datum: de eerstvolgende sessie staat bovenaan. Op elke kaart zie je de datum, de plaats, de prijs en hoe het met die sessie staat."
+            },
+            {
+              "title": "Boek je plek",
+              "body": "Je kiest een datum en met hoeveel je komt, en vult je naam en e-mailadres in. Tijdens de pilot staat je plek vast zodra je je aanmeldt. Er is geen aanvraag die de workshopgever nog moet goedkeuren."
+            },
+            {
+              "title": "Kijk of je datum doorgaat",
+              "body": "Sommige workshops hebben een minimum aantal deelnemers. Je ziet precies hoeveel er nog nodig zijn en tot wanneer het minimum gehaald moet zijn.",
+              "cta_label": "Zo werkt het minimum",
+              "cta_to": "#doorgaan"
+            },
+            {
+              "title": "Na afloop: vertel hoe het was",
+              "body": "Een review schrijven kan alleen na een boeking via Wicked Workshops."
+            }
+          ],
+          "image": "/pages/koken2.jpg",
+          "image_alt": "Een bord pasta wordt opgeschept tijdens een kookworkshop",
+          "settings": {
+            "image_position": "left"
+          }
+        },
+        {
+          "type": "threshold_explainer",
+          "variant": "legend",
+          "style": "cloud",
+          "anchor": "doorgaan",
+          "title": "Gaat je workshop door? Dat zie je altijd",
+          "body": "De workshopgever zet per datum een maximum, soms een minimum, en een beslismoment. Is het minimum op dat moment gehaald, dan gaat de datum vanzelf door.",
+          "settings": {
+            "example": {
+              "title": "Kookworkshop, zaterdag 15:00",
+              "capacity": 8,
+              "min": 4,
+              "taken": 3,
+              "decision": "vr 22:00"
+            },
+            "note": "Voorbeeld: workshop, datum en aantallen zijn voorbeelddata."
+          }
+        },
+        {
+          "type": "cancellation_policy",
+          "title": "Toch niet kunnen?",
+          "body": "Het annuleringsbeleid verschilt per workshop. Wat bij jouw workshop geldt, staat altijd op de workshoppagina.",
+          "items": [
+            {
+              "text": "Verzetten naar een andere datum van dezelfde workshop kan zolang er plek is."
+            },
+            {
+              "text": "Annuleert de workshopgever? Dan krijg je alles terug en bieden we je een alternatief."
+            },
+            {
+              "text": "Gaat een datum niet door omdat het minimum niet gehaald is, dan bieden we je een andere datum aan."
+            }
+          ]
+        },
+        {
+          "type": "steps_rail",
+          "variant": "timeline",
+          "style": "ink",
+          "anchor": "geven",
+          "title": "Als je een workshop geeft",
+          "body": "Je hebt geen bedrijf nodig. Wel kijken we je workshop na voordat hij online gaat. Zo ziet de weg eruit:",
+          "items": [
+            {
+              "label": "1",
+              "title": "Een account met je e-mailadres",
+              "body": "Geen bedrijfsgegevens bij het begin."
+            },
+            {
+              "label": "2",
+              "title": "Je workshop in zes stappen",
+              "body": "Basis, inhoud, praktisch, beeld, prijs en datums. Tussendoor bewaar je hem als concept."
+            },
+            {
+              "label": "3",
+              "title": "Daarna de aanbiedersverklaring",
+              "body": "Je gegevens en je IBAN vul je in als je workshop klaar is."
+            },
+            {
+              "label": "4",
+              "title": "Wij kijken hem na",
+              "body": "Pas na die check gaat je workshop online."
+            }
+          ],
+          "cta_label": "Lees hoe workshop geven werkt",
+          "cta_to": "/word-workshopgever",
+          "cta_secondary_label": "Geen eigen ruimte? Bekijk ruimtes",
+          "cta_secondary_to": "/locatie-gezocht",
+          "image": "/pages/ontdek-klei-duo.jpg",
+          "image_alt": "Twee mensen werken samen aan klei"
+        },
+        {
+          "type": "faq_list",
+          "anchor": "vragen",
+          "title": "Veelgestelde vragen",
+          "body": "Gesorteerd op wie je bent. Klik op een vraag voor het antwoord.",
+          "items": [
+            {
+              "group": "Als je meedoet",
+              "question": "Wat kost meedoen tijdens de pilot?",
+              "answer": "Niets. Tijdens de pilot betaal je niets. Betalen via de site kan op zijn vroegst vanaf januari 2027."
+            },
+            {
+              "group": "Als je meedoet",
+              "question": "Betaal ik straks boekingskosten?",
+              "answer": "Nee. Boekingskosten zijn €0, altijd. Je betaalt alleen de prijs van de workshop."
+            },
+            {
+              "group": "Als je meedoet",
+              "question": "Kan \"gaat door\" nog veranderen?",
+              "answer": "Nee. Is het minimum gehaald, dan gaat de workshop door, ook als er daarna iemand afzegt."
+            },
+            {
+              "group": "Als je meedoet",
+              "question": "Wat gebeurt er als mijn workshop niet doorgaat?",
+              "answer": "Dan krijg je een andere datum aangeboden."
+            },
+            {
+              "group": "Als je meedoet",
+              "question": "Kan ik met mijn bedrijf een workshop boeken?",
+              "answer": "Ja, voor groepen van tien tot twintig personen. Stuur via Voor bedrijven een aanvraag, dan hoor je binnen één werkdag van ons. Een minimum aantal deelnemers speelt bij een bedrijfsuitje niet."
+            },
+            {
+              "group": "Als je workshops geeft",
+              "question": "Heb ik een bedrijf nodig?",
+              "answer": "Nee. Je kunt ook zonder bedrijf workshops geven. Wel kijken we elke workshop na voordat hij online gaat."
+            },
+            {
+              "group": "Als je workshops geeft",
+              "question": "Wat kost het om workshops te geven?",
+              "answer": "Je betaalt een commissie over de workshopprijs. Die verschilt per categorie en ligt tussen 9 en 20 procent. Er zijn geen vaste kosten."
+            },
+            {
+              "group": "Als je workshops geeft",
+              "question": "Kan ik een minimum aantal deelnemers instellen?",
+              "answer": "Ja, per datum. Je kiest het maximum, eventueel een minimum, en het beslismoment. Zonder minimum gaat de datum altijd door."
+            },
+            {
+              "group": "Als je workshops geeft",
+              "question": "Ik heb geen eigen ruimte. Kan ik toch lesgeven?",
+              "answer": "Ja. Bij locatie gezocht vind je ruimtes die je rechtstreeks bij de eigenaar huurt. Wicked Workshops is daar geen partij in. Past er niets, dan helpt ons team je zoeken."
+            },
+            {
+              "group": "Als je workshops geeft",
+              "question": "Wanneer krijg ik mijn geld?",
+              "answer": "Zodra er via de site betaald wordt, krijg je je geld na afloop van de workshop."
+            }
+          ]
+        },
+        {
+          "type": "form",
+          "form": "contact",
+          "style": "cloud",
+          "anchor": "contact",
+          "title": "Stuur ons een bericht",
+          "body": "Staat je vraag er niet bij? Laat hem hier achter, dan mailen we je terug.",
+          "cta_secondary_label": "Met je bedrijf op pad? Naar Voor bedrijven",
+          "cta_secondary_to": "/bedrijven",
+          "settings": {
+            "button": "Verstuur je bericht"
+          },
+          "image": "/pages/keramiek.jpg",
+          "image_alt": "Handen vormen klei op een draaischijf"
+        }
+      ]
+    }
+  ]
+}

@@ -1,20 +1,24 @@
-"use client";
+import PublicShell from "@/components/PublicShell";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import { getSiteSettings } from "@/lib/directus";
 
-import { usePathname } from "next/navigation";
-import { Header, Footer, BottomNav } from "@/components/layout";
-
-/* De publieke schil (header + footer + mobiele onderste balk) voor alle
-   routes die geen auth- of dashboard-scherm zijn. Die hebben hun eigen
-   layout zonder deze navigatie. */
-export default function PublicLayout({ children }) {
-  const pathname = usePathname() || "/";
-  const route = pathname === "/" ? "home" : pathname.startsWith("/zoeken") || pathname.startsWith("/categorie") ? "listing" : pathname.startsWith("/inspiratie") ? "blog" : "";
+/* Publieke layout (server): haalt de aankondigingsbalk uit de
+   settings-singleton en geeft hem aan de client-schil met header en footer. */
+export default async function PublicLayout({ children }) {
+  const settings = await getSiteSettings();
   return (
-    <>
-      <Header />
-      <main>{children}</main>
-      <Footer />
-      <BottomNav route={route} />
-    </>
+    <PublicShell
+      announcement={
+        settings.announcement ? (
+          <AnnouncementBar
+            text={settings.announcement}
+            highlight={settings.announcementHighlight}
+            href={settings.announcementLink}
+          />
+        ) : null
+      }
+    >
+      {children}
+    </PublicShell>
   );
 }
