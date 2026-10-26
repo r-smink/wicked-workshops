@@ -55,6 +55,24 @@ export function publicPermissions() {
     R("reviews", "read", { filter: published, fields: PUBLIC_FIELDS.reviews }),
     R("venue_listings", "read", { filter: { _and: [{ visible: { _eq: true } }, published] }, fields: PUBLIC_FIELDS.venue_listings }),
     R("venue_listing_images", "read", { filter: { listing: { _and: [{ visible: { _eq: true } }, published] } } }),
+    ...liveSitePermissions(),
+  ];
+}
+
+/* Wat de bestaande publieke site (artikelen, plaatspagina's, pagina's,
+   formulieren, afbeeldingen) al uitgelogd mocht. Overgenomen van productie,
+   zodat de seed die rechten niet weghaalt. */
+function liveSitePermissions() {
+  const ALL = ["location_page_faq", "article_faq", "article_authors", "provider_media", "providers_languages", "articles_workshops", "articles_related"];
+  return [
+    ...ALL.map((c) => R(c, "read")),
+    ...["location_pages", "articles", "pages"].map((c) => R(c, "read", { filter: published })),
+    R("redirects", "read", { filter: { active: { _eq: true } } }),
+    R("directus_files", "read"),
+    R("business_requests", "create", {
+      fields: ["company", "contact_name", "email", "phone", "participants", "preferred_date", "city", "budget_indication", "message", "workshop", "provider", "source"],
+    }),
+    R("newsletter_subscribers", "create", { fields: ["email", "source"] }),
   ];
 }
 

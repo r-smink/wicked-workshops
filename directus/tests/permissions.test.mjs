@@ -108,6 +108,13 @@ describe("uitgelogd", () => {
     }
   });
 
+  it("houdt wat de bestaande site al mocht lezen", async () => {
+    for (const c of ["pages", "articles", "location_pages", "redirects"]) {
+      expect((await read("public", c, { limit: 1 })).status, c).toBe(200);
+    }
+    expect((await as("public", "GET", "/files?limit=1")).status).toBe(200);
+  });
+
   it("ziet alleen live workshops, zonder adres of interne velden", async () => {
     const res = await read("public", "workshops", { filter: { id: { _in: [ids.lucaLive, ids.lucaDraft] } }, fields: "*" });
     expect(res.status).toBe(200);
