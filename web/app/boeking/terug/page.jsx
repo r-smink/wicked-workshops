@@ -2,7 +2,8 @@ import Link from "next/link";
 import PublicLayout from "@/components/PublicLayout";
 import { getBookingByCode, bookingLocation } from "@/lib/directus";
 import { cancellationLong } from "@/lib/cancellation";
-import { mollieGetPayment, mollieCheckoutUrl, isMollieConfigured } from "@/lib/mollie";
+import { getPayment, isPaymentConfigured } from "@/lib/payment";
+import { getPlatformSettings } from "@/lib/directus/settings";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Je boeking" };
@@ -18,19 +19,21 @@ function sessionLabel(startsAt) {
   return `${day.charAt(0).toUpperCase() + day.slice(1)} om ${time}`;
 }
 
-/* Terugkeerpagina vanuit Mollie. Toont de boekingsstatus op basis van de
-   booking_code uit de redirect-URL. De webhook zet de status meestal al
-   goed voordat de bezoeker hier landt. */
+/* Terugkeerpagina na betaling (OPP of Mollie). Toont de boekingsstatus
+   op basis van de booking_code uit de redirect-URL. De webhook zet de
+   status meestal al goed voordat de bezoeker hier landt. */
 export default async function Page({ searchParams }) {
   const { code } = await searchParams;
   const booking = code ? await getBookingByCode(code) : null;
+  const settings = await getPlatformSettings();
 
   /* Als de betaling nog "open" staat, bieden we de betaallink opnieuw aan. */
   let retryUrl = null;
-  if (booking?.status === "awaiting_payment" && booking.payment_id && isMollieConfigured) {
-    const payment = await mollieGetPayment(booking.payment_id);
-    if (payment && payment.status === "open") {
-      retryUrl = mollieCheckoutUrl(payment);
+  const paymentUid = booking?.opp_transaction_uid || booking?.payment_id;
+  if (booking?.status === "awaiting_payment" && paymentUid && isPaymentConfigured(settings.paymentProvider)) {
+    const payment = await getPayment(settings.paymentProvider, paymentUid);
+    if (payment && (payment.status === "open" || payment.status === "pending")) {
+      retryUrl = payment.redirect_url || payment._links?.checkout?.href || null;
     }
   }
 

@@ -16,6 +16,10 @@ export type PlatformSettings = {
   offerMinHoursAhead: number;
   offerExpiresDaysBefore: number;
   features: { authSocial: boolean; venues: boolean };
+  paymentProvider: "opp" | "mollie";
+  paymentHoldMinutes: number;
+  settlementDelayHours: number;
+  decisionGraceHours: number;
 };
 
 export const DEFAULT_SETTINGS: PlatformSettings = {
@@ -27,6 +31,10 @@ export const DEFAULT_SETTINGS: PlatformSettings = {
   offerMinHoursAhead: 48,
   offerExpiresDaysBefore: 7,
   features: { authSocial: false, venues: false },
+  paymentProvider: "opp",
+  paymentHoldMinutes: 30,
+  settlementDelayHours: 168,
+  decisionGraceHours: 12,
 };
 
 export function toPlatformSettings(row: Partial<PlatformSetting> | null | undefined): PlatformSettings {
@@ -47,6 +55,10 @@ export function toPlatformSettings(row: Partial<PlatformSetting> | null | undefi
       authSocial: row.feature_auth_social ?? d.features.authSocial,
       venues: row.feature_venues ?? d.features.venues,
     },
+    paymentProvider: row.payment_provider === "mollie" ? "mollie" : d.paymentProvider,
+    paymentHoldMinutes: row.payment_hold_minutes ?? d.paymentHoldMinutes,
+    settlementDelayHours: row.settlement_delay_hours ?? d.settlementDelayHours,
+    decisionGraceHours: row.decision_grace_hours ?? d.decisionGraceHours,
   };
 }
 

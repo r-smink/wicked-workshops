@@ -118,6 +118,10 @@ export interface Booking {
   cancel_fee_percent: number | null;
   first_name: string | null;
   last_initial: string | null;
+  opp_transaction_uid: string | null;
+  opp_refund_uid: string | null;
+  refund_status: "none" | "pending" | "completed" | "failed" | null;
+  refunded_at: string | null;
 }
 
 export interface BusinessRequest {
@@ -417,6 +421,10 @@ export interface PlatformSetting {
   offer_expires_days_before: number | null;
   feature_auth_social: boolean;
   feature_venues: boolean;
+  payment_provider: "opp" | "mollie" | null;
+  payment_hold_minutes: number | null;
+  settlement_delay_hours: number | null;
+  decision_grace_hours: number | null;
 }
 
 export interface ProviderDeclaration {
@@ -508,6 +516,10 @@ export interface Provider {
   kind: "private" | "business" | null;
   has_location: "own" | "need" | "unknown" | null;
   onboarded_at: string | null;
+  opp_merchant_uid: string | null;
+  opp_merchant_status: "none" | "pending" | "live" | "suspended" | null;
+  opp_compliance_status: "unverified" | "pending" | "verified" | null;
+  opp_onboarded_at: string | null;
 }
 
 export interface ProvidersLanguage {
@@ -698,6 +710,8 @@ export interface WorkshopSession {
   state: "open" | "confirmed" | "not_happening" | "cancelled_by_provider" | null;
   confirmed_at: string | null;
   closed_at: string | null;
+  provider_override: boolean | null;
+  provider_override_at: string | null;
 }
 
 export interface Workshop {

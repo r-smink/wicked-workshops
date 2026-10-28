@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { getAccessToken, directusMe } from "@/lib/auth";
 import {
   directusCreate, directusUpdate, isDirectusConfigured,
-  getSessionForCheckout,
+  getSessionForCheckout, directusFetch,
 } from "@/lib/directus";
-import { mollieCreatePayment, mollieCheckoutUrl, isMollieConfigured } from "@/lib/mollie";
+import { createPayment, isPaymentConfigured } from "@/lib/payment";
 import { cancellationDeadline } from "@/lib/cancellation";
+import { calculateBookingFees } from "@/lib/rules/fees";
+import { getPlatformSettings } from "@/lib/directus/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +19,8 @@ function bookingCode() {
 
 /* POST /api/checkout
    Body: { session_id, participants, guest_name, guest_email }
-   Maakt een booking aan in Directus. Bij een instant_bookable workshop
-   wordt meteen een Mollie-betaling aangemaakt en komt de checkout-URL
-   terug; anders blijft de boeking "pending" tot de aanbieder bevestigt. */
+   Boeken is direct (docs/05): geen goedkeuring van de aanbieder nodig.
+   Bij OPP gaat het geld naar escrow tot de workshop voorbij is. */
 export async function POST(request) {
   if (!isDirectusConfigured) {
     return NextResponse.json({ error: "Directus is niet geconfigureerd" }, { status: 503 });
@@ -63,31 +64,53 @@ export async function POST(request) {
   }
 
   const workshop = session.workshop;
-  const unitPrice = Number(session.price_override ?? workshop.price_per_person ?? 0);
-  const subtotal = unitPrice * participants;
-  const total = subtotal; /* service_fee blijft 0 zolang er geen marge-afspraak is */
-  const instant = Boolean(workshop.instant_bookable);
+  const settings = await getPlatformSettings();
 
-  /* Booking aanmaken. */
+  /* Commissie ophalen van de categorie. */
+  let commissionPercent = 0;
+  if (workshop.category) {
+    const categoryId = typeof workshop.category === "string" ? workshop.category : workshop.category?.id;
+    if (categoryId) {
+      const cat = await directusFetch(`/items/categories/${categoryId}?fields=commission_percent`, { noCache: true });
+      commissionPercent = cat?.commission_percent ?? 0;
+    }
+  }
+
+  const unitPrice = Number(session.price_override ?? workshop.price_per_person ?? 0);
+  const fees = calculateBookingFees({ priceCents: unitPrice, participants, commissionPercent });
+
+  /* Provider ophalen voor OPP merchant check. */
+  const providerId = typeof workshop.provider === "string" ? workshop.provider : workshop.provider?.id;
+  let merchantUid = null;
+  if (providerId && settings.paymentProvider === "opp" && !settings.pilotNoPayments) {
+    const provider = await directusFetch(`/items/providers/${providerId}?fields=opp_merchant_uid,opp_merchant_status`, { noCache: true });
+    if (!provider?.opp_merchant_uid || provider.opp_merchant_status !== "live") {
+      return NextResponse.json({ error: "De workshopgever kan nog geen betalingen ontvangen" }, { status: 409 });
+    }
+    merchantUid = provider.opp_merchant_uid;
+  }
+
+  /* Booking aanmaken. Stoelen worden direct gereserveerd. */
   const code = bookingCode();
+  const holdMinutes = settings.paymentHoldMinutes || 30;
+
   const booking = await directusCreate("bookings", {
-    status: instant ? "awaiting_payment" : "pending",
+    status: settings.pilotNoPayments ? "confirmed" : "awaiting_payment",
     booking_code: code,
     guest_name: name,
     guest_email: email,
     participants,
     unit_price: unitPrice,
-    subtotal,
+    subtotal: fees.subtotal,
     service_fee: 0,
     discount: 0,
-    total,
+    total: fees.total,
     session: session.id,
     workshop: workshop.id,
-    provider: workshop.provider || null,
+    provider: providerId || null,
     customer: user?.id || null,
-    payment_status: instant ? "open" : null,
-    hold_expires_at: instant ? new Date(Date.now() + 30 * 60 * 1000).toISOString() : null,
-    /* Vastleggen welk annuleringsbeleid gold op het moment van boeken. */
+    payment_status: settings.pilotNoPayments ? null : "open",
+    hold_expires_at: settings.pilotNoPayments ? null : new Date(Date.now() + holdMinutes * 60 * 1000).toISOString(),
     cancellation_deadline: cancellationDeadline(workshop.cancellation_policy, session.starts_at),
   });
 
@@ -95,30 +118,43 @@ export async function POST(request) {
     return NextResponse.json({ error: "Kon boeking niet opslaan" }, { status: 500 });
   }
 
-  /* Niet-instant: aanvraag staat klaar, aanbieder bevestigt via dashboard. */
-  if (!instant) {
-    return NextResponse.json({ ok: true, requested: true, booking_code: code });
+  /* Stoelen direct reserveren (voorkomt overselling). */
+  await directusUpdate("workshop_sessions", session.id, {
+    seats_taken: (session.seats_taken ?? 0) + participants,
+  });
+
+  /* Pilot: geen betaling nodig, booking is meteen bevestigd. */
+  if (settings.pilotNoPayments) {
+    return NextResponse.json({ ok: true, booking_code: code });
   }
 
-  /* Instant: Mollie-betaling aanmaken. */
-  if (!isMollieConfigured) {
+  /* Betaling aanmaken via de actieve provider. */
+  const provider = settings.paymentProvider;
+  if (!isPaymentConfigured(provider)) {
     return NextResponse.json({ error: "Betalingen zijn nog niet geconfigureerd" }, { status: 503 });
   }
 
-  const payment = await mollieCreatePayment({
-    amount: total,
+  const webhookPath = provider === "mollie" ? "/api/webhooks/mollie" : "/api/webhooks/opp";
+  const result = await createPayment(provider, {
+    merchantUid,
+    amountCents: fees.total,
     description: `${workshop.title} · ${code}`,
-    redirectUrl: `${SITE}/boeking/terug?code=${code}`,
-    webhookUrl: `${SITE}/api/webhooks/mollie`,
-    metadata: { booking_id: booking.id, booking_code: code },
+    returnUrl: `${SITE}/boeking/terug?code=${code}`,
+    webhookUrl: `${SITE}${webhookPath}`,
+    metadata: { booking_id: booking.id, booking_code: code, session_id: session.id },
+    pilotNoPayments: false,
   });
 
-  const checkoutUrl = mollieCheckoutUrl(payment);
-  if (!checkoutUrl) {
+  if (!result?.uid) {
     return NextResponse.json({ error: "Kon betaling niet aanmaken" }, { status: 502 });
   }
 
-  await directusUpdate("bookings", booking.id, { payment_id: payment.id });
+  /* Transactie-ID opslaan op de booking. */
+  const paymentUpdate = { payment_id: result.uid };
+  if (provider === "opp") {
+    paymentUpdate.opp_transaction_uid = result.uid;
+  }
+  await directusUpdate("bookings", booking.id, paymentUpdate);
 
-  return NextResponse.json({ ok: true, checkoutUrl, booking_code: code });
+  return NextResponse.json({ ok: true, checkoutUrl: result.checkoutUrl, booking_code: code });
 }

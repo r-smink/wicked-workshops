@@ -1007,7 +1007,7 @@ export async function getMenuItems(location = "header") {
    vergeven zijn. */
 export async function getSessionForCheckout(sessionId) {
   return directusFetch(
-    `/items/workshop_sessions/${sessionId}?fields=id,starts_at,ends_at,capacity,seats_taken,status,price_override,workshop.id,workshop.slug,workshop.title,workshop.price_per_person,workshop.instant_bookable,workshop.cancellation_policy,workshop.provider`,
+    `/items/workshop_sessions/${sessionId}?fields=id,starts_at,ends_at,capacity,seats_taken,status,price_override,workshop.id,workshop.slug,workshop.title,workshop.price_per_person,workshop.instant_bookable,workshop.cancellation_policy,workshop.provider,workshop.category`,
     { noCache: true }
   );
 }
@@ -1024,7 +1024,7 @@ const BOOKING_LOCATION_FIELDS = [
 
 export async function getBookingByCode(code) {
   const data = await directusFetch(
-    `/items/bookings?filter[booking_code]=${encodeURIComponent(code)}&fields=id,booking_code,guest_name,participants,unit_price,total,status,payment_status,payment_id,cancellation_deadline,session.starts_at,workshop.title,workshop.slug,workshop.cancellation_policy,${BOOKING_LOCATION_FIELDS}&single`,
+    `/items/bookings?filter[booking_code]=${encodeURIComponent(code)}&fields=id,booking_code,guest_name,participants,unit_price,total,status,payment_status,payment_id,opp_transaction_uid,cancellation_deadline,session.starts_at,workshop.title,workshop.slug,workshop.cancellation_policy,${BOOKING_LOCATION_FIELDS}&single`,
     { noCache: true }
   );
   return data || null;
