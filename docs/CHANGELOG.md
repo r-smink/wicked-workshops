@@ -62,7 +62,35 @@ Per fase een korte demo-notitie (docs/13).
 
 **Bekend**
 
-- Productie is nog niet aangeraakt. Daar staan 0 workshops, 0 aanmeldingen, 0 datums, 15 plaatsen en 2 gebruikers. De werkwijze staat in `directus/README.md`.
+- Productie gemigreerd op 26 oktober 2026 (migratie 001 en seed). `schema:diff` gaf daarna geen verschillen. De publieke rechten van de bestaande site (pagina's, artikelen, plaatspagina's, redirects, bestanden, formulieren) staan nu in `seed/access.mjs`. De rollen Customer, Provider en Editor en hun policies zijn niet aangeraakt.
+- De extensie `ww-guards` staat nog niet op productie: Directus daar installeert extensies uit de marketplace. Zolang niemand de rol Member of Team heeft, maakt dat niets uit; uiterlijk in fase 3 moet ze erop.
+- Productie heeft nu 2502 plaatsen, waarvan 15 gepubliceerd. `getCities()` filtert daarom op `status = published`.
 - De bestaande site bepaalt "workshopgever" nog via de rol Provider en registreert met de rollen Customer en Provider. Na de migratie op productie moet dat via de `providers`-rij en de rol Member (fase 3).
 - De oude wizard van de site schrijft annuleerwaarden als `flexible_48h`; na de migratie op productie verwijst het veld naar `basis`, `soepel` of `vast`.
 - Geen foto's in de demo-seed.
+
+## Pilotfixes en betalen met OPP-sandbox (4 november 2026)
+
+**Wat werkt**
+
+- Betaalmodus in Directus: `platform_settings.payment_mode` = `off`, `sandbox` of `live` (migratie 003). Geld- en boekingsroutes lezen de instelling ongecacht, dus omzetten werkt direct. In sandbox toont de boekkaart en de terugkeerpagina "Testmodus".
+- OPP-koppeling volgens de API-documentatie: transacties met `products` en `total_price`, escrow tot einde workshop plus `settlement_delay_hours`, commissie als `partner_fee`, refunds, merchants per omgeving (`opp_merchant_env`, `payment_env`). In de sandbox krijgt een workshopgever bij de eerste boeking automatisch een test-merchant die live wordt gezet.
+- Webhook controleert de HTTP-handtekening (getest met het voorbeeld uit de OPP-documentatie) en vraagt de status altijd zelf op bij OPP.
+- Cron `/api/cron/escrow` alleen met `CRON_SECRET`; zet datums op door of niet door, betaalt terug, rondt af na de workshop en laat verlopen checkouts vervallen. Draait via `.github/workflows/cron.yml`.
+- Wizard en `/api/workshops` schrijven annuleerregelingen als `basis`, `soepel` of `vast`.
+- `/api/workshops`, `/api/upload` en `/api/venues` vragen inloggen; een workshopgever wijzigt alleen eigen workshops. Wijzigen gooit geen datums met aanmeldingen meer weg.
+
+**Opgeloste fouten**
+
+- Checkout gaf euro's door als centen (EUR 45 werd EUR 0,45).
+- Plekken werden bij betaling dubbel geteld; een betaalde boeking werd nooit `confirmed`.
+- Mislukte betaalstart liet een boeking met gereserveerde plekken achter.
+- `getPlatformSettings` las met de publieke rol en zag de betaalvelden niet.
+- Migratie 002 stond niet in `snapshot.yaml` en de velden ontbraken in `seed/fields.mjs`.
+- IBAN-spaties werden niet verwijderd (`/s+/` in plaats van `/\s+/`).
+
+**Bekend**
+
+- Nog niet getest tegen de echte OPP-sandbox: daarvoor is een sandbox-sleutel en notificatiegeheim van OPP nodig.
+- OPP vereist mogelijk IP-allowlisting van de aanroepende servers; Vercel heeft geen vaste uitgaande IP's. Navragen bij de technische contactpersoon van OPP.
+- Escrow moet in het OPP-contract aanstaan. Staat het uit, dan weigert OPP de transactie (zichtbaar in de logs).

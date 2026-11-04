@@ -27,7 +27,7 @@ const CLASSIFIED = {
       "is_private", "booking_deadline_hours", "workshop", "min_participants", "decision_at", "goes_ahead", "state",
       "confirmed_at", "closed_at",
     ],
-    private: ["user_created", "user_updated", "cancellation_reason", "bookings"],
+    private: ["user_created", "user_updated", "cancellation_reason", "bookings", "provider_override", "provider_override_at"],
   },
   providers: {
     public: [
@@ -40,6 +40,7 @@ const CLASSIFIED = {
     private: [
       "user_created", "user_updated", "user", "address", "postal_code", "lat", "lng", "kvk_number", "vat_number",
       "mollie_connect_id", "payout_iban_last4", "commission_rate", "has_location", "onboarded_at",
+      "opp_merchant_uid", "opp_merchant_status", "opp_compliance_status", "opp_onboarded_at", "opp_merchant_env",
     ],
   },
   reviews: {
@@ -62,6 +63,7 @@ const CLASSIFIED = {
       "unit_price", "subtotal", "service_fee", "discount", "total", "question", "payment_id", "payment_status", "paid_at",
       "hold_expires_at", "cancellation_deadline", "cancelled_at", "cancelled_by", "refund_amount", "review_requested_at",
       "workshop", "provider", "customer", "giftcard", "payout", "access_token", "moved_from", "cancel_fee_percent",
+      "opp_transaction_uid", "opp_refund_uid", "refund_status", "refunded_at", "payment_env",
     ],
   },
 };

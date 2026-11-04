@@ -10,6 +10,7 @@ import { ReadMore } from "@/components/layout";
 import { WorkshopCard } from "@/components/cards";
 import Map from "@/components/Map";
 import { cancellationShort, cancellationLong } from "@/lib/cancellation";
+import { werkteksten } from "@/content/werkteksten";
 
 function formatPrice(n) {
   if (n == null || isNaN(n)) return "0";
@@ -21,7 +22,7 @@ function formatLangs(langs) {
   return langs.join(", ");
 }
 
-function BookingCard({ workshop, sessions = SESSIONS }) {
+function BookingCard({ workshop, sessions = SESSIONS, paymentMode = "off" }) {
   const { user } = useAuth();
   const [session, setSession] = useState(sessions[0]?.id);
   const [people, setPeople] = useState(2);
@@ -33,7 +34,8 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
   const price = workshop.price ?? 0;
   const chosen = sessions.find((s) => s.id === session) || sessions[0];
   const max = Math.min(12, chosen?.seats ?? 12);
-  const instant = Boolean(workshop.instant_bookable);
+  /* Boeken is altijd direct (docs/05). Betalen alleen als payment_mode aan staat. */
+  const paying = paymentMode !== "off" && price > 0;
 
   useEffect(() => { if (people > max) setPeople(max); }, [session, max, people]);
 
@@ -130,14 +132,17 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
 
           <div style={{ marginTop: 16 }}>
             <Button variant="primary" size="lg" block disabled={busy || !canBook} onClick={handleBook}>
-              {busy ? "Bezig..." : instant ? `Boek en betaal €${formatPrice(price * people)}` : "Vraag aan"}
+              {busy ? "Bezig..." : paying ? `Boek en betaal €${formatPrice(price * people)}` : werkteksten.betalen.uitKnop}
             </Button>
           </div>
           <p style={{ fontSize: 12.5, color: tokens.color.slate, textAlign: "center", marginTop: 10 }}>
-            {instant
-              ? "Direct boeken en betalen via iDEAL of creditcard"
-              : "Je betaalt nog niets — eerst bevestigt de aanbieder"}
+            {paying ? "Direct boeken en betalen via iDEAL" : werkteksten.betalen.uitUitleg}
           </p>
+          {paymentMode === "sandbox" && (
+            <p role="note" style={{ fontSize: 12.5, color: tokens.color.slate, textAlign: "center", marginTop: 6, fontWeight: 600 }}>
+              {werkteksten.betalen.testmodus}
+            </p>
+          )}
           <p style={{ fontSize: 12, color: tokens.color.slate, textAlign: "center", marginTop: 8, lineHeight: 1.5 }}>
             Door te boeken ga je akkoord met de <a href="/voorwaarden" target="_blank" rel="noopener">boekingsvoorwaarden</a> en
             het annuleringsbeleid van deze workshop. Omdat de workshop op een vaste datum is, geldt er geen
@@ -158,7 +163,7 @@ function BookingCard({ workshop, sessions = SESSIONS }) {
   );
 }
 
-export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = REVIEWS, faq = FAQ, listing = LISTING }) {
+export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = REVIEWS, faq = FAQ, listing = LISTING, paymentMode = "off" }) {
   const go = useGo();
   const w = workshop || FEATURED[0];
   const [openFaq, setOpenFaq] = useState(0);
@@ -409,7 +414,7 @@ export default function WorkshopPage({ workshop, sessions = SESSIONS, reviews = 
           </div>
 
           <aside>
-            <BookingCard workshop={w} sessions={sessions} />
+            <BookingCard workshop={w} sessions={sessions} paymentMode={paymentMode} />
 
             {w.group_quote_from && (
               <div className="ww-sidecard">

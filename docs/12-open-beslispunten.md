@@ -62,7 +62,9 @@ Verantwoordelijken in de annotaties: **Rick** (back-end, werkt techniek en logic
 
 | Punt | Standaard |
 |---|---|
-| Betalen via de site | Niet in de pilot. Op zijn vroegst januari 2027. Alleen informatieve teksten. |
+| Betalen via de site | Besloten 4 november 2026: de pilot betaalt via de OPP-sandbox, met testgeld. Echt geld op zijn vroegst januari 2027. Schakelaar `platform_settings.payment_mode`: `off`, `sandbox` (pilot), `live` (alleen met `OPP_LIVE_API_KEY`). |
+| Uitbetalen aan workshopgevers | Via escrow bij OPP: de transactie staat vast tot het einde van de workshop plus `settlement_delay_hours`, daarna komt het geld vanzelf vrij. Gaat een datum niet door, dan volgt een refund. |
+| Merchants in de sandbox | Een workshopgever krijgt bij de eerste boeking automatisch een test-merchant (testgegevens, geen KYC). Live vraagt een echte merchant met KYC via OPP. |
 | Commissie per categorie | Veld op `categories` (9 tot 20 procent), niet getoond aan deelnemers. |
 
 ## Inconsistenties in het ontwerp (opgelost zoals hieronder)

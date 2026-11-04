@@ -5058,6 +5058,236 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: bookings
+    field: opp_transaction_uid
+    type: string
+    meta:
+      collection: bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: opp_transaction_uid
+      group: null
+      hidden: false
+      interface: input
+      note: OPP transactie-ID. Leeg bij Mollie-boekingen.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_transaction_uid
+      table: bookings
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: opp_refund_uid
+    type: string
+    meta:
+      collection: bookings
+      conditions: null
+      display: null
+      display_options: null
+      field: opp_refund_uid
+      group: null
+      hidden: false
+      interface: input
+      note: OPP refund-ID, als er een refund is aangemaakt.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_refund_uid
+      table: bookings
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: refund_status
+    type: string
+    meta:
+      collection: bookings
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Geen
+            value: none
+          - text: In behandeling
+            value: pending
+          - text: Afgerond
+            value: completed
+          - text: Mislukt
+            value: failed
+      field: refund_status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Status van een eventuele terugbetaling.
+      options:
+        choices:
+          - text: Geen
+            value: none
+          - text: In behandeling
+            value: pending
+          - text: Afgerond
+            value: completed
+          - text: Mislukt
+            value: failed
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: refund_status
+      table: bookings
+      data_type: character varying
+      default_value: none
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: refunded_at
+    type: timestamp
+    meta:
+      collection: bookings
+      conditions: null
+      display: datetime
+      display_options: null
+      field: refunded_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: Tijdstip van de voltooide refund.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: refunded_at
+      table: bookings
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: payment_env
+    type: string
+    meta:
+      collection: bookings
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Sandbox (testgeld)
+            value: sandbox
+          - text: Live
+            value: live
+      field: payment_env
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: OPP-omgeving van opp_transaction_uid.
+      options:
+        choices:
+          - text: Sandbox (testgeld)
+            value: sandbox
+          - text: Live
+            value: live
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: payment_env
+      table: bookings
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: business_requests
     field: id
     type: uuid
@@ -15280,6 +15510,236 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: platform_settings
+    field: payment_provider
+    type: string
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Online Payment Platform
+            value: opp
+          - text: Mollie
+            value: mollie
+      field: payment_provider
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Actieve betaalprovider. Feature flag voor de overgang.
+      options:
+        choices:
+          - text: Online Payment Platform
+            value: opp
+          - text: Mollie
+            value: mollie
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: payment_provider
+      table: platform_settings
+      data_type: character varying
+      default_value: opp
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: payment_hold_minutes
+    type: integer
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: payment_hold_minutes
+      group: null
+      hidden: false
+      interface: input
+      note: Hoe lang een checkout-URL geldig is voordat de boeking vervalt.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: payment_hold_minutes
+      table: platform_settings
+      data_type: integer
+      default_value: 30
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: settlement_delay_hours
+    type: integer
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: settlement_delay_hours
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Wachttijd na sessie-einde voordat uitbetaling aan de workshopgever wordt
+        getriggerd (168 = 7 dagen).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: settlement_delay_hours
+      table: platform_settings
+      data_type: integer
+      default_value: 168
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: decision_grace_hours
+    type: integer
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: decision_grace_hours
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Uren na het beslismoment waarin de workshopgever nog kan zeggen "gaat
+        toch door", voordat automatische refunds starten.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: decision_grace_hours
+      table: platform_settings
+      data_type: integer
+      default_value: 12
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: payment_mode
+    type: string
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: 'Uit: geen betaling, boeking direct bevestigd'
+            value: 'off'
+          - text: 'OPP sandbox: testbetalingen'
+            value: sandbox
+          - text: 'Live: echte betalingen'
+            value: live
+      field: payment_mode
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Pilot: sandbox. Live op zijn vroegst januari 2027 en alleen met
+        OPP_LIVE_API_KEY.
+      options:
+        choices:
+          - text: 'Uit: geen betaling, boeking direct bevestigd'
+            value: 'off'
+          - text: 'OPP sandbox: testbetalingen'
+            value: sandbox
+          - text: 'Live: echte betalingen'
+            value: live
+      readonly: false
+      required: true
+      searchable: true
+      sort: 16
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: payment_mode
+      table: platform_settings
+      data_type: character varying
+      default_value: 'off'
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: provider_declarations
     field: id
     type: uuid
@@ -18609,6 +19069,257 @@ fields:
       data_type: timestamp with time zone
       default_value: null
       max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: opp_merchant_uid
+    type: string
+    meta:
+      collection: providers
+      conditions: null
+      display: null
+      display_options: null
+      field: opp_merchant_uid
+      group: null
+      hidden: false
+      interface: input
+      note: OPP merchant identifier. Gezet na onboarding.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 45
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_merchant_uid
+      table: providers
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: opp_merchant_status
+    type: string
+    meta:
+      collection: providers
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Niet aangemeld
+            value: none
+          - text: In behandeling
+            value: pending
+          - text: Actief
+            value: live
+          - text: Geblokkeerd
+            value: suspended
+          - text: Beeindigd
+            value: terminated
+          - text: Geblokkeerd door OPP
+            value: blocked
+      field: opp_merchant_status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: OPP merchant status. Moet 'live' zijn om betalingen te ontvangen.
+      options:
+        choices:
+          - text: Niet aangemeld
+            value: none
+          - text: In behandeling
+            value: pending
+          - text: Actief
+            value: live
+          - text: Geblokkeerd
+            value: suspended
+          - text: Beeindigd
+            value: terminated
+          - text: Geblokkeerd door OPP
+            value: blocked
+      readonly: false
+      required: false
+      searchable: true
+      sort: 46
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_merchant_status
+      table: providers
+      data_type: character varying
+      default_value: none
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: opp_compliance_status
+    type: string
+    meta:
+      collection: providers
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Niet geverifieerd
+            value: unverified
+          - text: In behandeling
+            value: pending
+          - text: Geverifieerd
+            value: verified
+      field: opp_compliance_status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: OPP KYC/compliance status.
+      options:
+        choices:
+          - text: Niet geverifieerd
+            value: unverified
+          - text: In behandeling
+            value: pending
+          - text: Geverifieerd
+            value: verified
+      readonly: false
+      required: false
+      searchable: true
+      sort: 47
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_compliance_status
+      table: providers
+      data_type: character varying
+      default_value: unverified
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: opp_onboarded_at
+    type: timestamp
+    meta:
+      collection: providers
+      conditions: null
+      display: datetime
+      display_options: null
+      field: opp_onboarded_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: Wanneer de merchant live ging bij OPP.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 48
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_onboarded_at
+      table: providers
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: opp_merchant_env
+    type: string
+    meta:
+      collection: providers
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Sandbox (testgeld)
+            value: sandbox
+          - text: Live
+            value: live
+      field: opp_merchant_env
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: OPP-omgeving van opp_merchant_uid.
+      options:
+        choices:
+          - text: Sandbox (testgeld)
+            value: sandbox
+          - text: Live
+            value: live
+      readonly: false
+      required: false
+      searchable: true
+      sort: 49
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: opp_merchant_env
+      table: providers
+      data_type: character varying
+      default_value: null
+      max_length: 64
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -24736,6 +25447,90 @@ fields:
       width: half
     schema:
       name: closed_at
+      table: workshop_sessions
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: workshop_sessions
+    field: provider_override
+    type: boolean
+    meta:
+      collection: workshop_sessions
+      conditions: null
+      display: boolean
+      display_options: null
+      field: provider_override
+      group: null
+      hidden: false
+      interface: boolean
+      note: >-
+        Workshopgever zegt na het beslismoment: gaat toch door, ondanks dat het
+        minimum niet is gehaald.
+      options:
+        label: Gaat toch door
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: provider_override
+      table: workshop_sessions
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: workshop_sessions
+    field: provider_override_at
+    type: timestamp
+    meta:
+      collection: workshop_sessions
+      conditions: null
+      display: datetime
+      display_options: null
+      field: provider_override_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: Wanneer de workshopgever de override inzette.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: provider_override_at
       table: workshop_sessions
       data_type: timestamp with time zone
       default_value: null

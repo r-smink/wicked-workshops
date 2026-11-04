@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { isDirectusConfigured } from "@/lib/directus";
+import { currentUser, unauthorized } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL || "";
 const DIRECTUS_TOKEN = process.env.DIRECTUS_STATIC_TOKEN || "";
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_BYTES = 10 * 1024 * 1024;
 
 /* Uploadt een bestand naar Directus /files via multipart/form-data.
    Geeft { id, filename_download } terug bij succes. */
@@ -16,10 +19,18 @@ export async function POST(request) {
     );
   }
 
+  if (!(await currentUser())) return unauthorized();
+
   const formData = await request.formData();
   const file = formData.get("file");
   if (!file || typeof file === "string") {
     return NextResponse.json({ error: "Geen bestand meegezonden" }, { status: 400 });
+  }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: "Alleen JPG, PNG of WebP" }, { status: 415 });
+  }
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: "Een foto mag maximaal 10 MB zijn" }, { status: 413 });
   }
 
   try {

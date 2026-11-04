@@ -45,6 +45,20 @@ export const CANCELLATION_POLICIES = {
 
 const FALLBACK = "Annuleren volgens de voorwaarden van de aanbieder";
 
+/* Oude sleutel naar de sleutel in cancellation_policies. Sinds migratie 001
+   verwijst workshops.cancellation_policy naar die collection, dus alleen
+   basis, soepel en vast mogen worden opgeslagen. strict_none heeft geen
+   tegenhanger en wordt de strengste regeling. */
+const LEGACY_KEYS = { flexible_48h: "basis", moderate_7d: "vast", strict_none: "vast" };
+export const POLICY_KEYS = ["basis", "soepel", "vast"];
+
+export function toPolicyKey(policy) {
+  if (!policy) return null;
+  const key = typeof policy === "object" ? policy.key : policy;
+  if (POLICY_KEYS.includes(key)) return key;
+  return LEGACY_KEYS[key] || null;
+}
+
 export function cancellationShort(policy) {
   return CANCELLATION_POLICIES[policy]?.short || FALLBACK;
 }

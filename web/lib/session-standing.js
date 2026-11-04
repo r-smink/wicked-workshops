@@ -44,7 +44,7 @@ export function normalizeSession(s, workshopMin = null) {
     capacity: s.capacity ?? 0,
     taken: s.seats_taken ?? 0,
     min: min && min > 0 ? min : null,
-    goesAhead: Boolean(s.goes_ahead),
+    goesAhead: Boolean(s.goes_ahead) || Boolean(s.provider_override),
     decisionAt: s.decision_at ?? null,
     status: s.status ?? null,
   };

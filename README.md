@@ -116,7 +116,13 @@ Zodra je Directus koppelt, zet je ze in Vercel onder **Settings > Environment Va
 | `DIRECTUS_URL` | Waar de API staat | Alle omgevingen |
 | `DIRECTUS_STATIC_TOKEN` | Server-side lezen | Alleen server, nooit `NEXT_PUBLIC_` |
 | `REVALIDATE_SECRET` | Beveiligt de revalidatie-webhook | Alleen server |
-| `MOLLIE_API_KEY` | Betalingen, fase 2 | Alleen server |
+| `OPP_SANDBOX_API_KEY` | OPP-testbetalingen (pilot, `payment_mode` = `sandbox`) | Alleen server |
+| `OPP_SANDBOX_NOTIFY_SECRET` | Controleert de handtekening van OPP-webhooks in de sandbox | Alleen server |
+| `OPP_LIVE_API_KEY` / `OPP_LIVE_NOTIFY_SECRET` | Echte betalingen, op zijn vroegst januari 2027. Zonder deze sleutel kan `live` niet | Alleen server |
+| `CRON_SECRET` | Beveiligt `/api/cron/escrow`. Zonder deze waarde draait de cron niet. Zelfde waarde als het GitHub-secret `CRON_SECRET` | Alleen server |
+| `MOLLIE_API_KEY` | Oude betaalkoppeling, alleen als `payment_provider` = `mollie` | Alleen server |
+
+Betalen zet je aan en uit in Directus onder **Platform settings > payment_mode**: `off` (geen betaling, boeking direct bevestigd), `sandbox` (OPP-testgeld) of `live`. Omzetten werkt direct, zonder deploy. OPP stuurt webhooks naar `https://www.wickedworkshops.nl/api/webhooks/opp`; localhost werkt niet bij OPP.
 | `FIELD_ENCRYPTION_KEY` | Versleutelt het IBAN van workshopgevers (32 bytes, base64). Lokaal en op Vercel dezelfde waarde, anders zijn opgeslagen IBAN's niet meer te lezen | Alleen server |
 
 Alles wat met `NEXT_PUBLIC_` begint komt in de browser terecht. Zet daar dus nooit een token in.

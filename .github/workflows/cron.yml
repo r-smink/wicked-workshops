@@ -1,0 +1,28 @@
+name: cron
+
+# Roept /api/cron/escrow aan: beslismomenten, afronden na de workshop en
+# verlopen checkouts. Nodig in de repo-instellingen (Settings > Secrets and
+# variables > Actions): secret CRON_SECRET (gelijk aan die in Vercel) en
+# variable SITE_URL, bijvoorbeeld https://www.wickedworkshops.nl.
+# GitHub start geplande runs soms een paar minuten later; dat is hier prima.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  escrow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ vars.SITE_URL != '' }}
+    steps:
+      - name: Cron aanroepen
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          status=$(curl -sS -o response.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" "${SITE_URL%/}/api/cron/escrow")
+          cat response.json; echo
+          test "$status" = "200"
