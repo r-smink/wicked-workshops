@@ -90,5 +90,18 @@ describe("platform_settings", () => {
     expect(s.reminderHoursBeforeDecision).toEqual([24]);
     expect(s.minHoursDecisionBeforeStart).toBe(72);
     expect(s.pilotNoPayments).toBe(true);
+    expect(s.paymentMode).toBe("off");
+  });
+
+  it("payment_mode bepaalt of er betaald wordt", () => {
+    expect(toPlatformSettings({ payment_mode: "sandbox" })).toMatchObject({ paymentMode: "sandbox", pilotNoPayments: false });
+    expect(toPlatformSettings({ payment_mode: "live", pilot_no_payments: true })).toMatchObject({ paymentMode: "live", pilotNoPayments: false });
+    expect(toPlatformSettings({ payment_mode: "off" })).toMatchObject({ paymentMode: "off", pilotNoPayments: true });
+  });
+
+  it("zonder payment_mode telt de oude schakelaar, en nooit vanzelf live", () => {
+    expect(toPlatformSettings({ pilot_no_payments: false }).paymentMode).toBe("sandbox");
+    expect(toPlatformSettings({ pilot_no_payments: true }).paymentMode).toBe("off");
+    expect(toPlatformSettings({ payment_mode: "echt" as never }).paymentMode).toBe("off");
   });
 });

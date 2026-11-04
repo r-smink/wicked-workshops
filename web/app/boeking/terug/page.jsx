@@ -2,7 +2,9 @@ import Link from "next/link";
 import PublicLayout from "@/components/PublicLayout";
 import { getBookingByCode, bookingLocation } from "@/lib/directus";
 import { cancellationLong } from "@/lib/cancellation";
-import { getPayment, isPaymentConfigured } from "@/lib/payment";
+import { getPayment } from "@/lib/payment";
+import { oppPaymentStatus } from "@/lib/opp";
+import { werkteksten } from "@/content/werkteksten";
 import { getPlatformSettings } from "@/lib/directus/settings";
 
 export const dynamic = "force-dynamic";
@@ -27,15 +29,22 @@ export default async function Page({ searchParams }) {
   const booking = code ? await getBookingByCode(code) : null;
   const settings = await getPlatformSettings();
 
-  /* Als de betaling nog "open" staat, bieden we de betaallink opnieuw aan. */
+  /* Staat de boeking nog op betalen, dan vragen we OPP zelf: de webhook kan
+     een paar seconden later komen dan de bezoeker. Nog open: betaallink
+     opnieuw aanbieden. Al betaald: "we verwerken het". */
   let retryUrl = null;
+  let processing = false;
   const paymentUid = booking?.opp_transaction_uid || booking?.payment_id;
-  if (booking?.status === "awaiting_payment" && paymentUid && isPaymentConfigured(settings.paymentProvider)) {
-    const payment = await getPayment(settings.paymentProvider, paymentUid);
-    if (payment && (payment.status === "open" || payment.status === "pending")) {
+  if (booking?.status === "awaiting_payment" && paymentUid) {
+    const provider = booking.opp_transaction_uid ? "opp" : settings.paymentProvider;
+    const payment = await getPayment(provider, booking.payment_env, paymentUid);
+    const status = provider === "opp" ? oppPaymentStatus(payment?.status) : payment?.status;
+    if (status === "paid") processing = true;
+    else if (status === "open" || status === "pending") {
       retryUrl = payment.redirect_url || payment._links?.checkout?.href || null;
     }
   }
+  const testMode = booking?.payment_env === "sandbox";
 
   const workshopTitle = booking?.workshop?.title || "je workshop";
   const when = sessionLabel(booking?.session?.starts_at);
@@ -56,7 +65,7 @@ export default async function Page({ searchParams }) {
             <>
               <h1>Je boeking is bevestigd</h1>
               <p>
-                Leuk {booking.guest_name?.split(" ")[0] || ""} — je plek voor{" "}
+                Leuk{booking.guest_name ? `, ${booking.guest_name.split(" ")[0]}` : ""}! Je plek voor{" "}
                 <strong>{workshopTitle}</strong> is vastgelegd.
                 {when ? ` ${when}.` : ""} Je ontvangt de bevestiging per e-mail.
               </p>
@@ -67,6 +76,14 @@ export default async function Page({ searchParams }) {
               <p>
                 Je aanvraag voor <strong>{workshopTitle}</strong> ligt bij de aanbieder.
                 Zodra die bevestigt, ontvang je een betaallink per e-mail.
+              </p>
+            </>
+          ) : booking.status === "awaiting_payment" && processing ? (
+            <>
+              <h1>We verwerken je betaling</h1>
+              <p>
+                Je betaling voor <strong>{workshopTitle}</strong> is binnen. Over een paar
+                seconden is je plek bevestigd. Ververs deze pagina als je nog niets ziet.
               </p>
             </>
           ) : booking.status === "awaiting_payment" ? (
@@ -84,6 +101,12 @@ export default async function Page({ searchParams }) {
                 De boeking voor <strong>{workshopTitle}</strong> is geannuleerd of verlopen.
               </p>
             </>
+          )}
+
+          {testMode && (
+            <p className="ww-meta" role="note" style={{ marginTop: 14, fontSize: 14 }}>
+              {werkteksten.betalen.testmodusTerug}
+            </p>
           )}
 
           {location && (

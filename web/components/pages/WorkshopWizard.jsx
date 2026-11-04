@@ -9,6 +9,7 @@ import {
   EMPTY_WORKSHOP, WIZ_REQUIRED,
 } from "@/lib/mock-data";
 import { Icon, Button, Chip, Photo, Field, Switch } from "@/components/ui";
+import { toPolicyKey } from "@/lib/cancellation";
 
 export default function WorkshopWizard({
   go,
@@ -63,7 +64,7 @@ export default function WorkshopWizard({
       transit: initialWorkshop.transit ?? false,
       media: Array.isArray(initialWorkshop.media) && initialWorkshop.media.length ? initialWorkshop.media : [null, null, null, null, null, null],
       price: initialWorkshop.price_per_person ? String(initialWorkshop.price_per_person) : initialWorkshop.price ? String(initialWorkshop.price) : "",
-      cancellation: initialWorkshop.cancellation_policy || "flexible_48h",
+      cancellation: toPolicyKey(initialWorkshop.cancellation_policy) || "basis",
       instant: initialWorkshop.instant_bookable ?? true,
       giftcard: initialWorkshop.giftcard_eligible ?? true,
       group_quote: initialWorkshop.group_quote_from != null ? true : true,
@@ -509,9 +510,9 @@ export default function WorkshopWizard({
                   </Field>
                   <Field label="Annuleren">
                     <div className="ww-tagpick">
-                      {[["flexible_48h", "Tot 48 uur vooraf (flexibel)"],
-                        ["moderate_7d", "Tot 7 dagen vooraf"],
-                        ["strict_none", "Geen annulering mogelijk"]].map(([v, l]) => (
+                      {[["basis", "Gratis tot 48 uur vooraf"],
+                        ["soepel", "Gratis tot 24 uur vooraf"],
+                        ["vast", "Gratis tot 7 dagen vooraf"]].map(([v, l]) => (
                         <Chip key={v} on={w.cancellation === v} onClick={() => put("cancellation", v)}>{l}</Chip>
                       ))}
                     </div>

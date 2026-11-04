@@ -46,7 +46,7 @@ Als spec en referentie botsen, wint de referentie voor uiterlijk en kopij, en de
 - Tekst gemarkeerd als "Werktekst" of "Voorbeelddata" in het ontwerp is placeholder. Zet werkteksten in een apart bestand (`content/werkteksten.ts`) zodat juristen ze kunnen vervangen zonder code aan te raken.
 - Annotaties in het ontwerp (kaders "Annotatie: ...") zijn notities voor het team, geen UI. Bouw ze niet. Hun inhoud staat verwerkt in `docs/12-open-beslispunten.md`.
 - Het scaffolding in de prototypes (`.tools`, `.scherm-label`, "Scherm 3 van 9", de schermkoppen en de `#p-...` ids) bouw je niet.
-- Tijdens de pilot is er geen betaling. Prijzen worden getoond, nooit afgerekend. Bouw geen betaalflow. Betalen kan op zijn vroegst vanaf januari 2027.
+- Tijdens de pilot wordt er alleen met testgeld betaald, via de OPP-sandbox (besloten 4 november 2026, zie `docs/12`). Echt geld kan op zijn vroegst vanaf januari 2027. De schakelaar is `platform_settings.payment_mode` (`off`, `sandbox`, `live`); zet nooit vanzelf iets op `live`.
 - Boekingskosten voor deelnemers zijn EUR 0, altijd. Dit staat in de footer.
 - Privacy: aan deelnemers vragen we nooit geboortedatum, adres of telefoonnummer. Aan workshopgevers vragen we die pas in de aanbiedersverklaring, en alleen het team ziet ze.
 - Een workshopgever ziet van deelnemers alleen voornaam, aantal personen en dieetwens (geen e-mailadres, tenzij het team anders beslist).

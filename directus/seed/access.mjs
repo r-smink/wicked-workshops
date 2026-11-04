@@ -43,7 +43,7 @@ export function publicPermissions() {
   return [
     ...LOOKUPS.map((c) => R(c, "read")),
     R("categories", "read", { filter: published }),
-    R("platform_settings", "read", { fields: ["feature_auth_social", "feature_venues", "pilot_no_payments"] }),
+    R("platform_settings", "read", { fields: ["feature_auth_social", "feature_venues", "pilot_no_payments", "payment_mode"] }),
     R("workshops", "read", { filter: published, fields: PUBLIC_FIELDS.workshops }),
     ...WORKSHOP_CHILDREN.map((c) => R(c, "read", { filter: liveWorkshop("workshop") })),
     ...WORKSHOP_JUNCTIONS.map((c) => R(c, "read", { filter: liveWorkshop("workshop_id") })),

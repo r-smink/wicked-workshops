@@ -1,173 +1,190 @@
 import { NextResponse } from "next/server";
-import { isDirectusConfigured, directusUpdate, directusFetch, getBookingById } from "@/lib/directus";
-import { oppVerifyWebhook } from "@/lib/opp";
-import { oppGetTransaction } from "@/lib/opp";
+import { isDirectusConfigured, directusUpdate, directusFetch } from "@/lib/directus";
+import {
+  oppVerifyNotification, oppHasNotifySecret, oppGetTransaction, oppGetRefund, oppGetMerchant, oppPaymentStatus,
+} from "@/lib/opp";
+import { refundPayment } from "@/lib/payment";
+import { releaseSeats, reserveSeats } from "@/lib/seats";
 
 export const dynamic = "force-dynamic";
 
 /* POST /api/webhooks/opp
-   OPP roept dit aan bij elke statuswijziging. De body is JSON met een
-   HMAC-SHA256 handtekening. We verifiëren de handtekening en halen
-   vervolgens de transactie op voor de zekerheid (dubbele verificatie). */
+   OPP stuurt een notificatie bij elke statuswijziging. We controleren de
+   HTTP-handtekening over de ruwe body en halen het object daarna zelf op bij
+   OPP: de body bevat alleen een verwijzing, nooit de status zelf.
+
+   Antwoord binnen 10 seconden met 2xx, anders probeert OPP het opnieuw. */
 export async function POST(request) {
   if (!isDirectusConfigured) {
     return NextResponse.json({ error: "Directus is niet geconfigureerd" }, { status: 503 });
   }
 
+  const rawBody = await request.text();
+  const verifiedEnv = oppVerifyNotification({
+    rawBody,
+    headers: request.headers,
+    method: "POST",
+    path: request.nextUrl.pathname + request.nextUrl.search,
+  });
+  if (!verifiedEnv && oppHasNotifySecret()) {
+    console.warn("OPP webhook: ongeldige handtekening");
+    return NextResponse.json({ error: "Ongeldige handtekening" }, { status: 401 });
+  }
+  if (!verifiedEnv) {
+    console.warn("OPP webhook: geen OPP_*_NOTIFY_SECRET ingesteld, alleen terugvragen bij OPP");
+  }
+
   let body;
   try {
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  /* Handtekening verifiëren. */
-  const verified = oppVerifyWebhook(body, request.headers);
-  if (!verified) {
-    console.warn("OPP webhook: ongeldige handtekening");
-    /* Accepteer toch om retries te stoppen, maar log de waarschuwing. */
-  }
-
   const type = body.type || "";
-  const objectUid = body.object_uid || "";
-
-  /* ---------- transactie-statuswijziging ---------- */
-  if (type === "transaction.status.changed") {
-    return handleTransactionStatus(objectUid);
-  }
-
-  /* ---------- refund-statuswijziging ---------- */
-  if (type === "refund.status.changed") {
-    return handleRefundStatus(objectUid, body);
-  }
-
-  /* ---------- merchant-statuswijziging ---------- */
+  if (type === "transaction.status.changed") return handleTransaction(body.object_uid, verifiedEnv);
+  if (type === "refund.status.changed") return handleRefund(body, verifiedEnv);
   if (type === "merchant.status.changed" || type === "merchant.compliance_status.changed") {
-    return handleMerchantStatus(objectUid);
+    return handleMerchant(body.object_uid, verifiedEnv);
   }
 
-  /* Onbekend type: ack zodat OPP niet blijft retryen. */
+  /* Onbekend type: bevestigen zodat OPP niet blijft herhalen. */
   return NextResponse.json({ ok: true });
+}
+
+const ok = () => NextResponse.json({ ok: true });
+
+async function findBooking(transactionUid) {
+  const rows = await directusFetch(
+    `/items/bookings?filter[opp_transaction_uid][_eq]=${encodeURIComponent(transactionUid)}&fields=id,status,payment_status,payment_env,participants,session,opp_transaction_uid&limit=1`,
+    { noCache: true }
+  );
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
 }
 
 /* ---------- transactie ---------- */
 
-async function handleTransactionStatus(transactionUid) {
-  if (!transactionUid) return NextResponse.json({ ok: true });
+async function handleTransaction(transactionUid, verifiedEnv) {
+  if (!transactionUid) return ok();
+  const booking = await findBooking(transactionUid);
+  if (!booking) return ok();
 
-  /* Haal de transactie op bij OPP voor de actuele status. */
-  const txn = await oppGetTransaction(transactionUid);
-  if (!txn) return NextResponse.json({ ok: true });
+  const env = verifiedEnv || booking.payment_env;
+  if (!env || (verifiedEnv && booking.payment_env && verifiedEnv !== booking.payment_env)) return ok();
 
-  /* Zoek de booking via opp_transaction_uid. */
-  const bookings = await directusFetch(
-    `/items/bookings?filter[opp_transaction_uid]=${encodeURIComponent(transactionUid)}&fields=id,status,payment_status,session,session.seats_taken,participants&limit=1`,
-    { noCache: true }
-  );
-  const booking = Array.isArray(bookings) ? bookings[0] : bookings;
-  if (!booking) return NextResponse.json({ ok: true });
+  const txn = await oppGetTransaction(env, transactionUid);
+  /* OPP niet bereikbaar: 503 zodat OPP het later opnieuw probeert. */
+  if (!txn) return NextResponse.json({ error: "Transactie niet op te halen" }, { status: 503 });
 
-  const alreadyPaid = booking.payment_status === "paid";
-  const updates = { payment_status: txn.status };
+  const paymentStatus = oppPaymentStatus(txn.status);
+  const waiting = booking.status === "awaiting_payment";
+  const now = new Date().toISOString();
 
-  if (txn.status === "completed" || txn.status === "paid") {
-    updates.payment_status = "paid";
-    updates.paid_at = new Date().toISOString();
-
-    /* Stoelen bijwerken - alleen bij eerste overgang naar paid. */
-    if (!alreadyPaid) {
-      const sessionId = typeof booking.session === "string" ? booking.session : booking.session?.id;
-      if (sessionId) {
-        const seatsTaken = typeof booking.session === "object" ? booking.session?.seats_taken : null;
-        let current = seatsTaken;
-        if (current == null) {
-          const fresh = await directusFetch(`/items/workshop_sessions/${sessionId}?fields=seats_taken`, { noCache: true });
-          current = fresh?.seats_taken ?? 0;
-        }
-        await directusUpdate("workshop_sessions", sessionId, {
-          seats_taken: current + (booking.participants || 1),
-        });
-      }
+  if (paymentStatus === "paid") {
+    if (booking.payment_status === "paid") return ok();
+    if (waiting) {
+      await directusUpdate("bookings", booking.id, { status: "confirmed", payment_status: "paid", paid_at: now });
+      return ok();
     }
-  } else if (txn.status === "cancelled" || txn.status === "canceled") {
-    updates.status = "cancelled_by_customer";
-    if (!alreadyPaid) await releaseSeats(booking);
-  } else if (txn.status === "expired" || txn.status === "failed") {
-    updates.status = "expired";
-    if (!alreadyPaid) await releaseSeats(booking);
+    /* Betaald nadat de boeking al verlopen was (plekken zijn vrijgegeven).
+       Is er nog plek, dan alsnog bevestigen; anders meteen terugbetalen. */
+    if (booking.status === "expired" && await reserveSeats(booking.session, booking.participants || 1)) {
+      await directusUpdate("bookings", booking.id, { status: "confirmed", payment_status: "paid", paid_at: now });
+      return ok();
+    }
+    const refund = await refundPayment(env, transactionUid, {
+      message: "Je betaling kwam binnen nadat je plek was vrijgegeven. Je krijgt het volledige bedrag terug.",
+      internalReason: "late_payment",
+      idempotencyKey: `late-${booking.id}`,
+    });
+    await directusUpdate("bookings", booking.id, {
+      payment_status: "paid",
+      paid_at: now,
+      refund_status: refund ? "pending" : "failed",
+      ...(refund?.uid ? { opp_refund_uid: refund.uid } : {}),
+    });
+    return ok();
   }
 
-  await directusUpdate("bookings", booking.id, updates);
-  return NextResponse.json({ ok: true });
+  if (paymentStatus === "canceled" || paymentStatus === "expired" || paymentStatus === "failed") {
+    if (!waiting) return ok();
+    await directusUpdate("bookings", booking.id, {
+      status: paymentStatus === "canceled" ? "cancelled_by_customer" : "expired",
+      payment_status: paymentStatus,
+    });
+    await releaseSeats(booking.session, booking.participants || 1);
+    return ok();
+  }
+
+  if (paymentStatus === "refunded") {
+    await directusUpdate("bookings", booking.id, { payment_status: "refunded" });
+    return ok();
+  }
+
+  if (paymentStatus && paymentStatus !== booking.payment_status && waiting) {
+    await directusUpdate("bookings", booking.id, { payment_status: paymentStatus });
+  }
+  return ok();
 }
 
 /* ---------- refund ---------- */
 
-async function handleRefundStatus(refundUid, body) {
-  /* OPP geeft de parent transaction_uid mee. Zoek de booking. */
-  const transactionUid = body.metadata?.transaction_uid || "";
-  if (!transactionUid) return NextResponse.json({ ok: true });
+/* De refund hangt onder de transactie: parent_uid is de transactie. */
+async function handleRefund(body, verifiedEnv) {
+  const transactionUid = body.parent_uid || "";
+  const refundUid = body.object_uid || "";
+  if (!transactionUid || !refundUid) return ok();
+  const booking = await findBooking(transactionUid);
+  if (!booking) return ok();
 
-  const bookings = await directusFetch(
-    `/items/bookings?filter[opp_transaction_uid]=${encodeURIComponent(transactionUid)}&fields=id,refund_status&limit=1`,
-    { noCache: true }
-  );
-  const booking = Array.isArray(bookings) ? bookings[0] : bookings;
-  if (!booking) return NextResponse.json({ ok: true });
+  const env = verifiedEnv || booking.payment_env;
+  if (!env) return ok();
+  const refund = await oppGetRefund(env, transactionUid, refundUid);
+  if (!refund) return NextResponse.json({ error: "Refund niet op te halen" }, { status: 503 });
+  const status = refund.status || "";
 
-  const status = body.status || "pending";
-  const updates = {
-    opp_refund_uid: refundUid,
-    refund_status: status === "completed" ? "completed" : status === "failed" ? "failed" : "pending",
-  };
+  const updates = { opp_refund_uid: refundUid };
   if (status === "completed") {
+    updates.refund_status = "completed";
     updates.refunded_at = new Date().toISOString();
-    updates.status = "refunded";
     updates.payment_status = "refunded";
+    if (booking.status === "confirmed" || booking.status === "awaiting_payment" || booking.status === "expired") {
+      updates.status = "refunded";
+    }
+  } else if (status === "failed") {
+    updates.refund_status = "failed";
+  } else {
+    updates.refund_status = "pending";
   }
-
   await directusUpdate("bookings", booking.id, updates);
-  return NextResponse.json({ ok: true });
+  return ok();
 }
 
 /* ---------- merchant ---------- */
 
-async function handleMerchantStatus(merchantUid) {
-  if (!merchantUid) return NextResponse.json({ ok: true });
+const MERCHANT_STATUSES = ["pending", "live", "suspended", "terminated", "blocked"];
+const COMPLIANCE_STATUSES = ["unverified", "pending", "verified"];
 
-  /* Haal de merchant op bij OPP. */
-  const { oppGetMerchant } = await import("@/lib/opp");
-  const merchant = await oppGetMerchant(merchantUid);
-  if (!merchant) return NextResponse.json({ ok: true });
-
-  /* Zoek de provider via opp_merchant_uid. */
-  const providers = await directusFetch(
-    `/items/providers?filter[opp_merchant_uid]=${encodeURIComponent(merchantUid)}&fields=id,opp_merchant_status&limit=1`,
+async function handleMerchant(merchantUid, verifiedEnv) {
+  if (!merchantUid) return ok();
+  const rows = await directusFetch(
+    `/items/providers?filter[opp_merchant_uid][_eq]=${encodeURIComponent(merchantUid)}&fields=id,opp_merchant_status,opp_merchant_env&limit=1`,
     { noCache: true }
   );
-  const provider = Array.isArray(providers) ? providers[0] : providers;
-  if (!provider) return NextResponse.json({ ok: true });
+  const provider = Array.isArray(rows) ? rows[0] || null : rows || null;
+  if (!provider) return ok();
+
+  const env = verifiedEnv || provider.opp_merchant_env;
+  if (!env) return ok();
+  const merchant = await oppGetMerchant(env, merchantUid);
+  if (!merchant) return NextResponse.json({ error: "Merchant niet op te halen" }, { status: 503 });
 
   const updates = {};
-  if (merchant.status) updates.opp_merchant_status = merchant.status;
-  if (merchant.compliance?.status) updates.opp_compliance_status = merchant.compliance.status;
+  if (MERCHANT_STATUSES.includes(merchant.status)) updates.opp_merchant_status = merchant.status;
+  if (COMPLIANCE_STATUSES.includes(merchant.compliance?.status)) updates.opp_compliance_status = merchant.compliance.status;
   if (merchant.status === "live" && provider.opp_merchant_status !== "live") {
     updates.opp_onboarded_at = new Date().toISOString();
   }
-
-  await directusUpdate("providers", provider.id, updates);
-  return NextResponse.json({ ok: true });
-}
-
-/* ---------- helpers ---------- */
-
-async function releaseSeats(booking) {
-  const sessionId = typeof booking.session === "string" ? booking.session : booking.session?.id;
-  if (!sessionId) return;
-  const participants = booking.participants || 1;
-  const fresh = await directusFetch(`/items/workshop_sessions/${sessionId}?fields=seats_taken`, { noCache: true });
-  const current = fresh?.seats_taken ?? 0;
-  await directusUpdate("workshop_sessions", sessionId, {
-    seats_taken: Math.max(0, current - participants),
-  });
+  if (Object.keys(updates).length) await directusUpdate("providers", provider.id, updates);
+  return ok();
 }

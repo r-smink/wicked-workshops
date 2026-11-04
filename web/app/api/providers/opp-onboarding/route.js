@@ -1,81 +1,76 @@
 import { NextResponse } from "next/server";
-import { getAccessToken, directusMe } from "@/lib/auth";
 import { isDirectusConfigured, directusFetch, directusUpdate } from "@/lib/directus";
 import { getPlatformSettings } from "@/lib/directus/settings";
-import { createMerchant } from "@/lib/payment";
+import { paymentEnv, isPaymentConfigured, merchantReady, createSandboxMerchant, createLiveMerchant } from "@/lib/payment";
+import { currentProvider, unauthorized } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 
 /* POST /api/providers/opp-onboarding
-   Start OPP merchant onboarding voor de ingelogde workshopgever.
-   Wordt aangeroepen nadat de aanbiedersverklaring is voltooid. */
-export async function POST(request) {
+   Zorgt dat de ingelogde workshopgever betalingen kan ontvangen in de
+   huidige betaalmodus.
+     sandbox  test-merchant, meteen live (checkout doet dit ook vanzelf)
+     live     echte merchant; geeft overview_url terug voor de KYC bij OPP */
+export async function POST() {
   if (!isDirectusConfigured) {
     return NextResponse.json({ error: "Directus is niet geconfigureerd" }, { status: 503 });
   }
 
-  const token = await getAccessToken();
-  const user = token ? await directusMe(token) : null;
-  if (!user) {
-    return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
-  }
-
-  /* Vind de provider bij deze user. */
-  const providers = await directusFetch(
-    `/items/providers?filter[user]=${user.id}&fields=id,opp_merchant_uid,opp_merchant_status&limit=1`,
-    { noCache: true }
-  );
-  const provider = Array.isArray(providers) ? providers[0] : providers;
-
+  const { user, provider } = await currentProvider();
+  if (!user) return unauthorized();
   if (!provider) {
     return NextResponse.json({ error: "Geen workshopgeversprofiel gevonden" }, { status: 404 });
   }
 
-  /* Al aangemeld? */
-  if (provider.opp_merchant_uid) {
-    return NextResponse.json({
-      ok: true,
-      already_registered: true,
-      status: provider.opp_merchant_status,
-    });
+  const settings = await getPlatformSettings({ fresh: true });
+  const env = paymentEnv(settings);
+  if (!env) {
+    return NextResponse.json({ ok: true, payments: "off" });
+  }
+  if (!isPaymentConfigured(settings)) {
+    return NextResponse.json({ error: "Betalingen zijn nog niet geconfigureerd" }, { status: 503 });
   }
 
-  const settings = await getPlatformSettings();
+  if (merchantReady(provider, env)) {
+    return NextResponse.json({ ok: true, already_registered: true, status: "live" });
+  }
+  /* Al aangemeld in deze omgeving, maar nog niet live: wachten op KYC. */
+  if (provider.opp_merchant_uid && provider.opp_merchant_env === env && env === "live") {
+    return NextResponse.json({ ok: true, already_registered: true, status: provider.opp_merchant_status });
+  }
 
-  /* Haal verklaringsgegevens op voor de merchant-aanmaak. */
-  const declarations = await directusFetch(
-    `/items/provider_declarations?filter[provider]=${provider.id}&fields=email,kind,kvk_number,trade_name&limit=1`,
+  const notifyUrl = `${SITE}/api/webhooks/opp`;
+
+  if (env === "sandbox") {
+    const fields = await createSandboxMerchant(provider.id, { notifyUrl });
+    if (!fields) return NextResponse.json({ error: "Kon geen test-merchant aanmaken bij OPP" }, { status: 502 });
+    await directusUpdate("providers", provider.id, fields);
+    return NextResponse.json({ ok: true, merchant_uid: fields.opp_merchant_uid, status: fields.opp_merchant_status });
+  }
+
+  /* Live: gegevens uit de aanbiedersverklaring (alleen het team ziet die). */
+  const rows = await directusFetch(
+    `/items/provider_declarations?filter[provider][_eq]=${provider.id}&fields=email,phone,kind,kvk_number&limit=1`,
     { noCache: true }
   );
-  const declaration = Array.isArray(declarations) ? declarations[0] : declarations;
-
-  const merchantEmail = declaration?.email || user.email;
-  const merchantType = declaration?.kind === "business" ? "business" : "consumer";
-
-  const merchant = await createMerchant(settings.paymentProvider, {
-    email: merchantEmail,
-    notifyUrl: `${SITE}/api/webhooks/opp`,
-    pilotNoPayments: settings.pilotNoPayments,
-    metadata: { provider_id: provider.id },
+  const declaration = Array.isArray(rows) ? rows[0] : rows;
+  const created = await createLiveMerchant(provider.id, {
+    type: declaration?.kind === "business" ? "business" : "consumer",
+    email: declaration?.email || user.email,
+    phone: declaration?.phone || null,
+    cocNr: declaration?.kvk_number || null,
+    notifyUrl,
+    returnUrl: `${SITE}/dashboard`,
   });
+  if (!created) return NextResponse.json({ error: "Kon merchant niet aanmaken bij OPP" }, { status: 502 });
 
-  if (!merchant?.uid) {
-    return NextResponse.json({ error: "Kon merchant niet aanmaken bij OPP" }, { status: 502 });
-  }
-
-  /* Sla de merchant-ID op bij de provider. */
-  await directusUpdate("providers", provider.id, {
-    opp_merchant_uid: merchant.uid,
-    opp_merchant_status: settings.pilotNoPayments ? "live" : "pending",
-    opp_compliance_status: settings.pilotNoPayments ? "verified" : "unverified",
-    ...(settings.pilotNoPayments ? { opp_onboarded_at: new Date().toISOString() } : {}),
-  });
-
+  await directusUpdate("providers", provider.id, created.fields);
   return NextResponse.json({
     ok: true,
-    merchant_uid: merchant.uid,
-    status: settings.pilotNoPayments ? "live" : "pending",
+    merchant_uid: created.fields.opp_merchant_uid,
+    status: created.fields.opp_merchant_status,
+    overview_url: created.overviewUrl,
   });
 }

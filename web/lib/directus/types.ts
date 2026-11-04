@@ -122,6 +122,7 @@ export interface Booking {
   opp_refund_uid: string | null;
   refund_status: "none" | "pending" | "completed" | "failed" | null;
   refunded_at: string | null;
+  payment_env: "sandbox" | "live" | null;
 }
 
 export interface BusinessRequest {
@@ -425,6 +426,7 @@ export interface PlatformSetting {
   payment_hold_minutes: number | null;
   settlement_delay_hours: number | null;
   decision_grace_hours: number | null;
+  payment_mode: "off" | "sandbox" | "live" | null;
 }
 
 export interface ProviderDeclaration {
@@ -517,9 +519,10 @@ export interface Provider {
   has_location: "own" | "need" | "unknown" | null;
   onboarded_at: string | null;
   opp_merchant_uid: string | null;
-  opp_merchant_status: "none" | "pending" | "live" | "suspended" | null;
+  opp_merchant_status: "none" | "pending" | "live" | "suspended" | "terminated" | "blocked" | null;
   opp_compliance_status: "unverified" | "pending" | "verified" | null;
   opp_onboarded_at: string | null;
+  opp_merchant_env: "sandbox" | "live" | null;
 }
 
 export interface ProvidersLanguage {
@@ -710,7 +713,7 @@ export interface WorkshopSession {
   state: "open" | "confirmed" | "not_happening" | "cancelled_by_provider" | null;
   confirmed_at: string | null;
   closed_at: string | null;
-  provider_override: boolean | null;
+  provider_override: boolean;
   provider_override_at: string | null;
 }
 

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
    conservatief: alleen velden waarvan we zeker zijn dat ze in de
    providers-collectie bestaan. Persoonsgegevens gaan naar directus_users. */
 function formToProvider(body, existingProvider) {
-  const iban = body.iban ? String(body.iban).replace(/s+/g, "").toUpperCase() : null;
+  const iban = body.iban ? String(body.iban).replace(/\s+/g, "").toUpperCase() : null;
   const prev = existingProvider?.details || {};
   /* Tijdstip en versie van het akkoord bewaren als bewijs. Een eerder
      akkoord op dezelfde versie blijft staan. */

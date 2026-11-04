@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { directusCreate, directusUpdate, directusDeleteByFilter, isDirectusConfigured } from "@/lib/directus";
+import { directusCreate, directusUpdate, directusDeleteByFilter, directusFetch, isDirectusConfigured } from "@/lib/directus";
+import { currentProvider, unauthorized, forbidden } from "@/lib/guard";
+import { toPolicyKey } from "@/lib/cancellation";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,12 @@ export async function POST(request) {
   if (!workshop || !workshop.title) {
     return NextResponse.json({ error: "Titel is verplicht" }, { status: 400 });
   }
+
+  /* De workshop hoort altijd bij de ingelogde workshopgever. */
+  const { user, provider } = await currentProvider();
+  if (!user) return unauthorized();
+  if (!provider) return forbidden();
+  workshop.provider = provider.id;
 
   /* Bij opslaan als concept slaan we de verplichte velden over — de
      aanbieder kan later terugkomen om alles in te vullen. */
@@ -67,14 +75,14 @@ export async function POST(request) {
     format: workshop.format || null,
     price_per_person: workshop.price_per_person || (isDraft ? "0.00" : null),
     group_quote_from: workshop.group_quote_from || null,
-    cancellation_policy: workshop.cancellation_policy || null,
+    cancellation_policy: toPolicyKey(workshop.cancellation_policy),
     instant_bookable: workshop.instant_bookable ?? false,
     giftcard_eligible: workshop.giftcard_eligible ?? false,
     location_inherits_provider: workshop.location_inherits_provider ?? true,
     neighbourhood: workshop.neighbourhood || null,
     category: safeUUID(workshop.category) || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
     city: safeUUID(workshop.city) || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
-    provider: safeUUID(workshop.provider) || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
+    provider: provider.id,
     age_rating: safeUUID(workshop.age_rating),
   });
 
@@ -177,6 +185,14 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Titel is verplicht" }, { status: 400 });
   }
 
+  /* Alleen de eigen workshop. */
+  const { user, provider } = await currentProvider();
+  if (!user) return unauthorized();
+  if (!provider) return forbidden();
+  const existing = await directusFetch(`/items/workshops/${encodeURIComponent(id)}?fields=id,provider`, { noCache: true });
+  const ownerId = typeof existing?.provider === "object" ? existing?.provider?.id : existing?.provider;
+  if (!existing || ownerId !== provider.id) return forbidden();
+
   const updated = await directusUpdate("workshops", id, {
     slug: workshop.slug,
     title: workshop.title,
@@ -190,14 +206,14 @@ export async function PATCH(request) {
     format: workshop.format || null,
     price_per_person: workshop.price_per_person || (isDraft ? "0.00" : null),
     group_quote_from: workshop.group_quote_from || null,
-    cancellation_policy: workshop.cancellation_policy || null,
+    cancellation_policy: toPolicyKey(workshop.cancellation_policy),
     instant_bookable: workshop.instant_bookable ?? false,
     giftcard_eligible: workshop.giftcard_eligible ?? false,
     location_inherits_provider: workshop.location_inherits_provider ?? true,
     neighbourhood: workshop.neighbourhood || null,
     category: safeUUID(workshop.category) || (isDraft ? "17043849-00ca-4bab-963f-eef335b88628" : null),
     city: safeUUID(workshop.city) || (isDraft ? "fa30a48d-1ff2-4c73-823d-c79b1fa18fb9" : null),
-    provider: safeUUID(workshop.provider) || (isDraft ? "57626c22-6a10-43f5-b7aa-3d0741db4e4e" : null),
+    provider: provider.id,
     age_rating: safeUUID(workshop.age_rating),
   });
 
@@ -250,10 +266,28 @@ export async function PATCH(request) {
   }
 
   if (Array.isArray(sessions)) {
-    await directusDeleteByFilter("workshop_sessions", { workshop: { _eq: id } });
+    /* Datums met aanmeldingen blijven staan: weggooien zou boekingen en
+       betalingen van hun datum losmaken. Alleen lege datums worden vervangen. */
+    const current = await directusFetch(
+      `/items/workshop_sessions?filter[workshop][_eq]=${encodeURIComponent(id)}&fields=id,starts_at,seats_taken,bookings&limit=-1`,
+      { noCache: true }
+    );
+    const kept = new Set();
+    for (const s of Array.isArray(current) ? current : []) {
+      const inUse = (s.seats_taken ?? 0) > 0 || (Array.isArray(s.bookings) && s.bookings.length > 0);
+      if (inUse) kept.add(String(s.starts_at).slice(0, 16));
+    }
+    await directusDeleteByFilter("workshop_sessions", {
+      _and: [
+        { workshop: { _eq: id } },
+        { _or: [{ seats_taken: { _null: true } }, { seats_taken: { _eq: 0 } }] },
+        { bookings: { _none: { id: { _nnull: true } } } },
+      ],
+    });
     for (const s of sessions) {
       if (s.date) {
         const startsAt = s.time ? `${s.date}T${s.time}:00` : `${s.date}T14:00:00`;
+        if (kept.has(startsAt.slice(0, 16))) continue;
         await directusCreate("workshop_sessions", {
           workshop: id,
           starts_at: startsAt,

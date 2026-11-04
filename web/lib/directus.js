@@ -1024,7 +1024,7 @@ const BOOKING_LOCATION_FIELDS = [
 
 export async function getBookingByCode(code) {
   const data = await directusFetch(
-    `/items/bookings?filter[booking_code]=${encodeURIComponent(code)}&fields=id,booking_code,guest_name,participants,unit_price,total,status,payment_status,payment_id,opp_transaction_uid,cancellation_deadline,session.starts_at,workshop.title,workshop.slug,workshop.cancellation_policy,${BOOKING_LOCATION_FIELDS}&single`,
+    `/items/bookings?filter[booking_code]=${encodeURIComponent(code)}&fields=id,booking_code,guest_name,participants,unit_price,total,status,payment_status,payment_env,payment_id,opp_transaction_uid,cancellation_deadline,session.starts_at,workshop.title,workshop.slug,workshop.cancellation_policy,${BOOKING_LOCATION_FIELDS}&single`,
     { noCache: true }
   );
   return data || null;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { directusCreate, isDirectusConfigured } from "@/lib/directus";
+import { currentUser, unauthorized } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,8 @@ export async function POST(request) {
       { status: 503 }
     );
   }
+
+  if (!(await currentUser())) return unauthorized();
 
   let body;
   try {

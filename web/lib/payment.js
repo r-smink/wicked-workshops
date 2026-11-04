@@ -1,130 +1,128 @@
 /* ===========================================================================
-   Payment facade: delegeert naar OPP of Mollie op basis van de feature
-   flag platform_settings.payment_provider.
+   Betalen, los van de provider. Bepaalt aan de hand van platform_settings
+   of er betaald wordt en in welke OPP-omgeving:
 
-   Alle functies verwachten bedragen in centen (integer).
+     payment_mode off      geen betaling (boeking direct bevestigd)
+     payment_mode sandbox  OPP-sandbox, testgeld (de pilot)
+     payment_mode live     OPP live, echt geld
+
+   payment_provider "mollie" is de oude koppeling en werkt alleen nog voor
+   het aanmaken en ophalen van een betaling.
+
+   Alle bedragen in centen (integer).
    =========================================================================== */
 
 import {
-  isOppConfigured,
-  oppCreateTransaction, oppGetTransaction, oppCheckoutUrl,
-  oppRefundTransaction, oppCreateMerchant, oppGetMerchant,
-  oppCreateWithdrawal, oppVerifyWebhook,
-  oppMockTransaction, oppMockRefund, oppMockMerchant, oppMockWithdrawal,
+  isOppConfigured, oppCreateTransaction, oppGetTransaction, oppRefundTransaction,
+  oppCreateMerchant, oppGetMerchant, oppSimulateMerchantStatus,
 } from "./opp";
-import {
-  isMollieConfigured,
-  mollieCreatePayment, mollieGetPayment, mollieCheckoutUrl,
-} from "./mollie";
+import { isMollieConfigured, mollieCreatePayment, mollieGetPayment, mollieCheckoutUrl } from "./mollie";
 
-/* ---------- provider check ---------- */
-
-export function isPaymentConfigured(provider) {
-  if (provider === "mollie") return isMollieConfigured;
-  return isOppConfigured;
+/* "sandbox" | "live" | null (geen betaling). */
+export function paymentEnv(settings) {
+  return settings.paymentMode === "sandbox" || settings.paymentMode === "live" ? settings.paymentMode : null;
 }
 
-/* ---------- transactie aanmaken ---------- */
+export function isPaymentConfigured(settings) {
+  const env = paymentEnv(settings);
+  if (!env) return false;
+  if (settings.paymentProvider === "mollie") return isMollieConfigured;
+  return isOppConfigured(env);
+}
 
-/* Maakt een betaling aan en retourneert { uid, checkoutUrl }.
-   Bij pilot-modus (pilotNoPayments=true) retourneert dit een mock. */
-export async function createPayment(provider, {
-  merchantUid, amountCents, description, returnUrl, webhookUrl, metadata, pilotNoPayments,
+/* ---------- transactie ---------- */
+
+/* Maakt een betaling aan en geeft { uid, checkoutUrl } terug, of null. */
+export async function createPayment(settings, {
+  merchantUid, productName, unitCents, quantity, partnerFeeCents,
+  returnUrl, webhookUrl, metadata, escrowUntil, idempotencyKey,
 }) {
-  /* Pilot: geen echte API-calls. */
-  if (pilotNoPayments) {
-    const mock = oppMockTransaction({ amountCents, metadata });
-    return { uid: mock.uid, checkoutUrl: null };
-  }
+  const env = paymentEnv(settings);
+  if (!env) return null;
 
-  if (provider === "mollie") {
+  if (settings.paymentProvider === "mollie") {
     const payment = await mollieCreatePayment({
-      amount: amountCents / 100,
-      description,
+      amount: (unitCents * quantity) / 100,
+      description: productName,
       redirectUrl: returnUrl,
       webhookUrl,
       metadata,
     });
-    return {
-      uid: payment?.id || null,
-      checkoutUrl: mollieCheckoutUrl(payment),
-    };
+    return payment?.id ? { uid: payment.id, checkoutUrl: mollieCheckoutUrl(payment) } : null;
   }
 
-  /* OPP (standaard). */
-  const txn = await oppCreateTransaction({
-    merchantUid,
-    amountCents,
-    description,
-    returnUrl,
-    notifyUrl: webhookUrl,
-    metadata,
-    idempotencyKey: metadata?.booking_code,
+  const txn = await oppCreateTransaction(env, {
+    merchantUid, productName, unitCents, quantity, partnerFeeCents,
+    returnUrl, notifyUrl: webhookUrl, metadata, escrowUntil,
+  }, { idempotencyKey });
+  return txn?.uid ? { uid: txn.uid, checkoutUrl: txn.redirect_url || null } : null;
+}
+
+/* env is de omgeving waarin de transactie is gemaakt (bookings.payment_env). */
+export async function getPayment(provider, env, uid) {
+  if (!uid) return null;
+  if (provider === "mollie") return mollieGetPayment(uid);
+  return env ? oppGetTransaction(env, uid) : null;
+}
+
+export async function refundPayment(env, transactionUid, { amountCents, message, internalReason, idempotencyKey } = {}) {
+  if (!env || !transactionUid) return null;
+  return oppRefundTransaction(env, transactionUid, { amountCents, message, internalReason, idempotencyKey });
+}
+
+/* ---------- merchant van de workshopgever ---------- */
+
+/* Kan deze workshopgever nu betalingen ontvangen in deze omgeving? */
+export function merchantReady(provider, env) {
+  return Boolean(
+    provider?.opp_merchant_uid &&
+    provider.opp_merchant_env === env &&
+    provider.opp_merchant_status === "live"
+  );
+}
+
+/* Sandbox: maak een test-merchant aan en zet hem meteen op live, zodat elke
+   workshop in de pilot met testgeld te boeken is zonder KYC. OPP vraagt in de
+   sandbox om geen echte gegevens, dus we sturen een testadres en -nummer.
+   Geeft de velden terug die op de provider moeten worden opgeslagen. */
+export async function createSandboxMerchant(providerId, { notifyUrl }) {
+  const merchant = await oppCreateMerchant("sandbox", {
+    type: "consumer",
+    email: `sandbox+${providerId}@wickedworkshops.nl`,
+    phone: "0612345678",
+    notifyUrl,
+    metadata: { provider_id: providerId },
   });
+  if (!merchant?.uid) return null;
+  const simulated = await oppSimulateMerchantStatus(merchant.uid, "live");
   return {
-    uid: txn?.uid || null,
-    checkoutUrl: oppCheckoutUrl(txn),
+    opp_merchant_uid: merchant.uid,
+    opp_merchant_env: "sandbox",
+    opp_merchant_status: simulated ? "live" : "pending",
+    opp_compliance_status: merchant.compliance?.status || "unverified",
+    ...(simulated ? { opp_onboarded_at: new Date().toISOString() } : {}),
   };
 }
 
-/* ---------- transactie ophalen ---------- */
-
-export async function getPayment(provider, uid) {
-  if (!uid) return null;
-  if (provider === "mollie") return mollieGetPayment(uid);
-  return oppGetTransaction(uid);
+/* Live: echte merchant met echte gegevens. De workshopgever rondt de KYC af
+   via compliance.overview_url; de webhook zet de status daarna op live. */
+export async function createLiveMerchant(providerId, { type, email, phone, cocNr, notifyUrl, returnUrl }) {
+  const merchant = await oppCreateMerchant("live", {
+    type, email, phone, cocNr, notifyUrl, returnUrl,
+    metadata: { provider_id: providerId },
+  });
+  if (!merchant?.uid) return null;
+  return {
+    fields: {
+      opp_merchant_uid: merchant.uid,
+      opp_merchant_env: "live",
+      opp_merchant_status: merchant.status || "pending",
+      opp_compliance_status: merchant.compliance?.status || "unverified",
+    },
+    overviewUrl: merchant.compliance?.overview_url || null,
+  };
 }
 
-/* ---------- refund ---------- */
-
-export async function refundPayment(provider, transactionUid, { amountCents, description, pilotNoPayments } = {}) {
-  if (pilotNoPayments) {
-    return oppMockRefund(transactionUid);
-  }
-  if (provider === "mollie") {
-    /* Mollie refund API is anders; voor nu niet geïmplementeerd.
-       Mollie wordt alleen als fallback bewaard, refunds gaan via OPP. */
-    console.warn("Mollie refunds zijn niet geïmplementeerd in de facade.");
-    return null;
-  }
-  return oppRefundTransaction(transactionUid, { amountCents, description });
-}
-
-/* ---------- withdrawal (uitbetaling) ---------- */
-
-export async function createWithdrawal(provider, merchantUid, { amountCents, description, pilotNoPayments } = {}) {
-  if (pilotNoPayments) {
-    return oppMockWithdrawal(merchantUid);
-  }
-  if (provider === "mollie") {
-    console.warn("Mollie withdrawals zijn niet geïmplementeerd in de facade.");
-    return null;
-  }
-  return oppCreateWithdrawal(merchantUid, { amountCents, description });
-}
-
-/* ---------- merchant ---------- */
-
-export async function createMerchant(provider, { email, notifyUrl, pilotNoPayments, metadata }) {
-  if (pilotNoPayments) {
-    return oppMockMerchant({ email });
-  }
-  if (provider === "mollie") {
-    console.warn("Mollie merchant onboarding is niet geïmplementeerd in de facade.");
-    return null;
-  }
-  return oppCreateMerchant({ email, notifyUrl, metadata });
-}
-
-export async function getMerchant(provider, uid) {
-  if (!uid) return null;
-  if (provider === "mollie") return null;
-  return oppGetMerchant(uid);
-}
-
-/* ---------- webhook verificatie ---------- */
-
-export function verifyWebhook(provider, body, headers) {
-  if (provider === "mollie") return true; /* Mollie verificeert via fetch-back. */
-  return oppVerifyWebhook(body, headers);
+export async function getMerchant(env, uid) {
+  return env && uid ? oppGetMerchant(env, uid) : null;
 }

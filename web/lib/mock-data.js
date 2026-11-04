@@ -212,7 +212,7 @@ export const EMPTY_WORKSHOP = {
   diet: [], age_rating: "Alle leeftijden",
   wheelchair: false, parking: false, transit: false,
   media: [null, null, null, null, null, null],
-  price: "", cancellation: "flexible_48h", instant: true, giftcard: true,
+  price: "", cancellation: "basis", instant: true, giftcard: true,
   group_quote: true, group_from: "10",
   sessions: [{ date: "", time: "14:00", capacity: "12" }],
   recurring: { enabled: false, weekday: 1, weeks: 8, time: "14:00", capacity: "12" },
