@@ -7,12 +7,26 @@ const env = loadEnv();
 export const BASE = (env.DIRECTUS_TARGET_URL || directusUrl(env)).replace(/\/$/, "");
 const TOKEN = env.DIRECTUS_TARGET_TOKEN || env.ADMIN_TOKEN;
 
+/* Directus weigert met 503 ("Under pressure") of 429 als de server het druk
+   heeft, bijvoorbeeld terwijl hij na een schemawijziging het schema opnieuw
+   laadt. Dan even wachten en opnieuw proberen. */
+const RETRY_STATUS = [429, 503];
+const RETRY_WAIT_MS = [2000, 5000, 10000, 20000, 30000, 60000];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function api(method, path, body, token = TOKEN) {
-  const res = await fetch(BASE + path, {
-    method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let res;
+  for (let attempt = 0; ; attempt++) {
+    res = await fetch(BASE + path, {
+      method,
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    if (!RETRY_STATUS.includes(res.status) || attempt >= RETRY_WAIT_MS.length) break;
+    const wait = RETRY_WAIT_MS[attempt];
+    console.warn(`\n  ${method} ${path}: ${res.status}, opnieuw over ${wait / 1000} s`);
+    await sleep(wait);
+  }
   if (res.status === 204) return null;
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
