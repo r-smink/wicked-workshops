@@ -128,6 +128,22 @@ export async function oppGetTransaction(env, uid) {
   return oppRequest(env, `/transactions/${encodeURIComponent(uid)}`);
 }
 
+/* Escrowdatum van een bestaande transactie wijzigen ("Update transaction",
+   POST /transactions/{uid} met escrow_date). Later zetten houdt het geld
+   langer vast (verzetten, aanbod, klacht); op nu zetten geeft het vrij.
+   OPP accepteert minstens 15 minuten vooruit; oppEscrowDate zorgt daarvoor. */
+export function oppEscrowUpdateBody(escrowDate, now = Date.now()) {
+  return { escrow_date: oppEscrowDate(escrowDate, now) };
+}
+
+export async function oppUpdateTransaction(env, uid, { escrowDate } = {}) {
+  if (!uid || !escrowDate) return null;
+  return oppRequest(env, `/transactions/${encodeURIComponent(uid)}`, {
+    method: "POST",
+    body: oppEscrowUpdateBody(escrowDate),
+  });
+}
+
 /* OPP-status naar payment_status op de boeking. reserved is betaald en
    staat in escrow; dat telt als betaald. */
 export function oppPaymentStatus(oppStatus) {

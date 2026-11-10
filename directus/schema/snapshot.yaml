@@ -170,6 +170,32 @@ collections:
       versioning: false
     schema:
       name: articles_workshops
+  - collection: auth_tokens
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: auth_tokens
+      color: null
+      display_template: '{{purpose}} {{email}}'
+      group: null
+      hidden: false
+      icon: key
+      item_duplication_fields: null
+      note: >-
+        PRIVE. Eenmalige links voor bevestigen en wachtwoord kiezen (docs/04).
+        Alleen de hash.
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: auth_tokens
   - collection: bookings
     meta:
       accountability: all
@@ -294,6 +320,32 @@ collections:
       versioning: false
     schema:
       name: cities
+  - collection: complaints
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: complaints
+      color: null
+      display_template: '{{booking.booking_code}} - {{status}}'
+      group: null
+      hidden: false
+      icon: report
+      item_duplication_fields: null
+      note: >-
+        PRIVE. Klachten van deelnemers. Alleen het team. Terugbetalen via de
+        knop Terugbetalen (vier ogen).
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: complaints
   - collection: dietary_options
     meta:
       accountability: all
@@ -510,6 +562,32 @@ collections:
       versioning: false
     schema:
       name: location_pages
+  - collection: mail_log
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: mail_log
+      color: null
+      display_template: '{{kind}} {{recipient}}'
+      group: null
+      hidden: false
+      icon: mail
+      item_duplication_fields: null
+      note: >-
+        PRIVE. Verstuurde mails. (kind, ref_key) is uniek: dezelfde mail gaat
+        nooit twee keer.
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: mail_log
   - collection: newsletter_subscribers
     meta:
       accountability: all
@@ -3449,6 +3527,437 @@ fields:
       has_auto_increment: false
       foreign_key_table: workshops
       foreign_key_column: id
+  - collection: auth_tokens
+    field: id
+    type: uuid
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: auth_tokens
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: user
+    type: uuid
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{email}}'
+      field: user
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{email}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - m2o
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user
+      table: auth_tokens
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: auth_tokens
+    field: email
+    type: string
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: null
+      display_options: null
+      field: email
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email
+      table: auth_tokens
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: purpose
+    type: string
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: E-mail bevestigen
+            value: verify
+          - text: Wachtwoord kiezen
+            value: reset
+      field: purpose
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: E-mail bevestigen
+            value: verify
+          - text: Wachtwoord kiezen
+            value: reset
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: purpose
+      table: auth_tokens
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: token_hash
+    type: string
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: null
+      display_options: null
+      field: token_hash
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: true
+      searchable: true
+      sort: 5
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: token_hash
+      table: auth_tokens
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: intent
+    type: string
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Deelnemer
+            value: participant
+          - text: Workshopgever
+            value: provider
+          - text: Ruimte-eigenaar
+            value: venue
+      field: intent
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Deelnemer
+            value: participant
+          - text: Workshopgever
+            value: provider
+          - text: Ruimte-eigenaar
+            value: venue
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: intent
+      table: auth_tokens
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: next_path
+    type: string
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: null
+      display_options: null
+      field: next_path
+      group: null
+      hidden: false
+      interface: input
+      note: Waar iemand na bevestigen landt.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: next_path
+      table: auth_tokens
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: expires_at
+    type: timestamp
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: datetime
+      display_options: null
+      field: expires_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: expires_at
+      table: auth_tokens
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: used_at
+    type: timestamp
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: datetime
+      display_options: null
+      field: used_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: used_at
+      table: auth_tokens
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_tokens
+    field: created_at
+    type: timestamp
+    meta:
+      collection: auth_tokens
+      conditions: null
+      display: datetime
+      display_options: null
+      field: created_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: created_at
+      table: auth_tokens
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: bookings
     field: id
     type: uuid
@@ -4863,7 +5372,7 @@ fields:
       group: null
       hidden: true
       interface: input
-      note: null
+      note: sha256 van de beheerlink. Nooit het token zelf.
       options: null
       readonly: true
       required: false
@@ -5277,6 +5786,126 @@ fields:
       data_type: character varying
       default_value: null
       max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: escrow_until
+    type: timestamp
+    meta:
+      collection: bookings
+      conditions: null
+      display: datetime
+      display_options: null
+      field: escrow_until
+      group: null
+      hidden: false
+      interface: datetime
+      note: Escrowdatum bij OPP. Daarna komt het geld vrij voor de workshopgever.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 16
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: escrow_until
+      table: bookings
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: no_show_marked_at
+    type: timestamp
+    meta:
+      collection: bookings
+      conditions: null
+      display: datetime
+      display_options: null
+      field: no_show_marked_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 17
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: no_show_marked_at
+      table: bookings
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bookings
+    field: review_written_at
+    type: timestamp
+    meta:
+      collection: bookings
+      conditions: null
+      display: datetime
+      display_options: null
+      field: review_written_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 18
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: review_written_at
+      table: bookings
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -8245,6 +8874,795 @@ fields:
       data_type: character varying
       default_value: null
       max_length: 80
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: id
+    type: uuid
+    meta:
+      collection: complaints
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: complaints
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: date_created
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - date-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: user_created
+    type: uuid
+    meta:
+      collection: complaints
+      conditions: null
+      display: user
+      display_options: null
+      field: user_created
+      group: null
+      hidden: true
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{avatar}} {{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - user-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user_created
+      table: complaints
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: complaints
+    field: user_updated
+    type: uuid
+    meta:
+      collection: complaints
+      conditions: null
+      display: user
+      display_options: null
+      field: user_updated
+      group: null
+      hidden: true
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{avatar}} {{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - user-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user_updated
+      table: complaints
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: complaints
+    field: booking
+    type: uuid
+    meta:
+      collection: complaints
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{booking_code}}'
+      field: booking
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{booking_code}}'
+      readonly: false
+      required: true
+      searchable: true
+      sort: 6
+      special:
+        - m2o
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: booking
+      table: complaints
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: bookings
+      foreign_key_column: id
+  - collection: complaints
+    field: status
+    type: string
+    meta:
+      collection: complaints
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Nieuw
+            value: new
+          - text: In behandeling
+            value: in_review
+          - text: Terugbetaling goedgekeurd
+            value: refund_approved
+          - text: Terugbetaald
+            value: refunded
+          - text: Afgewezen
+            value: rejected
+          - text: Opgelost zonder terugbetaling
+            value: resolved
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Nieuw
+            value: new
+          - text: In behandeling
+            value: in_review
+          - text: Terugbetaling goedgekeurd
+            value: refund_approved
+          - text: Terugbetaald
+            value: refunded
+          - text: Afgewezen
+            value: rejected
+          - text: Opgelost zonder terugbetaling
+            value: resolved
+      readonly: false
+      required: true
+      searchable: true
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: complaints
+      data_type: character varying
+      default_value: new
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: kind
+    type: string
+    meta:
+      collection: complaints
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Workshopgever kwam niet
+            value: no_show_provider
+          - text: Inhoud of kwaliteit
+            value: quality
+          - text: Veiligheid of gedrag
+            value: safety
+          - text: Ik was er wel (no-show betwist)
+            value: no_show_dispute
+          - text: Anders
+            value: other
+      field: kind
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Workshopgever kwam niet
+            value: no_show_provider
+          - text: Inhoud of kwaliteit
+            value: quality
+          - text: Veiligheid of gedrag
+            value: safety
+          - text: Ik was er wel (no-show betwist)
+            value: no_show_dispute
+          - text: Anders
+            value: other
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: kind
+      table: complaints
+      data_type: character varying
+      default_value: other
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: description
+    type: text
+    meta:
+      collection: complaints
+      conditions: null
+      display: null
+      display_options: null
+      field: description
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Tekst van de deelnemer.
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 9
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: description
+      table: complaints
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: submitted_at
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options: null
+      field: submitted_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: submitted_at
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: refund_amount
+    type: string
+    meta:
+      collection: complaints
+      conditions: null
+      display: null
+      display_options: null
+      field: refund_amount
+      group: null
+      hidden: false
+      interface: input
+      note: In euro's, bijvoorbeeld 45.00. Leeg = volledig bedrag.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: refund_amount
+      table: complaints
+      data_type: character varying
+      default_value: null
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: decision_note
+    type: text
+    meta:
+      collection: complaints
+      conditions: null
+      display: null
+      display_options: null
+      field: decision_note
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Intern. Waarom dit besluit.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: decision_note
+      table: complaints
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: approved_by
+    type: uuid
+    meta:
+      collection: complaints
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{first_name}} {{last_name}}'
+      field: approved_by
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: >-
+        Teamlid dat de terugbetaling goedkeurt. Moet een ander zijn dan wie
+        uitvoert.
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special:
+        - m2o
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: approved_by
+      table: complaints
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: complaints
+    field: executed_by
+    type: uuid
+    meta:
+      collection: complaints
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{first_name}} {{last_name}}'
+      field: executed_by
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: Gezet door de knop Terugbetalen.
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special:
+        - m2o
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: executed_by
+      table: complaints
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: complaints
+    field: approved_at
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options: null
+      field: approved_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: approved_at
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: executed_at
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options: null
+      field: executed_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 16
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: executed_at
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: escrow_extended_until
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options: null
+      field: escrow_extended_until
+      group: null
+      hidden: false
+      interface: datetime
+      note: Tot wanneer OPP het geld vasthoudt door deze klacht.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 17
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: escrow_extended_until
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: complaints
+    field: resolved_at
+    type: timestamp
+    meta:
+      collection: complaints
+      conditions: null
+      display: datetime
+      display_options: null
+      field: resolved_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 18
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: resolved_at
+      table: complaints
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -11549,6 +12967,291 @@ fields:
       has_auto_increment: false
       foreign_key_table: directus_files
       foreign_key_column: id
+  - collection: mail_log
+    field: id
+    type: uuid
+    meta:
+      collection: mail_log
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: mail_log
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mail_log
+    field: kind
+    type: string
+    meta:
+      collection: mail_log
+      conditions: null
+      display: null
+      display_options: null
+      field: kind
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: true
+      searchable: true
+      sort: 2
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: kind
+      table: mail_log
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mail_log
+    field: ref_key
+    type: string
+    meta:
+      collection: mail_log
+      conditions: null
+      display: null
+      display_options: null
+      field: ref_key
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: true
+      searchable: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: ref_key
+      table: mail_log
+      data_type: character varying
+      default_value: null
+      max_length: 191
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mail_log
+    field: dedupe_key
+    type: string
+    meta:
+      collection: mail_log
+      conditions: null
+      display: null
+      display_options: null
+      field: dedupe_key
+      group: null
+      hidden: false
+      interface: input
+      note: kind:ref_key
+      options:
+        trim: true
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dedupe_key
+      table: mail_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mail_log
+    field: recipient
+    type: string
+    meta:
+      collection: mail_log
+      conditions: null
+      display: null
+      display_options: null
+      field: recipient
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: recipient
+      table: mail_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mail_log
+    field: sent_at
+    type: timestamp
+    meta:
+      collection: mail_log
+      conditions: null
+      display: datetime
+      display_options: null
+      field: sent_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: sent_at
+      table: mail_log
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: mail_log
+    field: error
+    type: text
+    meta:
+      collection: mail_log
+      conditions: null
+      display: null
+      display_options: null
+      field: error
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: error
+      table: mail_log
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: newsletter_subscribers
     field: id
     type: uuid
@@ -15740,6 +17443,211 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: platform_settings
+    field: pilot_full_refund_on_cancel
+    type: boolean
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: pilot_full_refund_on_cancel
+      group: null
+      hidden: false
+      interface: boolean
+      note: >-
+        Aan: de deelnemer krijgt ook na de gratis termijn alles terug. Het
+        percentage uit de regeling wordt wel bewaard (cancel_fee_percent).
+      options:
+        label: 'Pilot: bij annuleren altijd 100% terug'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 17
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: pilot_full_refund_on_cancel
+      table: platform_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: complaint_hold_days
+    type: integer
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: complaint_hold_days
+      group: null
+      hidden: false
+      interface: input
+      note: Zoveel dagen houdt OPP het geld extra vast na een klacht.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 18
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: complaint_hold_days
+      table: platform_settings
+      data_type: integer
+      default_value: 14
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: start_reminder_hours
+    type: integer
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: start_reminder_hours
+      group: null
+      hidden: false
+      interface: input
+      note: Herinnering met adres, zoveel uur voor de start. 0 = uit.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 19
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: start_reminder_hours
+      table: platform_settings
+      data_type: integer
+      default_value: 24
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: review_invite_hours_after
+    type: integer
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: review_invite_hours_after
+      group: null
+      hidden: false
+      interface: input
+      note: Uitnodiging voor een review, zoveel uur na afloop.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: review_invite_hours_after
+      table: platform_settings
+      data_type: integer
+      default_value: 24
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: platform_settings
+    field: team_email
+    type: string
+    meta:
+      collection: platform_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: team_email
+      group: null
+      hidden: false
+      interface: input
+      note: Hier komen klachten en meldingen voor het team binnen.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 21
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: team_email
+      table: platform_settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: provider_declarations
     field: id
     type: uuid
@@ -19320,6 +21228,88 @@ fields:
       data_type: character varying
       default_value: null
       max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: blocked_reason
+    type: text
+    meta:
+      collection: providers
+      conditions: null
+      display: null
+      display_options: null
+      field: blocked_reason
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Intern. Gezet door het team bij blokkeren. Zolang dit gevuld is, kan de
+        workshopgever zelf niet weer publiceren.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 50
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: blocked_reason
+      table: providers
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: providers
+    field: blocked_at
+    type: timestamp
+    meta:
+      collection: providers
+      conditions: null
+      display: datetime
+      display_options: null
+      field: blocked_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 51
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: blocked_at
+      table: providers
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -25546,6 +27536,49 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: workshop_sessions
+    field: private_key
+    type: string
+    meta:
+      collection: workshop_sessions
+      conditions: null
+      display: null
+      display_options: null
+      field: private_key
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Alleen bij een verborgen datum (is_private) voor een groep. Zit in de
+        boekingslink die het team stuurt.
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: private_key
+      table: workshop_sessions
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: workshops
     field: id
     type: uuid
@@ -29226,6 +31259,27 @@ relations:
       constraint_name: articles_workshops_workshop_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
+  - collection: auth_tokens
+    field: user
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: auth_tokens
+      many_field: user
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: auth_tokens
+      column: user
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: auth_tokens_user_foreign
+      on_update: NO ACTION
+      on_delete: CASCADE
   - collection: bookings
     field: session
     related_collection: workshop_sessions
@@ -29560,6 +31614,111 @@ relations:
       foreign_key_table: directus_files
       foreign_key_column: id
       constraint_name: cities_seo_image_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: complaints
+    field: user_created
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: complaints
+      many_field: user_created
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: complaints
+      column: user_created
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: complaints_user_created_foreign
+      on_update: NO ACTION
+      on_delete: NO ACTION
+  - collection: complaints
+    field: user_updated
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: complaints
+      many_field: user_updated
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: complaints
+      column: user_updated
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: complaints_user_updated_foreign
+      on_update: NO ACTION
+      on_delete: NO ACTION
+  - collection: complaints
+    field: booking
+    related_collection: bookings
+    meta:
+      junction_field: null
+      many_collection: complaints
+      many_field: booking
+      one_allowed_collections: null
+      one_collection: bookings
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: complaints
+      column: booking
+      foreign_key_table: bookings
+      foreign_key_column: id
+      constraint_name: complaints_booking_foreign
+      on_update: NO ACTION
+      on_delete: CASCADE
+  - collection: complaints
+    field: approved_by
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: complaints
+      many_field: approved_by
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: complaints
+      column: approved_by
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: complaints_approved_by_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: complaints
+    field: executed_by
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: complaints
+      many_field: executed_by
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: complaints
+      column: executed_by
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: complaints_executed_by_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: favorites

@@ -32,6 +32,13 @@ describe("profielstatus", () => {
     expect(providerStatusError("paused", "published")).toBeNull();
     expect(providerStatusError("draft", "published")).toBeTruthy();
   });
+
+  it("geblokkeerd: niets meer online zetten of insturen, wel pauzeren", () => {
+    expect(providerStatusError("paused", "published", { blocked: true })).toMatch(/gepauzeerd/);
+    expect(workshopStatusError("paused", "published", { blocked: true })).toMatch(/gepauzeerd/);
+    expect(workshopStatusError("draft", "pending_review", { blocked: true })).toMatch(/gepauzeerd/);
+    expect(workshopStatusError("published", "paused", { blocked: true })).toBeNull();
+  });
 });
 
 const start = "2026-11-21T14:00:00.000Z"; /* za 21 nov, 15:00 in Amsterdam */

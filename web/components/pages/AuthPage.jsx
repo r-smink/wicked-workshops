@@ -7,11 +7,17 @@ import { useRouter } from "next/navigation";
 import { SIDE_COPY } from "@/lib/mock-data";
 import { Icon, Logo, Wordmark, Button, Field } from "@/components/ui";
 
-export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities = [] }) {
+export default function AuthPage({
+  tab: initialTab, sideCopy = SIDE_COPY, cities = [],
+  initialMode = "login", initialEmail = "", confirmed = false, next = "",
+}) {
   const go = useGo();
   const router = useRouter();
   const [tab, setTab] = useState(initialTab || "visitor");
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(initialMode);
+  const [remember, setRemember] = useState(true);
+  const [showResend, setShowResend] = useState(false);
+  const [resent, setResent] = useState(false);
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,37 +26,56 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
 
   /* Form state */
   const [form, setForm] = useState({
-    first_name: "", last_name: "", email: "", password: "",
+    first_name: "", last_name: "", email: initialEmail || "", password: "",
     profession: "", city: "", active_since: "", bio_short: "",
     terms: false,
   });
   const setField = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   const setCheck = (k) => (e) => setForm({ ...form, [k]: e.target.checked });
 
-  useEffect(() => { setMode("login"); setStep(1); setDone(false); setError(""); }, [tab]);
+  const [firstRender, setFirstRender] = useState(true);
+  useEffect(() => {
+    if (firstRender) { setFirstRender(false); return; }
+    setMode("login"); setStep(1); setDone(false); setError(""); setShowResend(false);
+  }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isProviderSignup = tab === "provider" && mode === "signup";
 
-  /* Login: POST naar /api/auth/login */
+  /* Login: POST naar /api/auth/login. De server bepaalt de bestemming
+     (?next= of de context van het account, docs/04). */
   async function handleLogin() {
     setLoading(true);
     setError("");
+    setResent(false);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }),
+        body: JSON.stringify({ email: form.email, password: form.password, remember, next }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Inloggen mislukt");
-      /* Succes — redirect op basis van tab */
-      router.push(tab === "provider" ? "/dashboard" : "/");
+      if (!res.ok) {
+        /* Altijd tonen, ook als het adres niet bestaat (docs/04). */
+        setShowResend(Boolean(data.resend));
+        throw new Error(data.error || "Inloggen mislukt");
+      }
+      router.push(data.redirect || (tab === "provider" ? "/dashboard" : "/"));
       router.refresh();
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleResend() {
+    if (!form.email) { setError("Vul eerst je e-mailadres in."); return; }
+    await fetch("/api/auth/resend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
+    }).catch(() => null);
+    setResent(true);
   }
 
   /* Register: POST naar /api/auth/register */
@@ -67,6 +92,7 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
           first_name: form.first_name,
           last_name: form.last_name,
           role: tab === "provider" ? "provider" : "visitor",
+          next,
           profession: form.profession,
           bio_short: form.bio_short,
           city: form.city,
@@ -75,14 +101,8 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Account aanmaken mislukt");
-      if (data.needsLogin) {
-        /* Account aangemaakt maar niet ingelogd — stuur naar login. */
-        setMode("login");
-        setError(data.message || "Account aangemaakt. Log in om verder te gaan.");
-      } else {
-        /* Ingelogd — toon succes of redirect. */
-        setDone(true);
-      }
+      /* Eerst bevestigen, dan pas binnen (docs/04). */
+      router.push(data.next || "/account-maken/controleer-mail");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -134,10 +154,29 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
             </button>
           </div>
 
+          {confirmed && !error && (
+            <div className="ww-alert" role="status" style={{ marginBottom: 20 }}>
+              <Icon name="check" size={18} style={{ color: tokens.color.brand, flex: "none" }} />
+              <p style={{ fontSize: 14 }}>Je e-mailadres is bevestigd. Log in met je wachtwoord, dan ben je binnen.</p>
+            </div>
+          )}
+
           {error && (
-            <div className="ww-alert" style={{ marginBottom: 20 }}>
+            <div className="ww-alert" role="alert" style={{ marginBottom: 20 }}>
               <Icon name="alert" size={18} style={{ color: tokens.color.coral, flex: "none" }} />
-              <p style={{ fontSize: 14, color: tokens.color.coral }}>{error}</p>
+              <div>
+                <p style={{ fontSize: 14, color: tokens.color.coral }}>{error}</p>
+                {showResend && mode === "login" && (
+                  <p style={{ fontSize: 13.5, marginTop: 6 }}>
+                    {resent ? "Hoort er een account bij dat nog niet bevestigd is, dan staat er een nieuwe mail klaar." : (
+                      <>Nog niet bevestigd?{" "}
+                        <a style={{ color: tokens.color.brand, fontWeight: 700, cursor: "pointer" }} onClick={handleResend}>
+                          Stuur de bevestigingsmail opnieuw
+                        </a></>
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
@@ -188,8 +227,10 @@ export default function AuthPage({ tab: initialTab, sideCopy = SIDE_COPY, cities
                       onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
                   </Field>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "4px 0 22px" }}>
-                    <label className="ww-check"><input type="checkbox" defaultChecked /> Ingelogd blijven</label>
-                    <a style={{ fontSize: 13.5, fontWeight: 700, color: tokens.color.brand, cursor: "pointer" }}>
+                    <label className="ww-check">
+                      <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Ingelogd blijven op dit apparaat
+                    </label>
+                    <a href="/wachtwoord-vergeten" style={{ fontSize: 13.5, fontWeight: 700, color: tokens.color.brand }}>
                       Wachtwoord vergeten?
                     </a>
                   </div>

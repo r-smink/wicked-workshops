@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getAccessToken, directusMe, getUserFromCookie, isAuthConfigured, providerRoleId } from "@/lib/auth";
+import { getAccessToken, directusMe, isAuthConfigured, providerRoleId } from "@/lib/auth";
+import { isProviderUser } from "@/lib/account/flows";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,9 @@ export async function GET() {
       email: user.email,
       first_name: user.first_name || "",
       last_name: user.last_name || "",
-      is_provider: user.role === providerRoleId(),
+      /* Workshopgever is wie een rij in providers heeft (docs/03); de
+         oude Provider-rol telt nog mee voor bestaande accounts. */
+      is_provider: user.role === providerRoleId() || (await isProviderUser(user.id)),
     },
   });
 }

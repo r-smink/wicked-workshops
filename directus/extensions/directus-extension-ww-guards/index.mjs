@@ -126,9 +126,12 @@ export default ({ filter }, { database, logger }) => {
     if (!w.member) return input;
     const payload = strip(input, ["submitted_at"]);
     if (!("status" in payload)) return payload;
-    const rows = await db(context)("workshops").whereIn("id", meta.keys).select("id", "status");
+    const rows = await db(context)("workshops")
+      .leftJoin("providers", "providers.id", "workshops.provider")
+      .whereIn("workshops.id", meta.keys)
+      .select("workshops.id", "workshops.status", "providers.blocked_reason");
     for (const row of rows) {
-      const err = workshopStatusError(row.status, payload.status);
+      const err = workshopStatusError(row.status, payload.status, { blocked: Boolean(row.blocked_reason) });
       if (err) reject(err);
     }
     if (payload.status === "pending_review") return { ...payload, submitted_at: new Date().toISOString() };
@@ -138,9 +141,9 @@ export default ({ filter }, { database, logger }) => {
   filter("providers.items.update", async (payload, meta, context) => {
     const w = await who(context);
     if (!w.member || !("status" in payload)) return payload;
-    const rows = await db(context)("providers").whereIn("id", meta.keys).select("status");
+    const rows = await db(context)("providers").whereIn("id", meta.keys).select("status", "blocked_reason");
     for (const row of rows) {
-      const err = providerStatusError(row.status, payload.status);
+      const err = providerStatusError(row.status, payload.status, { blocked: Boolean(row.blocked_reason) });
       if (err) reject(err);
     }
     return payload;

@@ -3,6 +3,8 @@ import { getAccessToken, directusMe } from "@/lib/auth";
 import { isDirectusConfigured, directusFetch, directusUpdate } from "@/lib/directus";
 import { getPlatformSettings } from "@/lib/directus/settings";
 import { canProviderOverride } from "@/lib/rules/escrow";
+import { loadBookings } from "@/lib/bookings/load";
+import { mailSessionConfirmed } from "@/lib/mail/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +53,7 @@ export async function POST(request) {
   }
 
   /* Controleer of override mogelijk is. */
-  const settings = await getPlatformSettings();
+  const settings = await getPlatformSettings({ fresh: true });
   const now = Date.now();
 
   if (!canProviderOverride(session, settings.decisionGraceHours, now)) {
@@ -70,8 +72,8 @@ export async function POST(request) {
     confirmed_at: new Date(now).toISOString(),
   });
 
-  /* TODO: Stuur session_confirmed mail aan alle deelnemers.
-     Wordt geïmplementeerd samen met het mailsysteem. */
+  const bookings = await loadBookings(`filter[session][_eq]=${session.id}&filter[status][_eq]=confirmed`);
+  for (const b of bookings) await mailSessionConfirmed(b);
 
   return NextResponse.json({ ok: true });
 }

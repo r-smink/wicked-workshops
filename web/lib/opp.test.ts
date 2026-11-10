@@ -60,6 +60,29 @@ describe("oppEscrowDate", () => {
   });
 });
 
+describe("oppUpdateTransaction", () => {
+  it("stuurt alleen escrow_date, minstens 15 minuten vooruit", async () => {
+    const { oppEscrowUpdateBody } = await loadOpp();
+    const now = Date.parse("2026-11-04T10:00:00Z");
+    expect(oppEscrowUpdateBody(new Date("2026-11-30T09:00:00Z"), now)).toEqual({ escrow_date: "2026-11-30 10:00:00" });
+    expect(oppEscrowUpdateBody(new Date(now), now)).toEqual({ escrow_date: "2026-11-04 11:20:00" });
+  });
+
+  it("post naar /transactions/{uid} met de sleutel van de omgeving", async () => {
+    const { oppUpdateTransaction } = await loadOpp({ OPP_SANDBOX_API_KEY: "sk_test" });
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ uid: "tra_1" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await oppUpdateTransaction("sandbox", "tra_1", { escrowDate: new Date("2030-01-01T12:00:00Z") });
+    expect(result).toEqual({ uid: "tra_1" });
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe("https://api-sandbox.onlinebetaalplatform.nl/v1/transactions/tra_1");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body)).toEqual({ escrow_date: "2030-01-01 13:00:00" });
+    expect(init.headers.Authorization).toBe("Bearer sk_test");
+    vi.unstubAllGlobals();
+  });
+});
+
 describe("oppPaymentStatus", () => {
   it("telt completed en reserved (escrow) als betaald", async () => {
     const { oppPaymentStatus } = await loadOpp();

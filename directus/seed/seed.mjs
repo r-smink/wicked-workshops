@@ -7,6 +7,7 @@
 import { BASE } from "../scripts/api.mjs";
 import { seedAccess } from "./access.mjs";
 import { seedReference } from "./reference.mjs";
+import { seedFlows } from "./flows.mjs";
 
 const local = /^http:\/\/(localhost|127\.0\.0\.1)/.test(BASE);
 const demo = process.argv.includes("--demo");
@@ -20,6 +21,8 @@ console.log("Rollen en rechten ...");
 await seedAccess();
 console.log("Referentiedata ...");
 console.log(await seedReference());
+console.log("Knoppen voor het team ...");
+console.log(await seedFlows());
 
 if (demo) {
   const { seedDemo } = await import("./demo.mjs");

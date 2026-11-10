@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
 import { directusCreate, isDirectusConfigured } from "@/lib/directus";
 import { currentUser, unauthorized } from "@/lib/guard";
+import { getPlatformSettings } from "@/lib/directus/settings";
 
 export const dynamic = "force-dynamic";
 
-/* Maakt een nieuwe locatie aan in Directus met status "draft".
-   Body: JSON met de venue-velden uit het VenueForm. */
+const KINDS = ["kitchen", "atelier", "hall", "outdoor"];
+const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s || ""));
+
+/* POST /api/venues
+   Advertentie van een ruimte-eigenaar (Locatie gezocht, docs/11) in
+   venue_listings, volgens het datamodel van docs/03: plaats en wijk, geen
+   adres, geen prijs en geen contactgegevens. Afspraken en betaling lopen
+   buiten het platform; contact gaat via Wicked Workshops
+   (venue_contact_requests). Velden als address of price_per_hour uit het
+   oude formulier worden genegeerd.
+
+   Alleen als de feature flag venues.enabled aan staat. */
 export async function POST(request) {
   if (!isDirectusConfigured) {
-    return NextResponse.json(
-      { error: "Directus is niet geconfigureerd" },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: "Directus is niet geconfigureerd" }, { status: 503 });
+  }
+  const settings = await getPlatformSettings({ fresh: true });
+  if (!settings.features.venues) {
+    return NextResponse.json({ error: "Locatie gezocht staat nog uit" }, { status: 404 });
   }
 
-  if (!(await currentUser())) return unauthorized();
+  const user = await currentUser();
+  if (!user) return unauthorized();
 
   let body;
   try {
@@ -23,44 +36,27 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  if (!body.name) {
-    return NextResponse.json({ error: "Naam is verplicht" }, { status: 400 });
-  }
+  const name = String(body.name || "").trim().slice(0, 255);
+  if (!name) return NextResponse.json({ error: "Naam is verplicht" }, { status: 400 });
 
-  const slug = body.slug
-    || body.name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
-
-  const created = await directusCreate("venues", {
+  const place = body.place || body.city;
+  const capacity = Number(body.capacity ?? body.max_capacity);
+  const created = await directusCreate("venue_listings", {
+    owner: user.id,
     status: "draft",
-    slug,
-    name: body.name,
-    description: body.description || null,
-    city: body.city || null,
-    address: body.address || null,
-    postal_code: body.postal_code || null,
-    neighbourhood: body.neighbourhood || null,
-    lat: body.lat ? Number(body.lat) : null,
-    lng: body.lng ? Number(body.lng) : null,
-    max_capacity: body.max_capacity ? Number(body.max_capacity) : null,
-    price_per_hour: body.price_per_hour ? Number(body.price_per_hour) : null,
-    surface_m2: body.surface_m2 ? Number(body.surface_m2) : null,
-    contact_name: body.contact_name || null,
-    contact_email: body.contact_email || null,
-    contact_phone: body.contact_phone || null,
-    amenities: Array.isArray(body.amenities) ? body.amenities : [],
+    visible: true,
+    name,
+    place: isUUID(place) ? place : null,
+    neighbourhood: String(body.neighbourhood || "").trim().slice(0, 255) || null,
+    kind: KINDS.includes(body.kind) ? body.kind : null,
+    capacity: Number.isFinite(capacity) && capacity >= 1 ? Math.round(capacity) : null,
+    amenities: Array.isArray(body.amenities) ? body.amenities.map(String).slice(0, 30) : [],
+    description: String(body.description || "").trim().slice(0, 4000) || null,
+    availability: body.availability && typeof body.availability === "object" ? body.availability : null,
   });
 
   if (!created) {
-    return NextResponse.json(
-      { error: "Kon locatie niet opslaan in Directus" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Kon de ruimte niet opslaan" }, { status: 500 });
   }
-
-  return NextResponse.json({
-    ok: true,
-    id: created.id,
-    slug: created.slug,
-    status: created.status,
-  });
+  return NextResponse.json({ ok: true, id: created.id, status: created.status });
 }

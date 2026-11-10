@@ -5,6 +5,15 @@ import {
 } from "@/lib/opp";
 import { refundPayment } from "@/lib/payment";
 import { releaseSeats, reserveSeats } from "@/lib/seats";
+import { loadBookingById } from "@/lib/bookings/load";
+import { mailBookingConfirmed } from "@/lib/mail/notify";
+
+/* Bevestigingsmail na betaling. mail_log voorkomt dubbel versturen als OPP
+   dezelfde notificatie herhaalt. */
+async function confirmMail(bookingId, env) {
+  const full = await loadBookingById(bookingId);
+  if (full) await mailBookingConfirmed(full, { testMode: env === "sandbox" });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -84,12 +93,14 @@ async function handleTransaction(transactionUid, verifiedEnv) {
     if (booking.payment_status === "paid") return ok();
     if (waiting) {
       await directusUpdate("bookings", booking.id, { status: "confirmed", payment_status: "paid", paid_at: now });
+      await confirmMail(booking.id, env);
       return ok();
     }
     /* Betaald nadat de boeking al verlopen was (plekken zijn vrijgegeven).
        Is er nog plek, dan alsnog bevestigen; anders meteen terugbetalen. */
     if (booking.status === "expired" && await reserveSeats(booking.session, booking.participants || 1)) {
       await directusUpdate("bookings", booking.id, { status: "confirmed", payment_status: "paid", paid_at: now });
+      await confirmMail(booking.id, env);
       return ok();
     }
     const refund = await refundPayment(env, transactionUid, {

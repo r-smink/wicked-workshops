@@ -79,6 +79,19 @@ export interface ArticlesWorkshop {
   workshop_id: string | Workshop | null;
 }
 
+export interface AuthToken {
+  id: string;
+  user: string | DirectusUser | null;
+  email: string | null;
+  purpose: "verify" | "reset" | null;
+  token_hash: string | null;
+  intent: "participant" | "provider" | "venue" | null;
+  next_path: string | null;
+  expires_at: string | null;
+  used_at: string | null;
+  created_at: string | null;
+}
+
 export interface Booking {
   id: string;
   date_created: string | null;
@@ -123,6 +136,9 @@ export interface Booking {
   refund_status: "none" | "pending" | "completed" | "failed" | null;
   refunded_at: string | null;
   payment_env: "sandbox" | "live" | null;
+  escrow_until: string | null;
+  no_show_marked_at: string | null;
+  review_written_at: string | null;
 }
 
 export interface BusinessRequest {
@@ -208,6 +224,27 @@ export interface City {
   seo_image: string | DirectusFile | null;
   cbs_code: string | null;
   municipality: string | null;
+}
+
+export interface Complaint {
+  id: string;
+  date_created: string | null;
+  date_updated: string | null;
+  user_created: string | DirectusUser | null;
+  user_updated: string | DirectusUser | null;
+  booking: string | Booking | null;
+  status: "new" | "in_review" | "refund_approved" | "refunded" | "rejected" | "resolved" | null;
+  kind: "no_show_provider" | "quality" | "safety" | "no_show_dispute" | "other" | null;
+  description: string | null;
+  submitted_at: string | null;
+  refund_amount: string | null;
+  decision_note: string | null;
+  approved_by: string | DirectusUser | null;
+  executed_by: string | DirectusUser | null;
+  approved_at: string | null;
+  executed_at: string | null;
+  escrow_extended_until: string | null;
+  resolved_at: string | null;
 }
 
 export interface DietaryOption {
@@ -309,6 +346,16 @@ export interface LocationPage {
   seo_title: string | null;
   seo_description: string | null;
   seo_image: string | DirectusFile | null;
+}
+
+export interface MailLog {
+  id: string;
+  kind: string | null;
+  ref_key: string | null;
+  dedupe_key: string | null;
+  recipient: string | null;
+  sent_at: string | null;
+  error: string | null;
 }
 
 export interface NewsletterSubscriber {
@@ -427,6 +474,11 @@ export interface PlatformSetting {
   settlement_delay_hours: number | null;
   decision_grace_hours: number | null;
   payment_mode: "off" | "sandbox" | "live" | null;
+  pilot_full_refund_on_cancel: boolean;
+  complaint_hold_days: number | null;
+  start_reminder_hours: number | null;
+  review_invite_hours_after: number | null;
+  team_email: string | null;
 }
 
 export interface ProviderDeclaration {
@@ -523,6 +575,8 @@ export interface Provider {
   opp_compliance_status: "unverified" | "pending" | "verified" | null;
   opp_onboarded_at: string | null;
   opp_merchant_env: "sandbox" | "live" | null;
+  blocked_reason: string | null;
+  blocked_at: string | null;
 }
 
 export interface ProvidersLanguage {
@@ -715,6 +769,7 @@ export interface WorkshopSession {
   closed_at: string | null;
   provider_override: boolean;
   provider_override_at: string | null;
+  private_key: string | null;
 }
 
 export interface Workshop {
@@ -849,11 +904,13 @@ export interface Schema {
   articles: Article[];
   articles_related: ArticlesRelated[];
   articles_workshops: ArticlesWorkshop[];
+  auth_tokens: AuthToken[];
   bookings: Booking[];
   business_requests: BusinessRequest[];
   cancellation_policies: CancellationPolicy[];
   categories: Category[];
   cities: City[];
+  complaints: Complaint[];
   dietary_options: DietaryOption[];
   favorites: Favorite[];
   follows: Follow[];
@@ -863,6 +920,7 @@ export interface Schema {
   languages: Language[];
   location_page_faq: LocationPageFaq[];
   location_pages: LocationPage[];
+  mail_log: MailLog[];
   newsletter_subscribers: NewsletterSubscriber[];
   occasions: Occasion[];
   page_blocks: PageBlock[];

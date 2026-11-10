@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Dashboard from "@/components/pages/Dashboard";
 import { requireAuth, providerRoleId } from "@/lib/auth";
+import { getPlatformSettings } from "@/lib/directus/settings";
 import {
   getDashboardSessions, getDashboardBookings, getDashboardWorkshops,
   getDashboardReviews, getDashboardVenues, getProviderProfile, getCategories, getCities,
@@ -39,7 +40,7 @@ export default async function Page() {
   /* Fallback: als provider niet gevonden wordt, gebruik de user-naam. */
   const displayName = provider?.display_name || [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email || "Aanbieder";
 
-  const [sessions, bookings, workshops, reviews, venues, categories, cities] = await Promise.all([
+  const [sessions, bookings, workshops, reviews, venues, categories, cities, settings] = await Promise.all([
     getDashboardSessions(pid),
     getDashboardBookings(pid),
     getDashboardWorkshops(pid),
@@ -47,12 +48,13 @@ export default async function Page() {
     getDashboardVenues(),
     getCategories(),
     getCities(),
+    getPlatformSettings(),
   ]);
 
-  /* Nav-badges dynamisch: alleen tonen als er echt iets is. */
-  const pendingBookings = bookings.filter((b) => b.status === "pending").length;
+  /* Nav-badges dynamisch: alleen tonen als er echt iets is. Boeken is
+     direct (docs/05 §1), dus er is geen wachtrij om goed te keuren. */
+  const pendingBookings = 0;
   const nav = DASH_NAV.map((n) => {
-    if (n.key === "bookings" && pendingBookings > 0) return { ...n, dot: pendingBookings };
     if (n.key === "reviews" && reviews.length > 0) return { ...n, dot: reviews.length };
     return { ...n, dot: undefined };
   });
@@ -90,6 +92,7 @@ export default async function Page() {
       cities={cities}
       nav={nav}
       titles={titles}
+      settlementDelayHours={settings.settlementDelayHours}
       kpis={{
         monthTotal,
         monthBookings: monthBookings.length,
