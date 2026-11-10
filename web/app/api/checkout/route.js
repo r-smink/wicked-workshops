@@ -8,6 +8,13 @@ import {
   createPayment, isPaymentConfigured, paymentEnv, merchantReady, createSandboxMerchant,
 } from "@/lib/payment";
 import { cancellationDeadline } from "@/lib/cancellation";
+import { reserveSeats, releaseSeats } from "@/lib/seats";
+import { newAccessNonce } from "@/lib/bookings/access";
+import { newBookingCode } from "@/lib/bookings/actions";
+import { loadBookingById } from "@/lib/bookings/load";
+import { escrowUntilFor } from "@/lib/rules/booking-rules";
+import { mailBookingConfirmed } from "@/lib/mail/notify";
+import { timingSafeEqual } from "crypto";
 import { calculateBookingFees } from "@/lib/rules/fees";
 import { getPlatformSettings } from "@/lib/directus/settings";
 import { priceCents, centsToDecimal } from "@/lib/directus/model";
@@ -16,8 +23,14 @@ export const dynamic = "force-dynamic";
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 
-function bookingCode() {
-  return `WW-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+/* Verborgen datum voor een groep: alleen te boeken met de sleutel uit de
+   link die het team stuurt (workshop_sessions.private_key). */
+function privateKeyMatches(session, key) {
+  if (!session.is_private) return true;
+  if (!session.private_key || !key) return false;
+  const a = Buffer.from(String(session.private_key));
+  const b = Buffer.from(String(key));
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 /* "Femke de Vries" -> { first_name: "Femke", last_initial: "V" }. De
@@ -29,7 +42,7 @@ function nameParts(fullName) {
 }
 
 /* POST /api/checkout
-   Body: { session_id, participants, guest_name, guest_email }
+   Body: { session_id, participants, guest_name, guest_email, private_key? }
    Boeken is direct (docs/05): geen goedkeuring van de aanbieder nodig.
    Met betalen aan (payment_mode sandbox of live) gaat het geld naar escrow
    tot na de workshop; anders is de boeking meteen bevestigd. */
@@ -46,7 +59,6 @@ export async function POST(request) {
   }
 
   const { session_id, guest_name, guest_email } = body;
-  const participants = Math.max(1, Math.min(50, Number(body.participants) || 1));
 
   if (!session_id) {
     return NextResponse.json({ error: "Kies een datum" }, { status: 400 });
@@ -67,9 +79,20 @@ export async function POST(request) {
 
   /* Sessie + workshop ophalen en plekken controleren. */
   const session = await getSessionForCheckout(session_id);
-  if (!session || !session.workshop) {
+  if (!session || !session.workshop || !privateKeyMatches(session, body.private_key)) {
     return NextResponse.json({ error: "Sessie niet gevonden" }, { status: 404 });
   }
+  /* Openbare datums alleen bij een gepubliceerde workshop. Een groepsdatum
+     (verborgen) maakt het team ook bij een workshop die niet openbaar is. */
+  if (!session.is_private && session.workshop.status !== "published") {
+    return NextResponse.json({ error: "Deze workshop is niet te boeken" }, { status: 409 });
+  }
+  if (["not_happening", "cancelled_by_provider"].includes(session.state) || session.status === "cancelled") {
+    return NextResponse.json({ error: "Deze datum gaat niet door" }, { status: 409 });
+  }
+  /* Maximaal 50 per boeking; bij een groepsdatum geldt de capaciteit. */
+  const maxPerBooking = session.is_private ? Math.max(1, session.capacity ?? 1) : 50;
+  const participants = Math.max(1, Math.min(maxPerBooking, Number(body.participants) || 1));
   if (!session.starts_at || new Date(session.starts_at).getTime() <= Date.now()) {
     return NextResponse.json({ error: "Deze datum is al voorbij" }, { status: 409 });
   }
@@ -132,7 +155,13 @@ export async function POST(request) {
   }
 
   const paid = Boolean(env && unitCents > 0);
-  const code = bookingCode();
+  const code = newBookingCode();
+
+  /* Plekken eerst vastleggen (atomair in Directus), dan pas de boeking. */
+  if (!(await reserveSeats(session.id, participants))) {
+    return NextResponse.json({ error: "Deze datum is net vol geraakt" }, { status: 409 });
+  }
+  const escrowUntil = escrowUntilFor(session.ends_at, session.starts_at, settings.settlementDelayHours || 0);
   const holdMinutes = settings.paymentHoldMinutes || 30;
 
   const booking = await directusCreate("bookings", {
@@ -155,25 +184,22 @@ export async function POST(request) {
     payment_env: paid && settings.paymentProvider === "opp" ? env : null,
     hold_expires_at: paid ? new Date(Date.now() + holdMinutes * 60 * 1000).toISOString() : null,
     cancellation_deadline: cancellationDeadline(workshop.cancellation_policy, session.starts_at),
+    access_token: newAccessNonce(),
+    escrow_until: escrowUntil,
   });
 
   if (!booking) {
+    await releaseSeats(session.id, participants);
     return NextResponse.json({ error: "Kon boeking niet opslaan" }, { status: 500 });
   }
 
-  /* Stoelen direct reserveren (voorkomt overselling). */
-  await directusUpdate("workshop_sessions", session.id, {
-    seats_taken: (session.seats_taken ?? 0) + participants,
-  });
-
   if (!paid) {
+    const full = await loadBookingById(booking.id);
+    if (full) await mailBookingConfirmed(full);
     return NextResponse.json({ ok: true, booking_code: code });
   }
 
-  /* Escrow tot na de workshop plus de wachttijd uit de instellingen. */
-  const endsAt = new Date(session.ends_at || session.starts_at).getTime();
-  const escrowUntil = new Date(endsAt + (settings.settlementDelayHours || 0) * 60 * 60 * 1000);
-  const webhookPath = settings.paymentProvider === "mollie" ? "/api/webhooks/mollie" : "/api/webhooks/opp";
+  const webhookPath = "/api/webhooks/opp";
 
   const result = await createPayment(settings, {
     merchantUid,
@@ -184,17 +210,14 @@ export async function POST(request) {
     returnUrl: `${SITE}/boeking/terug?code=${code}`,
     webhookUrl: `${SITE}${webhookPath}`,
     metadata: { booking_id: booking.id, booking_code: code, session_id: session.id },
-    escrowUntil,
+    escrowUntil: escrowUntil ? new Date(escrowUntil) : null,
     idempotencyKey: code,
   });
 
   if (!result?.uid) {
     /* Geen betaling: boeking vervalt en de plekken komen terug. */
     await directusUpdate("bookings", booking.id, { status: "expired", payment_status: "failed" });
-    const fresh = await directusFetch(`/items/workshop_sessions/${session.id}?fields=seats_taken`, { noCache: true });
-    await directusUpdate("workshop_sessions", session.id, {
-      seats_taken: Math.max(0, (fresh?.seats_taken ?? participants) - participants),
-    });
+    await releaseSeats(session.id, participants);
     return NextResponse.json({ error: "Kon de betaling niet starten. Probeer het opnieuw." }, { status: 502 });
   }
 

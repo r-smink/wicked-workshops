@@ -1,0 +1,13 @@
+{
+  "name": "directus-extension-ww-seats",
+  "version": "1.0.0",
+  "description": "Plekken op een datum atomair reserveren en vrijgeven, zodat twee gelijktijdige boekingen nooit allebei de laatste plek krijgen.",
+  "type": "module",
+  "private": true,
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "index.mjs",
+    "source": "index.mjs",
+    "host": "^11.0.0"
+  }
+}

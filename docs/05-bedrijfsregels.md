@@ -60,7 +60,7 @@ Regel bij verzetten naar een datum die nog verzamelt: de verplaatste aanmelding 
 
 ## 5. Annuleren door deelnemer
 
-Tekst in het paneel (voor de basisregeling): "Gratis tot do 19 nov, 15:00. 50 procent daarna, tot de start. Dit is de basisregeling, die geldt bij de meeste workshops." Het tijdstip is `starts_at - free_until_hours_before`. Tijdens de pilot wordt niets afgerekend; sla wel `cancel_fee_percent` op zodat de regel later toepasbaar is. De knop heet "Annuleer, nu nog gratis" zolang het gratis is, daarna "Annuleer" met de kosten genoemd. Na annuleren: bevestigingsmail en melding in Mijn account.
+Tekst in het paneel (voor de basisregeling): "Gratis tot do 19 nov, 15:00. 50 procent daarna, tot de start. Dit is de basisregeling, die geldt bij de meeste workshops." Het tijdstip is `starts_at - free_until_hours_before`. Tijdens de pilot krijgt de deelnemer altijd alles terug (`platform_settings.pilot_full_refund_on_cancel`); sla wel `cancel_fee_percent` op zodat de regel later toepasbaar is. Daarna geldt `penalty_percent_after` uit de regeling, als gedeeltelijke refund via OPP. De knop heet "Annuleer, nu nog gratis" zolang het gratis is, daarna "Annuleer" met de kosten genoemd. Na annuleren: bevestigingsmail en melding in Mijn account.
 
 De annuleerregelingen zijn "De basis" (gratis tot 48 uur vooraf, daarna 50 procent, verzetten kosteloos), "Soepel" (gratis tot 24 uur) en "Vast" (gratis tot 7 dagen vooraf, daarna 50 procent). Soepel en Vast zijn werktekst en de regelingen zijn niet uitgewerkt; lees ze uit `cancellation_policies`.
 
@@ -71,6 +71,12 @@ De annuleerregelingen zijn "De basis" (gratis tot 48 uur vooraf, daarna 50 proce
 ## 7. Een andere datum aanbieden
 
 Wanneer een datum niet doorgaat of wordt geannuleerd krijgt elke deelnemer een voorstel. In Mijn account verschijnt het blok bovenaan: "Er is een nieuwe datum voor je: za 5 dec. Zelfde tijd, de datum gaat al door, en er is plek." met knoppen "Ja, za 5 dec" en "Andere datum of annuleren". Hoe het voorstel wordt gekozen en wat er gebeurt zonder reactie is niet beslist. Standaard (zie `12`): kies de eerstvolgende datum van dezelfde workshop die `confirmed` is, niet vol en minimaal 48 uur in de toekomst; zonder reactie verloopt het aanbod 7 dagen voor die datum en wordt de aanmelding geannuleerd zonder kosten. Maak dit in 1 functie met 1 configuratieregel.
+
+### Niet verschijnen en meldingen (gebouwd 10 november 2026)
+
+- **No-show:** de workshopgever meldt in het dashboard dat een deelnemer niet kwam, na de start en voor de escrowdatum. Status `no_show`, geen terugbetaling, mail aan de deelnemer.
+- **Melding:** een deelnemer kan vanaf de start tot de escrowdatum een melding doen via de beheerlink. De escrow bij OPP wordt verlengd met `complaint_hold_days`, het team krijgt een mail en beslist in Directus (`complaints`). Een open melding houdt de afronding (`completed`) tegen.
+- **Afgerond:** een aanmelding is afgehandeld als de escrowdatum (`bookings.escrow_until`) voorbij is en er geen melding openstaat. Dan staat het geld vrij bij OPP.
 
 ## 8. Reviews
 

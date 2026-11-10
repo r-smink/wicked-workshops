@@ -1,17 +1,25 @@
 import { NextResponse } from "next/server";
-import { directusRegister, directusLogin, directusMe, setAuthCookies, isAuthConfigured } from "@/lib/auth";
+import { isAuthConfigured } from "@/lib/auth";
+import { createProviderForUser } from "@/lib/directus";
+import { allowed, atLeast, clientIp } from "@/lib/account/rate-limit";
+import { createUser, findUserByEmail, normalizeEmail, passwordError, validEmail } from "@/lib/account/users";
+import { sendVerifyMail } from "@/lib/account/flows";
+import { safeNext } from "@/lib/account/redirect";
 
 export const dynamic = "force-dynamic";
 
+const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || "");
+
 /* POST /api/auth/register
-   Body: { email, password, first_name, last_name }
-   Maakt een Directus-gebruiker aan en logt direct in. */
+   Body: { email, password, first_name, last_name, role: "visitor"|"provider", next?, ...profiel }
+
+   Eerst bevestigen, dan pas binnen (docs/04): het account wordt aangemaakt
+   als "unverified" en krijgt een mail met een eenmalige link. Het antwoord
+   is altijd hetzelfde, ook als het adres al bestaat, zodat niemand kan
+   afleiden welke adressen bij ons bekend zijn. */
 export async function POST(request) {
   if (!isAuthConfigured()) {
-    return NextResponse.json(
-      { error: "Directus is niet geconfigureerd" },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: "Directus is niet geconfigureerd" }, { status: 503 });
   }
 
   let body;
@@ -21,75 +29,52 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { email, password, first_name, last_name, role } = body;
-  if (!email || !password) {
-    return NextResponse.json(
-      { error: "E-mailadres en wachtwoord zijn verplicht" },
-      { status: 400 }
-    );
-  }
-  if (password.length < 8) {
-    return NextResponse.json(
-      { error: "Wachtwoord moet minimaal 8 tekens zijn" },
-      { status: 400 }
-    );
+  const email = normalizeEmail(body.email);
+  if (!validEmail(email)) return NextResponse.json({ error: "Vul een geldig e-mailadres in." }, { status: 400 });
+  const pwError = passwordError(body.password);
+  if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+
+  const ip = clientIp(request.headers);
+  if (!allowed([`register:ip:${ip}`, `register:mail:${email}`], { limit: 8, windowMs: 60 * 60 * 1000 })) {
+    return NextResponse.json({ error: "Even te vaak geprobeerd. Wacht een paar minuten." }, { status: 429 });
   }
 
-  /* Maak de gebruiker aan met de juiste rol ("visitor" → Customer,
-     "provider" → Provider). */
-  const created = await directusRegister({ email, password, first_name, last_name, role });
-  if (!created) {
-    return NextResponse.json(
-      { error: "Kon account niet aanmaken. Misschien bestaat dit e-mailadres al." },
-      { status: 400 }
-    );
-  }
+  const provider = body.role === "provider";
+  const intent = provider ? "provider" : "participant";
+  const nextPath = safeNext(body.next);
 
-  /* Als dit een provider-registratie is, maak direct een provider-record aan
-     met de profielgegevens uit stap 2 van de aanmeldfow. */
-  if (role === "provider") {
-    const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || "");
-    const { createProviderForUser } = await import("@/lib/directus");
-    await createProviderForUser(created, {
-      profession: body.profession || null,
-      bio_short: body.bio_short || null,
-      city: isUUID(body.city) ? body.city : null,
-      /* active_since is een date-veld — jaar ("2024") wordt "2024-01-01". */
-      active_since: /^\d{4}$/.test(String(body.active_since || ""))
-        ? `${body.active_since}-01-01`
-        : null,
+  await atLeast(600, (async () => {
+    const existing = await findUserByEmail(email);
+    if (existing) {
+      /* Bestaat al. Nog niet bevestigd: nieuwe bevestigingslink. Wel
+         bevestigd: niets doen (inloggen of wachtwoord vergeten werkt). */
+      if (existing.status === "unverified") await sendVerifyMail(existing, intent, nextPath);
+      return;
+    }
+    const created = await createUser({
+      email,
+      password: String(body.password),
+      firstName: body.first_name,
+      lastName: body.last_name,
+      verified: false,
+      context: intent,
     });
-  }
+    if (!created?.id) return;
 
-  /* Log direct in zodat de gebruiker meteen door kan. */
-  const tokens = await directusLogin(email, password);
-  if (!tokens || !tokens.accessToken) {
-    /* Account is aangemaakt maar inloggen mislukt — stuur naar login-pagina. */
-    return NextResponse.json({
-      ok: true,
-      needsLogin: true,
-      message: "Account aangemaakt. Log in om verder te gaan.",
-    });
-  }
-
-  const user = await directusMe(tokens.accessToken);
-  await setAuthCookies({
-    accessToken: tokens.accessToken,
-    user: user ? {
-      id: user.id,
-      email: user.email,
-      first_name: user.first_name || first_name || "",
-      last_name: user.last_name || last_name || "",
-    } : { email, first_name: first_name || "", last_name: last_name || "" },
-  });
+    if (provider) {
+      await createProviderForUser(created, {
+        profession: body.profession || null,
+        bio_short: body.bio_short || null,
+        city: isUUID(body.city) ? body.city : null,
+        /* active_since is een date-veld: jaar ("2024") wordt "2024-01-01". */
+        active_since: /^\d{4}$/.test(String(body.active_since || "")) ? `${body.active_since}-01-01` : null,
+      });
+    }
+    await sendVerifyMail(created, intent, nextPath);
+  })());
 
   return NextResponse.json({
     ok: true,
-    user: user ? {
-      id: user.id,
-      email: user.email,
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-    } : { email, first_name: first_name || "", last_name: last_name || "" },
+    next: `/account-maken/controleer-mail?e=${encodeURIComponent(email)}${provider ? "&tab=provider" : ""}`,
   });
 }

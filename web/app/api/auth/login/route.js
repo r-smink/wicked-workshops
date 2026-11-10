@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
-import { directusLogin, directusMe, setAuthCookies, isAuthConfigured } from "@/lib/auth";
+import { isAuthConfigured } from "@/lib/auth";
+import { allowed, atLeast, clientIp } from "@/lib/account/rate-limit";
+import { normalizeEmail } from "@/lib/account/users";
+import { LOGIN_ERROR, loginAndRedirect } from "@/lib/account/flows";
 
 export const dynamic = "force-dynamic";
 
 /* POST /api/auth/login
-   Body: { email, password }
-   Geeft een HTTP-only cookie met het Directus access_token en retourneert
-   de gebruikersgegevens. */
+   Body: { email, password, remember?, next? }
+   Zet de auth-cookies (lib/auth.js) en geeft de bestemming terug.
+
+   Eén foutmelding voor onbekend adres, fout wachtwoord en een nog niet
+   bevestigd account (Directus weigert status "unverified"). De responstijd
+   is altijd minstens 500 ms, zodat ook die niets verraadt (docs/04). */
 export async function POST(request) {
   if (!isAuthConfigured()) {
-    return NextResponse.json(
-      { error: "Directus is niet geconfigureerd" },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: "Directus is niet geconfigureerd" }, { status: 503 });
   }
 
   let body;
@@ -22,48 +25,20 @@ export async function POST(request) {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const { email, password } = body;
+  const email = normalizeEmail(body.email);
+  const password = String(body.password || "");
   if (!email || !password) {
-    return NextResponse.json(
-      { error: "E-mailadres en wachtwoord zijn verplicht" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Vul je e-mailadres en wachtwoord in." }, { status: 400 });
   }
 
-  const tokens = await directusLogin(email, password);
-  if (!tokens || !tokens.accessToken) {
-    return NextResponse.json(
-      { error: "E-mailadres of wachtwoord is onjuist" },
-      { status: 401 }
-    );
+  const ip = clientIp(request.headers);
+  if (!allowed([`login:ip:${ip}`, `login:mail:${email}`], { limit: 10, windowMs: 15 * 60 * 1000 })) {
+    return NextResponse.json({ error: "Even te vaak geprobeerd. Wacht een kwartier, of kies een nieuw wachtwoord." }, { status: 429 });
   }
 
-  /* Haal de gebruikersgegevens op met het access token. */
-  const user = await directusMe(tokens.accessToken);
-  if (!user) {
-    return NextResponse.json(
-      { error: "Kon gebruikersgegevens niet ophalen" },
-      { status: 500 }
-    );
+  const result = await atLeast(500, loginAndRedirect(email, password, { remember: body.remember !== false, next: body.next }));
+  if (!result) {
+    return NextResponse.json({ error: LOGIN_ERROR, resend: true }, { status: 401 });
   }
-
-  await setAuthCookies({
-    accessToken: tokens.accessToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-    },
-  });
-
-  return NextResponse.json({
-    ok: true,
-    user: {
-      id: user.id,
-      email: user.email,
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-    },
-  });
+  return NextResponse.json({ ok: true, user: result.user, redirect: result.redirect });
 }

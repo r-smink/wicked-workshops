@@ -249,7 +249,9 @@ export const STATUS_LABEL = {
   cancelled_by_provider: ["ww-badge--draft", "Geannuleerd"],
   expired: ["ww-badge--draft", "Verlopen"],
   refunded: ["ww-badge--draft", "Terugbetaald"],
-  no_show: ["ww-badge--draft", "No show"],
+  no_show: ["ww-badge--draft", "Niet gekomen"],
+  session_cancelled: ["ww-badge--draft", "Datum gaat niet door"],
+  moved: ["ww-badge--draft", "Verzet"],
 };
 
 export const DASH_WORKSHOPS = [];

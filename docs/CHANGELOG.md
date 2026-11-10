@@ -2,6 +2,43 @@
 
 Per fase een korte demo-notitie (docs/13).
 
+## Pilotoperatie (10 november 2026)
+
+Uitwerking van "Wicked Workshops - code fixes.md", hoofdstuk 7.
+
+**Wat werkt**
+
+- Mail: SMTP via nodemailer (`web/lib/mail/`, templates in `web/mail/`), idempotent via `mail_log`. Bevestiging met adres en beheerlink, datum gaat door, datum gaat niet door, datum geannuleerd, annulering, verzet, aanbod verlopen, herinnering voor het beslismoment en voor de start, reviewuitnodiging, no-show, melding (deelnemer en team), terugbetaald, workshop online, workshop aanpassen, bevestig je e-mailadres, nieuw wachtwoord.
+- Beheerpagina `/boeking/beheer?code=&t=` voor deelnemers met en zonder account: verzetten, annuleren (met gedeeltelijke refund via OPP buiten de pilot), aanbod kiezen of geld terug, melding, review.
+- Workshopgever: datum toevoegen, datum verwijderen (zonder aanmeldingen), datum annuleren met reden (iedereen krijgt een andere datum of alles terug), no-show melden. Dashboard toont alleen voornaam en initiaal plus dieetwens; de knoppen "Bevestig" en "Reageren" zijn weg; uitbetaling klopt nu ("7 dagen na je workshop, via OPP").
+- Klachten: collectie `complaints`, escrow verlengen via OPP (`POST /transactions/{uid}` met `escrow_date`), knoppen in Directus (Terugbetalen met vier ogen, Uitbetaling vrijgeven, Workshopgever blokkeren) via `/api/team/actions`. `ww-guards` laat een geblokkeerde workshopgever niets meer publiceren.
+- Cron `/api/cron/escrow`: minimum op elk moment gehaald, beslismoment met mail aan de workshopgever, aanbod in plaats van directe refund, verlopen aanbiedingen, afronden per aanmelding op `escrow_until` zonder open melding, herinneringen, reviewuitnodigingen, mails na de check.
+- Auth (docs/04): registratie maakt een onbevestigd account met bevestigingsmail, één foutmelding en minimale responstijd bij inloggen, rate limiting, "Ingelogd blijven" (refresh-cookie 30 dagen of sessie), stil vernieuwen in `middleware.ts`, wachtwoord vergeten en kiezen, link werkt niet meer, account maken vanuit de bevestigingsmail van een aanmelding, gastaanmeldingen koppelen na bevestigen.
+- Plekken atomair via de nieuwe endpoint-extensie `directus-extension-ww-seats`, met terugval op lezen en terugschrijven zolang die niet op de server staat.
+- Groepen: verborgen datum met sleutel (`workshop_sessions.private_key`).
+- Opgeruimd: Mollie, `/api/bookings/confirm`, `/api/webhooks/mollie`. `/api/venues` schrijft naar `venue_listings` zonder adres en prijs, alleen met de feature flag aan.
+- Schema: migratie `004-pilot-operations.mjs`.
+
+**Hoe je het ziet**
+
+- Lokaal: Directus en Mailpit (`npm run dev` in `directus/`), `npm run migrate` en `npm run seed`. Start Next met `DIRECTUS_URL=http://localhost:8055`, `SMTP_URL=smtp://127.0.0.1:1025` en de geheimen uit `web/.env.example`. Boek een workshop en open de mail in Mailpit (http://localhost:8025).
+- `npm test` in `web/` (rules, mail, tokens), `npm run verify` in `directus/` (inclusief de gelijktijdigheidstest van `ww-seats`).
+
+**Naar productie (alleen na akkoord)**
+
+1. `npm run migrate -- --ja-ik-weet-het` en `npm run seed -- --ja-ik-weet-het` tegen productie, met `WEB_URL` en `TEAM_ACTION_SECRET` gezet voor de Flows.
+2. Extensies `directus-extension-ww-guards` en `directus-extension-ww-seats` op de server zetten en Directus herstarten.
+3. Op Vercel: `SMTP_URL`, `MAIL_FROM`, `TEAM_EMAIL`, `TEAM_ACTION_SECRET`, `BOOKING_LINK_SECRET`, `CRON_SECRET`.
+4. In `platform_settings`: `team_email` invullen.
+
+**Bekend**
+
+- Na de bevestigingslink moet iemand nog zelf inloggen (Directus kan geen sessie maken zonder wachtwoord, zie docs/12).
+- Andere sessies ongeldig maken na een wachtwoordwijziging is niet gebouwd.
+- Rate limiting is per serverinstantie.
+- Mijn account (ddash-b) bestaat nog niet; de beheerlink vervangt het voor nu.
+- Niet getest tegen de echte OPP-sandbox (geen sleutels): refunds, gedeeltelijke refunds en het verschuiven van de escrowdatum zijn alleen tegen de OPP-documentatie gebouwd.
+
 ## Fase 0 - Fundament
 
 **Wat werkt**

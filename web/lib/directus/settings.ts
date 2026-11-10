@@ -24,10 +24,16 @@ export type PlatformSettings = {
   offerMinHoursAhead: number;
   offerExpiresDaysBefore: number;
   features: { authSocial: boolean; venues: boolean };
-  paymentProvider: "opp" | "mollie";
+  /* Alleen OPP. Het veld payment_provider in Directus is een restant. */
+  paymentProvider: "opp";
   paymentHoldMinutes: number;
   settlementDelayHours: number;
   decisionGraceHours: number;
+  pilotFullRefundOnCancel: boolean;
+  complaintHoldDays: number;
+  startReminderHours: number;
+  reviewInviteHoursAfter: number;
+  teamEmail: string | null;
 };
 
 export const DEFAULT_SETTINGS: PlatformSettings = {
@@ -44,6 +50,11 @@ export const DEFAULT_SETTINGS: PlatformSettings = {
   paymentHoldMinutes: 30,
   settlementDelayHours: 168,
   decisionGraceHours: 12,
+  pilotFullRefundOnCancel: true,
+  complaintHoldDays: 14,
+  startReminderHours: 24,
+  reviewInviteHoursAfter: 24,
+  teamEmail: null,
 };
 
 export function toPlatformSettings(row: Partial<PlatformSetting> | null | undefined): PlatformSettings {
@@ -70,10 +81,15 @@ export function toPlatformSettings(row: Partial<PlatformSetting> | null | undefi
       authSocial: row.feature_auth_social ?? d.features.authSocial,
       venues: row.feature_venues ?? d.features.venues,
     },
-    paymentProvider: row.payment_provider === "mollie" ? "mollie" : d.paymentProvider,
+    paymentProvider: "opp",
     paymentHoldMinutes: row.payment_hold_minutes ?? d.paymentHoldMinutes,
     settlementDelayHours: row.settlement_delay_hours ?? d.settlementDelayHours,
     decisionGraceHours: row.decision_grace_hours ?? d.decisionGraceHours,
+    pilotFullRefundOnCancel: row.pilot_full_refund_on_cancel ?? d.pilotFullRefundOnCancel,
+    complaintHoldDays: row.complaint_hold_days ?? d.complaintHoldDays,
+    startReminderHours: row.start_reminder_hours ?? d.startReminderHours,
+    reviewInviteHoursAfter: row.review_invite_hours_after ?? d.reviewInviteHoursAfter,
+    teamEmail: row.team_email || process.env.TEAM_EMAIL || d.teamEmail,
   };
 }
 

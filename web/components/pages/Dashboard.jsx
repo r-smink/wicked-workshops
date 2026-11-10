@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { vul, werkteksten } from "@/content/werkteksten";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import {
@@ -38,31 +40,66 @@ export default function Dashboard({
   initialWorkshop = null,
   kpis = null,
   user = null,
+  settlementDelayHours = 168,
 }) {
   const go = useGo();
+  const router = useRouter();
   const [view, setView] = useState(initialView);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [confirming, setConfirming] = useState(null);
-  const [payLinks, setPayLinks] = useState({});
   const { demoMode, mounted: demoMounted, setDemoMode } = useDemoMode();
+  const [busy, setBusy] = useState(null);
+  const [actionError, setActionError] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [noShowFor, setNoShowFor] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [newDate, setNewDate] = useState({ workshop_id: "", date: "", time: "14:00", capacity: 8, min: "", decisionDate: "", decisionTime: "20:00" });
+  const payoutDays = Math.round(settlementDelayHours / 24);
 
-  /* Provider bevestigt een aanvraag → betaallink voor de gast. */
-  async function confirmBooking(id) {
-    setConfirming(id);
+  /* Acties van de workshopgever op datums en aanmeldingen. Daarna haalt de
+     server de nieuwe stand op. */
+  async function call(key, url, init) {
+    setBusy(key);
+    setActionError(null);
     try {
-      const res = await fetch("/api/bookings/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ booking_id: id }),
-      });
-      const data = await res.json();
-      if (data.checkoutUrl) {
-        setPayLinks((p) => ({ ...p, [id]: data.checkoutUrl }));
+      const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...init });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setActionError(data.error || "Dat lukte niet. Probeer het opnieuw.");
+        return false;
       }
+      router.refresh();
+      return true;
     } finally {
-      setConfirming(null);
+      setBusy(null);
     }
   }
+
+  async function addDate(e) {
+    e.preventDefault();
+    const local = (d, t) => (d ? new Date(`${d}T${t || "00:00"}:00`).toISOString() : null);
+    const ok = await call("add", "/api/sessions", {
+      method: "POST",
+      body: JSON.stringify({
+        workshop_id: newDate.workshop_id || workshops[0]?.id,
+        starts_at: local(newDate.date, newDate.time),
+        capacity: Number(newDate.capacity),
+        min_participants: newDate.min === "" ? null : Number(newDate.min),
+        decision_at: newDate.min === "" ? null : local(newDate.decisionDate, newDate.decisionTime),
+      }),
+    });
+    if (ok) setAdding(false);
+  }
+
+  const sessionLabel = (s) => {
+    if (s.state === "cancelled_by_provider" || s.state === "not_happening") return "Gaat niet door";
+    if (s.goesAhead || !s.min) return s.min ? "Gaat door" : "Gaat altijd door";
+    return `${s.booked} van ${s.min} nodig`;
+  };
+  const isClosed = (s) => s.state === "cancelled_by_provider" || s.state === "not_happening";
+  const isFuture = (iso) => Boolean(iso) && new Date(iso).getTime() > Date.now();
+  const canMarkNoShow = (b) =>
+    b.status === "confirmed" && b.startsAt && !isFuture(b.startsAt) && (!b.escrowUntil || isFuture(b.escrowUntil));
 
   if (view === "wizard") {
     return <WorkshopWizard go={go} provider={provider} categories={categories} cities={cities} ageRatings={ageRatings} initialWorkshop={initialWorkshop} />;
@@ -134,7 +171,7 @@ export default function Dashboard({
               <Stat label="Deze maand" value={kpis ? `€ ${kpis.monthTotal.toLocaleString("nl-NL")}` : "€ 0"} sub={kpis ? `${kpis.monthBookings} boekingen` : ""} accent />
               <Stat label="Deelnemers" value={kpis ? String(kpis.totalParticipants) : "0"} sub={kpis ? `${kpis.upcomingSessions} komende sessies` : ""} />
               <Stat label="Beoordeling" value={kpis?.avgRating ? String(kpis.avgRating).replace(".", ",") : "—"} sub={kpis ? `${kpis.reviewCount} reviews` : ""} />
-              <Stat label="Wachtrij" value={kpis ? String(kpis.pendingBookings) : "0"} sub="wacht op antwoord" />
+              <Stat label="Gaan door" value={String(sessions.filter((s) => s.goesAhead && isFuture(s.starts_at)).length)} sub="komende datums" />
             </div>
             <section className="ww-panel">
               <div className="ww-panel-head">
@@ -231,23 +268,98 @@ export default function Dashboard({
           <section className="ww-panel">
             <div className="ww-panel-head">
               <h2>Agenda</h2>
-              <Button variant="primary" size="sm" icon="plus">Datum toevoegen</Button>
+              <Button variant="primary" size="sm" icon="plus" onClick={() => setAdding((v) => !v)} disabled={!workshops.length}>Datum toevoegen</Button>
             </div>
+            {actionError && <p role="alert" style={{ padding: "0 20px", color: "var(--ww-coral-deep)", fontWeight: 700 }}>{actionError}</p>}
+            {adding && (
+              <form onSubmit={addDate} className="ww-panel-body" style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", alignItems: "end" }}>
+                <label className="ww-field" style={{ margin: 0 }}>
+                  <span>Workshop</span>
+                  <select className="ww-select" value={newDate.workshop_id || workshops[0]?.id || ""} onChange={(e) => setNewDate({ ...newDate, workshop_id: e.target.value })}>
+                    {workshops.map((w) => <option key={w.id} value={w.id}>{w.title}</option>)}
+                  </select>
+                </label>
+                <label className="ww-field" style={{ margin: 0 }}>
+                  <span>Datum</span>
+                  <input className="ww-input" type="date" required value={newDate.date} onChange={(e) => setNewDate({ ...newDate, date: e.target.value })} />
+                </label>
+                <label className="ww-field" style={{ margin: 0 }}>
+                  <span>Begintijd</span>
+                  <input className="ww-input" type="time" required value={newDate.time} onChange={(e) => setNewDate({ ...newDate, time: e.target.value })} />
+                </label>
+                <label className="ww-field" style={{ margin: 0 }}>
+                  <span>Maximum</span>
+                  <input className="ww-input" type="number" min={1} required value={newDate.capacity} onChange={(e) => setNewDate({ ...newDate, capacity: e.target.value })} />
+                </label>
+                <label className="ww-field" style={{ margin: 0 }}>
+                  <span>Minimum (optioneel)</span>
+                  <input className="ww-input" type="number" min={1} value={newDate.min} onChange={(e) => setNewDate({ ...newDate, min: e.target.value })} />
+                </label>
+                {newDate.min !== "" && (
+                  <>
+                    <label className="ww-field" style={{ margin: 0 }}>
+                      <span>Beslismoment</span>
+                      <input className="ww-input" type="date" required value={newDate.decisionDate} onChange={(e) => setNewDate({ ...newDate, decisionDate: e.target.value })} />
+                    </label>
+                    <label className="ww-field" style={{ margin: 0 }}>
+                      <span>Tijd</span>
+                      <input className="ww-input" type="time" required value={newDate.decisionTime} onChange={(e) => setNewDate({ ...newDate, decisionTime: e.target.value })} />
+                    </label>
+                  </>
+                )}
+                <p className="ww-meta" style={{ gridColumn: "1 / -1", margin: 0 }}>
+                  {newDate.min !== ""
+                    ? "Is het minimum er dan, dan gaat de datum door en blijft dat zo. Zo niet, dan krijgen de deelnemers een andere datum aangeboden."
+                    : "Geen minimum, dus geen beslismoment."}
+                </p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="ww-btn ww-btn--primary ww-btn--sm" type="submit" disabled={busy === "add"}>{busy === "add" ? "Bezig..." : "Bewaar datum"}</button>
+                  <button className="ww-btn ww-btn--ghost ww-btn--sm" type="button" onClick={() => setAdding(false)}>Annuleer</button>
+                </div>
+              </form>
+            )}
             <div className="ww-tablewrap">
               {sessions.length === 0 ? (
                 <p className="ww-meta" style={{ padding: 24 }}>Nog geen sessies. Voeg datums toe aan je workshops zodat mensen kunnen boeken.</p>
               ) : (
                 <table className="ww-table">
                   <thead>
-                    <tr><th>Datum</th><th>Workshop</th><th>Bezetting</th><th style={{width:100}}></th></tr>
+                    <tr><th>Datum</th><th>Workshop</th><th>Bezetting</th><th>Stand</th><th></th></tr>
                   </thead>
                   <tbody>
                     {sessions.map((s, i) => (
-                      <tr key={i}>
+                      <tr key={s.id || i}>
                         <td><strong>{s.date}</strong><span className="ww-meta" style={{display:"block",fontSize:12.5}}>{s.time}</span></td>
                         <td>{s.ws}</td>
                         <td><span className="ww-cap"><Icon name="users" size={15} /> {s.booked}/{s.cap}</span></td>
-                        <td><div className="ww-cap-bar"><i style={{ width: `${s.cap ? (s.booked / s.cap) * 100 : 0}%` }} /></div></td>
+                        <td>{sessionLabel(s)}</td>
+                        <td>
+                          {cancelling === s.id ? (
+                            <div style={{ display: "grid", gap: 8, minWidth: 260 }}>
+                              <p style={{ margin: 0, fontSize: 13.5 }}>{vul(werkteksten.datumAnnuleren.vraag, { n: s.booked })}</p>
+                              <label className="ww-field" style={{ margin: 0 }}>
+                                <span>{werkteksten.datumAnnuleren.reden}</span>
+                                <textarea className="ww-textarea" rows={2} value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
+                              </label>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <button className="ww-btn ww-btn--coral ww-btn--sm" disabled={busy === s.id}
+                                  onClick={async () => {
+                                    if (await call(s.id, `/api/sessions/${s.id}/cancel`, { method: "POST", body: JSON.stringify({ reason: cancelReason }) })) setCancelling(null);
+                                  }}>
+                                  {busy === s.id ? "Bezig..." : "Ja, annuleer deze datum"}
+                                </button>
+                                <button className="ww-btn ww-btn--ghost ww-btn--sm" onClick={() => setCancelling(null)}>Toch niet</button>
+                              </div>
+                            </div>
+                          ) : isClosed(s) || !isFuture(s.starts_at) ? null : s.booked > 0 ? (
+                            <button className="ww-chip" onClick={() => { setCancelling(s.id); setCancelReason(""); }}>Datum annuleren</button>
+                          ) : (
+                            <button className="ww-chip" disabled={busy === s.id}
+                              onClick={() => call(s.id, `/api/sessions/${s.id}`, { method: "DELETE" })}>
+                              {busy === s.id ? "Bezig..." : "Datum verwijderen"}
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -260,6 +372,7 @@ export default function Dashboard({
         {view === "bookings" && (
           <section className="ww-panel">
             <div className="ww-panel-head"><h2>Boekingen</h2></div>
+            {actionError && <p role="alert" style={{ padding: "0 20px", color: "var(--ww-coral-deep)", fontWeight: 700 }}>{actionError}</p>}
             <div className="ww-tablewrap">
               {bookings.length === 0 ? (
                 <p className="ww-meta" style={{ padding: 24 }}>Nog geen boekingen. Zodra iemand een workshop boekt, verschijnt dit hier.</p>
@@ -274,21 +387,27 @@ export default function Dashboard({
                       return (
                         <tr key={b.code || b.id}>
                           <td><strong>{b.code}</strong></td>
-                          <td>{b.name}</td>
+                          <td>{b.name}{b.diet ? <span className="ww-meta" style={{ display: "block", fontSize: 12.5 }}>{b.diet}</span> : null}</td>
                           <td>{b.ws} · {b.date}</td>
                           <td>{b.people}p</td>
                           <td>€ {b.total}</td>
                           <td><span className={`ww-badge ${cls}`}>{label}</span></td>
                           <td>
-                            {payLinks[b.id] ? (
-                              <input readOnly value={payLinks[b.id]} aria-label="Betaallink"
-                                style={{ fontSize: 12, width: 180, padding: "6px 8px", border: "1px solid var(--line)", borderRadius: 8 }}
-                                onFocus={(e) => e.target.select()} />
-                            ) : b.status === "pending" ? (
-                              <button className="ww-chip" disabled={confirming === b.id}
-                                onClick={() => confirmBooking(b.id)}>
-                                {confirming === b.id ? "Bezig..." : "Bevestig"}
-                              </button>
+                            {noShowFor === b.code ? (
+                              <div style={{ display: "grid", gap: 6, minWidth: 220 }}>
+                                <span style={{ fontSize: 13 }}>{vul(werkteksten.datumAnnuleren.noShowVraag, { naam: b.name })}</span>
+                                <div style={{ display: "flex", gap: 6 }}>
+                                  <button className="ww-btn ww-btn--coral ww-btn--sm" disabled={busy === b.code}
+                                    onClick={async () => {
+                                      if (await call(b.code, `/api/bookings/${encodeURIComponent(b.code)}/no-show`, { method: "POST" })) setNoShowFor(null);
+                                    }}>
+                                    Ja
+                                  </button>
+                                  <button className="ww-btn ww-btn--ghost ww-btn--sm" onClick={() => setNoShowFor(null)}>Nee</button>
+                                </div>
+                              </div>
+                            ) : canMarkNoShow(b) ? (
+                              <button className="ww-chip" onClick={() => setNoShowFor(b.code)}>{werkteksten.datumAnnuleren.noShow}</button>
                             ) : null}
                           </td>
                         </tr>
@@ -321,7 +440,6 @@ export default function Dashboard({
                           <div><strong>{r.name || "Deelnemer"}</strong><span className="ww-meta"> · {r.when || ""}{r.ws ? ` · ${r.ws}` : ""}</span></div>
                         </div>
                         <p style={{ marginTop: 10 }}>{r.body || ""}</p>
-                        <Button variant="outline" size="sm" style={{ marginTop: 10 }}>Reageren</Button>
                       </article>
                     ))}
                   </div>
@@ -372,11 +490,11 @@ export default function Dashboard({
               <div className="ww-kpis">
                 <Stat label="Deze maand" value={kpis ? `€ ${kpis.monthTotal.toLocaleString("nl-NL")}` : "€ 0"} sub={kpis ? `${kpis.monthBookings} boekingen` : ""} accent />
                 <Stat label="Totaal dit jaar" value="—" sub="nog niet beschikbaar" />
-                <Stat label="Volgende uitbetaling" value="—" sub="automatisch elke maand" />
+                <Stat label="Uitbetaling" value={`${payoutDays} dagen`} sub="na je workshop" />
               </div>
               <p className="ww-meta" style={{ marginTop: 16 }}>
-                Uitbetalingen worden automatisch verwerkt aan het einde van elke maand.
-                Zorg dat je IBAN en tenaamstelling ingevuld zijn in je profiel.
+                Je geld komt {payoutDays} dagen na je workshop vrij, via onze betaalpartner OPP. Wicked Workshops houdt de commissie in;
+                de rest gaat naar jou. Loopt er een melding van een deelnemer, dan wacht de uitbetaling tot die is afgehandeld.
               </p>
             </div>
           </section>

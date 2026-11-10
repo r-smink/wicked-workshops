@@ -344,8 +344,13 @@ function mapDashSession(s) {
     date,
     time: fmtTime(s.starts_at),
     ws: relName(s.workshop, "title") || "Workshop",
+    workshopId: s.workshop?.id ?? null,
     booked: s.seats_taken ?? 0,
     cap: s.capacity ?? 0,
+    min: s.min_participants ?? null,
+    state: s.state ?? null,
+    goesAhead: Boolean(s.goes_ahead || s.provider_override || s.state === "confirmed"),
+    decisionAt: s.decision_at ?? null,
   };
 }
 
@@ -358,12 +363,16 @@ function mapDashBooking(b) {
   return {
     id: b.id,
     code: b.booking_code ?? "",
-    name: b.guest_name ?? "",
+    name: [b.first_name, b.last_initial ? `${b.last_initial}.` : ""].filter(Boolean).join(" ") || "Deelnemer",
+    diet: b.dietary_notes ?? "",
     ws: relName(b.workshop, "title") || "",
     date: sessionDate,
+    startsAt: b.session?.starts_at ?? null,
+    endsAt: b.session?.ends_at ?? null,
+    escrowUntil: b.escrow_until ?? null,
     people: b.participants ?? 0,
     total: Number(b.total ?? 0),
-    status: b.status ?? "pending",
+    status: b.status ?? "confirmed",
   };
 }
 
@@ -480,12 +489,15 @@ const ARTICLE_FIELDS = [
 const ARTICLE_FAQ_FIELDS = ["id", "question", "answer", "sort"].join(",");
 
 const DASH_SESSION_FIELDS = [
-  "id", "starts_at", "ends_at", "capacity", "seats_taken", "status", "workshop.title",
+  "id", "starts_at", "ends_at", "capacity", "seats_taken", "status", "state", "min_participants",
+  "decision_at", "goes_ahead", "provider_override", "workshop.id", "workshop.title",
 ].join(",");
 
+/* Een workshopgever ziet van deelnemers alleen voornaam en initiaal,
+   aantal personen en dieetwens (CLAUDE.md, docs/03). */
 const DASH_BOOKING_FIELDS = [
-  "id", "booking_code", "guest_name", "participants", "total", "status",
-  "session.starts_at", "workshop.title",
+  "id", "booking_code", "first_name", "last_initial", "participants", "dietary_notes", "total", "status",
+  "escrow_until", "session.starts_at", "session.ends_at", "workshop.title",
 ].join(",");
 
 const VENUE_FIELDS = [
@@ -668,7 +680,8 @@ export async function getArticleFaq() {
 export async function getDashboardSessions(providerId = null) {
   const filter = providerId ? `filter[workshop][provider]=${providerId}&` : "";
   const data = await directusFetch(
-    `/items/workshop_sessions?${filter}fields=${DASH_SESSION_FIELDS}&sort=starts_at&limit=20`
+    `/items/workshop_sessions?${filter}filter[starts_at][_gte]=${new Date(Date.now() - 14 * 86400000).toISOString()}&fields=${DASH_SESSION_FIELDS}&sort=starts_at&limit=50`,
+    { noCache: true }
   );
   return data && data.length ? data.map(mapDashSession) : [];
 }
@@ -676,7 +689,8 @@ export async function getDashboardSessions(providerId = null) {
 export async function getDashboardBookings(providerId = null) {
   const filter = providerId ? `filter[workshop][provider]=${providerId}&` : "";
   const data = await directusFetch(
-    `/items/bookings?${filter}fields=${DASH_BOOKING_FIELDS}&sort=-date_created&limit=20`
+    `/items/bookings?${filter}fields=${DASH_BOOKING_FIELDS}&sort=-date_created&limit=50`,
+    { noCache: true }
   );
   return data && data.length ? data.map(mapDashBooking) : [];
 }
@@ -1007,7 +1021,7 @@ export async function getMenuItems(location = "header") {
    vergeven zijn. */
 export async function getSessionForCheckout(sessionId) {
   return directusFetch(
-    `/items/workshop_sessions/${sessionId}?fields=id,starts_at,ends_at,capacity,seats_taken,status,price_override,workshop.id,workshop.slug,workshop.title,workshop.price_per_person,workshop.instant_bookable,workshop.cancellation_policy,workshop.provider,workshop.category`,
+    `/items/workshop_sessions/${sessionId}?fields=id,starts_at,ends_at,capacity,seats_taken,status,state,is_private,private_key,price_override,workshop.id,workshop.slug,workshop.title,workshop.status,workshop.price_per_person,workshop.instant_bookable,workshop.cancellation_policy,workshop.provider,workshop.category`,
     { noCache: true }
   );
 }
@@ -1015,7 +1029,7 @@ export async function getSessionForCheckout(sessionId) {
 /* Booking op booking_code — voor de terugkeerpagina na betaling. Bevat
    het volledige lesadres; de pagina toont dat alleen bij een bevestigde
    boeking. */
-const BOOKING_LOCATION_FIELDS = [
+export const BOOKING_LOCATION_FIELDS = [
   "workshop.location_inherits_provider", "workshop.location_name",
   "workshop.address", "workshop.postal_code", "workshop.city.name",
   "workshop.provider.location_name", "workshop.provider.address",
@@ -1046,7 +1060,7 @@ export function bookingLocation(booking) {
   };
 }
 
-/* Booking op id — voor de Mollie-webhook en provider-acties. */
+/* Booking op id, voor provider-acties. */
 export async function getBookingById(id) {
   return directusFetch(
     `/items/bookings/${id}?fields=id,booking_code,guest_name,guest_email,participants,unit_price,subtotal,total,status,payment_status,payment_id,session,session.seats_taken,session.starts_at,workshop,workshop.title,provider,customer`,

@@ -5,7 +5,6 @@ import { cancellationLong } from "@/lib/cancellation";
 import { getPayment } from "@/lib/payment";
 import { oppPaymentStatus } from "@/lib/opp";
 import { werkteksten } from "@/content/werkteksten";
-import { getPlatformSettings } from "@/lib/directus/settings";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Je boeking" };
@@ -21,27 +20,25 @@ function sessionLabel(startsAt) {
   return `${day.charAt(0).toUpperCase() + day.slice(1)} om ${time}`;
 }
 
-/* Terugkeerpagina na betaling (OPP of Mollie). Toont de boekingsstatus
+/* Terugkeerpagina na betaling bij OPP. Toont de boekingsstatus
    op basis van de booking_code uit de redirect-URL. De webhook zet de
    status meestal al goed voordat de bezoeker hier landt. */
 export default async function Page({ searchParams }) {
   const { code } = await searchParams;
   const booking = code ? await getBookingByCode(code) : null;
-  const settings = await getPlatformSettings();
 
   /* Staat de boeking nog op betalen, dan vragen we OPP zelf: de webhook kan
      een paar seconden later komen dan de bezoeker. Nog open: betaallink
      opnieuw aanbieden. Al betaald: "we verwerken het". */
   let retryUrl = null;
   let processing = false;
-  const paymentUid = booking?.opp_transaction_uid || booking?.payment_id;
+  const paymentUid = booking?.opp_transaction_uid;
   if (booking?.status === "awaiting_payment" && paymentUid) {
-    const provider = booking.opp_transaction_uid ? "opp" : settings.paymentProvider;
-    const payment = await getPayment(provider, booking.payment_env, paymentUid);
-    const status = provider === "opp" ? oppPaymentStatus(payment?.status) : payment?.status;
+    const payment = await getPayment(booking.payment_env, paymentUid);
+    const status = oppPaymentStatus(payment?.status);
     if (status === "paid") processing = true;
     else if (status === "open" || status === "pending") {
-      retryUrl = payment.redirect_url || payment._links?.checkout?.href || null;
+      retryUrl = payment.redirect_url || null;
     }
   }
   const testMode = booking?.payment_env === "sandbox";
@@ -67,15 +64,7 @@ export default async function Page({ searchParams }) {
               <p>
                 Leuk{booking.guest_name ? `, ${booking.guest_name.split(" ")[0]}` : ""}! Je plek voor{" "}
                 <strong>{workshopTitle}</strong> is vastgelegd.
-                {when ? ` ${when}.` : ""} Je ontvangt de bevestiging per e-mail.
-              </p>
-            </>
-          ) : booking.status === "pending" ? (
-            <>
-              <h1>Aanvraag verstuurd</h1>
-              <p>
-                Je aanvraag voor <strong>{workshopTitle}</strong> ligt bij de aanbieder.
-                Zodra die bevestigt, ontvang je een betaallink per e-mail.
+                {when ? ` ${when}.` : ""} Je ontvangt de bevestiging per e-mail, met een link om je aanmelding te bekijken, te verzetten of te annuleren.
               </p>
             </>
           ) : booking.status === "awaiting_payment" && processing ? (

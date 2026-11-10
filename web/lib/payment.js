@@ -6,17 +6,17 @@
      payment_mode sandbox  OPP-sandbox, testgeld (de pilot)
      payment_mode live     OPP live, echt geld
 
-   payment_provider "mollie" is de oude koppeling en werkt alleen nog voor
-   het aanmaken en ophalen van een betaling.
+   Alleen OPP. De oude Mollie-koppeling is verwijderd (10 nov 2026): een
+   platform dat zelf geld ontvangt en doorbetaalt verleent een betaaldienst,
+   en OPP houdt het geld in escrow onder zijn eigen DNB-vergunning.
 
    Alle bedragen in centen (integer).
    =========================================================================== */
 
 import {
-  isOppConfigured, oppCreateTransaction, oppGetTransaction, oppRefundTransaction,
+  isOppConfigured, oppCreateTransaction, oppGetTransaction, oppRefundTransaction, oppUpdateTransaction,
   oppCreateMerchant, oppGetMerchant, oppSimulateMerchantStatus,
 } from "./opp";
-import { isMollieConfigured, mollieCreatePayment, mollieGetPayment, mollieCheckoutUrl } from "./mollie";
 
 /* "sandbox" | "live" | null (geen betaling). */
 export function paymentEnv(settings) {
@@ -26,7 +26,6 @@ export function paymentEnv(settings) {
 export function isPaymentConfigured(settings) {
   const env = paymentEnv(settings);
   if (!env) return false;
-  if (settings.paymentProvider === "mollie") return isMollieConfigured;
   return isOppConfigured(env);
 }
 
@@ -40,17 +39,6 @@ export async function createPayment(settings, {
   const env = paymentEnv(settings);
   if (!env) return null;
 
-  if (settings.paymentProvider === "mollie") {
-    const payment = await mollieCreatePayment({
-      amount: (unitCents * quantity) / 100,
-      description: productName,
-      redirectUrl: returnUrl,
-      webhookUrl,
-      metadata,
-    });
-    return payment?.id ? { uid: payment.id, checkoutUrl: mollieCheckoutUrl(payment) } : null;
-  }
-
   const txn = await oppCreateTransaction(env, {
     merchantUid, productName, unitCents, quantity, partnerFeeCents,
     returnUrl, notifyUrl: webhookUrl, metadata, escrowUntil,
@@ -59,15 +47,20 @@ export async function createPayment(settings, {
 }
 
 /* env is de omgeving waarin de transactie is gemaakt (bookings.payment_env). */
-export async function getPayment(provider, env, uid) {
-  if (!uid) return null;
-  if (provider === "mollie") return mollieGetPayment(uid);
-  return env ? oppGetTransaction(env, uid) : null;
+export async function getPayment(env, uid) {
+  if (!uid || !env) return null;
+  return oppGetTransaction(env, uid);
 }
 
 export async function refundPayment(env, transactionUid, { amountCents, message, internalReason, idempotencyKey } = {}) {
   if (!env || !transactionUid) return null;
   return oppRefundTransaction(env, transactionUid, { amountCents, message, internalReason, idempotencyKey });
+}
+
+/* Escrowdatum verschuiven. true als OPP het accepteerde. */
+export async function updateEscrow(env, transactionUid, escrowDate) {
+  if (!env || !transactionUid || !escrowDate) return false;
+  return Boolean(await oppUpdateTransaction(env, transactionUid, { escrowDate }));
 }
 
 /* ---------- merchant van de workshopgever ---------- */

@@ -6,15 +6,24 @@
    in de client-side JavaScript zit. Deze helpers worden server-side
    gebruikt in API-routes en server-componenten.
 
-   Cookie-naam: "ww_token" — HTTP-only, SameSite=Lax, 7 dagen geldig.
+   Cookies (docs/04, "Inloggen"):
+     ww_token    access token van Directus (kort, standaard 15 minuten)
+     ww_refresh  refresh token. Met "Ingelogd blijven" 30 dagen, anders een
+                 sessiecookie die met de browser verdwijnt.
+     ww_exp      wanneer het access token verloopt (ms), voor middleware.ts
+     ww_user     korte samenvatting voor snelle checks
+   middleware.ts vernieuwt het access token stil met het refresh token.
    =========================================================================== */
 
 import { cookies } from "next/headers";
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL || "";
-const TOKEN_COOKIE = "ww_token";
+export const TOKEN_COOKIE = "ww_token";
+export const REFRESH_COOKIE = "ww_refresh";
+export const EXP_COOKIE = "ww_exp";
+export const REMEMBER_COOKIE = "ww_remember";
 const USER_COOKIE = "ww_user";
-const MAX_AGE = 60 * 60 * 24 * 7; /* 7 dagen */
+const REMEMBER_AGE = 60 * 60 * 24 * 30; /* 30 dagen */
 
 export function isAuthConfigured() {
   return Boolean(DIRECTUS_URL);
@@ -28,7 +37,8 @@ export async function directusLogin(email, password) {
     const res = await fetch(`${DIRECTUS_URL.replace(/\/$/, "")}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, mode: "json" }),
+      cache: "no-store",
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -102,33 +112,46 @@ export async function directusRegister({ email, password, first_name, last_name,
   }
 }
 
-/* Cookie-helpers — werken alleen in server-components / route-handlers.
-   Next.js 15 vereist await voor cookies(). */
-export async function setAuthCookies(data) {
-  const store = await cookies();
-  store.set(TOKEN_COOKIE, data.accessToken, {
+/* Opties per cookie. remember: blijft 30 dagen, anders tot de browser sluit.
+   Ook gebruikt door middleware.ts. */
+export function authCookieOptions(remember) {
+  return {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: MAX_AGE,
-  });
+    ...(remember ? { maxAge: REMEMBER_AGE } : {}),
+  };
+}
+
+/* Cookie-helpers. Werken alleen in server-components / route-handlers.
+   Next.js 15 vereist await voor cookies().
+   data: { accessToken, refreshToken, expires (ms), remember, user } */
+export async function setAuthCookies(data) {
+  const store = await cookies();
+  const remember = data.remember !== false;
+  const opts = authCookieOptions(remember);
+  store.set(TOKEN_COOKIE, data.accessToken, opts);
+  if (data.refreshToken) store.set(REFRESH_COOKIE, data.refreshToken, opts);
+  if (data.expires) store.set(EXP_COOKIE, String(Date.now() + Number(data.expires)), opts);
+  if (remember) store.set(REMEMBER_COOKIE, "1", opts);
+  else store.delete(REMEMBER_COOKIE);
   /* Sla een minimale user-summary op voor snelle client-side checks. */
-  if (data.user) {
-    store.set(USER_COOKIE, JSON.stringify(data.user), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: MAX_AGE,
-    });
-  }
+  if (data.user) store.set(USER_COOKIE, JSON.stringify(data.user), opts);
 }
 
 export async function clearAuthCookies() {
   const store = await cookies();
-  store.delete(TOKEN_COOKIE);
-  store.delete(USER_COOKIE);
+  const refresh = store.get(REFRESH_COOKIE)?.value;
+  /* Refresh token ook bij Directus intrekken, zodat de sessie echt weg is. */
+  if (refresh && isAuthConfigured()) {
+    await fetch(`${DIRECTUS_URL.replace(/\/$/, "")}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refresh, mode: "json" }),
+    }).catch(() => null);
+  }
+  for (const name of [TOKEN_COOKIE, REFRESH_COOKIE, EXP_COOKIE, REMEMBER_COOKIE, USER_COOKIE]) store.delete(name);
 }
 
 export async function getAccessToken() {

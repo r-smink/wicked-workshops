@@ -13,8 +13,15 @@ const WORKSHOP_MEMBER_TRANSITIONS = {
   paused: ["published"],
 };
 
-export function workshopStatusError(from, to) {
+/* blocked: de workshopgever is door het team geblokkeerd
+   (providers.blocked_reason). Dan kan hij niets meer online zetten of
+   insturen; alleen het team heft dat op. */
+const BLOCKED_TARGETS = ["published", "pending_review"];
+const BLOCKED_MESSAGE = "Je account is gepauzeerd door Wicked Workshops. Neem contact met ons op.";
+
+export function workshopStatusError(from, to, { blocked = false } = {}) {
   if (to === undefined || to === from) return null;
+  if (blocked && BLOCKED_TARGETS.includes(to)) return BLOCKED_MESSAGE;
   if ((WORKSHOP_MEMBER_TRANSITIONS[from] || []).includes(to)) return null;
   return `Je kunt de status niet van "${from}" naar "${to}" zetten.`;
 }
@@ -22,8 +29,9 @@ export function workshopStatusError(from, to) {
 /* Workshopgever: profiel tonen of pauzeren. Publiceren doet het team. */
 const PROVIDER_MEMBER_TRANSITIONS = { published: ["paused"], paused: ["published"] };
 
-export function providerStatusError(from, to) {
+export function providerStatusError(from, to, { blocked = false } = {}) {
   if (to === undefined || to === from) return null;
+  if (blocked && BLOCKED_TARGETS.includes(to)) return BLOCKED_MESSAGE;
   if ((PROVIDER_MEMBER_TRANSITIONS[from] || []).includes(to)) return null;
   return `Je kunt je profiel niet van "${from}" naar "${to}" zetten.`;
 }
