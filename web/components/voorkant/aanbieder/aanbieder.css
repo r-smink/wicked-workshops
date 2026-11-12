@@ -1,0 +1,17 @@
+/* Aanvullingen op styles/voorkant.css voor de aanbiederpagina met echte data.
+   Alleen bestaande variabelen, gescoped onder #p-aanbieder. */
+
+/* Weekraster: aantal weken en workshoprijen volgen de data (ontwerp: 6 en 3). */
+#p-aanbieder .aanbieder-d-raster{
+  grid-template-columns:190px repeat(var(--weken,6),minmax(0,1fr));
+  grid-template-rows:auto repeat(var(--rijen,3),auto);
+}
+
+/* Volgen: melding na versturen of delen, en de honeypot. */
+#p-aanbieder .aanbieder-volg-melding{margin:0;font-size:13.5px;line-height:1.45;color:var(--text);font-weight:600}
+#p-aanbieder .aanbieder-volg-melding:empty,
+#p-aanbieder .aanbieder-volg-sr,
+#p-aanbieder .aanbieder-volg-honing{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+#p-aanbieder .aanbieder-a-volg{position:relative}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { createContext, useContext, useEffect, useState } from "react";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { Button, Switch } from "@/components/ui";
@@ -118,7 +119,7 @@ export function CookieConsentProvider({ children }) {
             <>
               <p>
                 We gebruiken noodzakelijke cookies om de site te laten werken. Met jouw toestemming plaatsen we ook
-                cookies voor statistiek en marketing. Lees meer in onze <a href="/privacy">privacyverklaring</a>.
+                cookies voor statistiek en marketing. Lees meer in onze <Link href="/privacy">privacyverklaring</Link>.
               </p>
               <div className="ww-consent-actions">
                 <Button variant="outline" onClick={() => save({ analytics: false, marketing: false })}>Weigeren</Button>

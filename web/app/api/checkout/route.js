@@ -42,7 +42,7 @@ function nameParts(fullName) {
 }
 
 /* POST /api/checkout
-   Body: { session_id, participants, guest_name, guest_email, private_key? }
+   Body: { session_id, participants, guest_name, guest_email, dietary_notes?, private_key? }
    Boeken is direct (docs/05): geen goedkeuring van de aanbieder nodig.
    Met betalen aan (payment_mode sandbox of live) gaat het geld naar escrow
    tot na de workshop; anders is de boeking meteen bevestigd. */
@@ -171,6 +171,8 @@ export async function POST(request) {
     guest_email: email,
     ...nameParts(name),
     participants,
+    /* Dieetwens uit het boekformulier; de workshopgever ziet dit veld. */
+    dietary_notes: typeof body.dietary_notes === "string" ? body.dietary_notes.trim().slice(0, 300) || null : null,
     unit_price: centsToDecimal(unitCents),
     subtotal: centsToDecimal(fees.subtotal),
     service_fee: "0.00",

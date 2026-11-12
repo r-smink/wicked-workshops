@@ -45,7 +45,7 @@ export function MobileMenu({ open, onClose, menu, loggedIn }: MobileMenuProps) {
       <p className="mm-kop">Categorieën</p>
       <div className="mnav-cats">
         {menu.categories.map((c) => (
-          <Link key={c.slug} className="mm-cat" href={`/categorie/${c.slug}`}>
+          <Link key={c.slug} className="mm-cat" href={`/nederland/${c.slug}`}>
             <span className="mm-th">{c.image ? <img src={c.image} alt="" width={42} height={42} loading="lazy" /> : null}</span>
             <span><b>{c.name}</b></span>
           </Link>
@@ -53,7 +53,7 @@ export function MobileMenu({ open, onClose, menu, loggedIn }: MobileMenuProps) {
       </div>
       {!loggedIn && (
         <div className="mnav-acts">
-          <ButtonLink variant="line" size="sm" href="/word-workshopgever">Word workshopgever</ButtonLink>
+          <ButtonLink variant="line" size="sm" href="/workshops-geven">Word workshopgever</ButtonLink>
         </div>
       )}
     </div>

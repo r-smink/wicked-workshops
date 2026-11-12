@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { tokens } from "@/lib/tokens";
 import { useGo } from "@/lib/use-go";
 import { useRouter } from "next/navigation";
@@ -230,9 +231,9 @@ export default function AuthPage({
                     <label className="ww-check">
                       <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Ingelogd blijven op dit apparaat
                     </label>
-                    <a href="/wachtwoord-vergeten" style={{ fontSize: 13.5, fontWeight: 700, color: tokens.color.brand }}>
+                    <Link href="/wachtwoord-vergeten" style={{ fontSize: 13.5, fontWeight: 700, color: tokens.color.brand }}>
                       Wachtwoord vergeten?
-                    </a>
+                    </Link>
                   </div>
                   <Button variant="primary" size="lg" block disabled={loading}
                     onClick={handleLogin}>

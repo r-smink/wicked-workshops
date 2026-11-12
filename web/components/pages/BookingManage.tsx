@@ -258,7 +258,7 @@ export default function BookingManage({ view }: { view: ManageView }) {
 
       <div style={{ marginTop: 28 }}>
         {view.workshopSlug ? (
-          <Link className="ww-btn ww-btn--outline" href={`/workshop/${view.workshopSlug}`}>Naar de workshop</Link>
+          <Link className="ww-btn ww-btn--outline" href={`/workshops/${view.workshopSlug}`}>Naar de workshop</Link>
         ) : (
           <Link className="ww-btn ww-btn--outline" href="/">Naar home</Link>
         )}

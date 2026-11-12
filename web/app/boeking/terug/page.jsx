@@ -135,7 +135,7 @@ export default async function Page({ searchParams }) {
               </a>
             ) : null}
             {booking?.workshop?.slug ? (
-              <Link className="ww-btn ww-btn--outline ww-btn--lg" href={`/workshop/${booking.workshop.slug}`}>
+              <Link className="ww-btn ww-btn--outline ww-btn--lg" href={`/workshops/${booking.workshop.slug}`}>
                 Terug naar de workshop
               </Link>
             ) : (

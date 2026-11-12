@@ -108,7 +108,7 @@ export function ClaimAccount({ code, token, email, booking }: {
           {busy ? "Bezig..." : "Maak mijn account"}
         </button>
         <p className="ww-meta" style={{ fontSize: 13 }}>
-          Je gaat akkoord met de <a href="/voorwaarden">voorwaarden</a> en het <a href="/privacy">privacybeleid</a>.
+          Je gaat akkoord met de <Link href="/voorwaarden">voorwaarden</Link> en het <Link href="/privacy">privacybeleid</Link>.
         </p>
       </form>
     </Shell>

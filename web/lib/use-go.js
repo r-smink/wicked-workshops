@@ -37,13 +37,13 @@ export function useGo() {
           url = "/";
           break;
         case "listing":
-          url = r.category && r.category.slug ? `/categorie/${r.category.slug}` : "/zoeken";
+          url = r.category && r.category.slug ? `/nederland/${r.category.slug}` : "/zoeken";
           break;
         case "workshop":
-          url = `/workshop/${(r.workshop && r.workshop.slug) || DEFAULT_WORKSHOP_SLUG}`;
+          url = `/workshops/${(r.workshop && r.workshop.slug) || DEFAULT_WORKSHOP_SLUG}`;
           break;
         case "provider":
-          url = `/aanbieder/${r.slug || "marco-rossi"}`;
+          url = `/aanbieders/${r.slug || "marco-rossi"}`;
           break;
         case "blog":
           url = "/inspiratie";

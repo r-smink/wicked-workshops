@@ -45,10 +45,11 @@ export const metadata: Metadata = {
     title: "Wicked Workshops - vind iets wicked om te doen",
     description: "Ontdek en boek unieke workshops en uitjes bij jou in de buurt.",
   },
+  /* Indexeren pas met SITE_INDEXABLE=1 (live met echte data); robots.ts
+     volgt dezelfde schakelaar. */
   robots: {
-    // Zet dit op true zodra de site echt live gaat met echte data.
-    index: false,
-    follow: false,
+    index: process.env.SITE_INDEXABLE === "1",
+    follow: process.env.SITE_INDEXABLE === "1",
   },
 };
 

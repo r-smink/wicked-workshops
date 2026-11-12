@@ -7,7 +7,7 @@ const COLUMNS = [
     title: "Ontdekken",
     links: [
       ["Alle workshops", "/zoeken"],
-      ["Categorieën", "/zoeken"],
+      ["Categorieën", "/nederland/alles"],
       ["Steden en plaatsen", "/zoeken"],
       ["Inspiratie", "/inspiratie"],
       ["Cadeaubon", "/cadeaubon"],
@@ -16,9 +16,9 @@ const COLUMNS = [
   {
     title: "Workshopgevers",
     links: [
-      ["Word workshopgever", "/word-workshopgever"],
-      ["Zo werkt het", "/hulp"],
-      ["Wat kost het", "/word-workshopgever"],
+      ["Word workshopgever", "/workshops-geven"],
+      ["Zo werkt het", "/workshops-geven"],
+      ["Wat kost het", "/workshops-geven"],
       ["Inloggen op je dashboard", "/inloggen"],
     ],
   },
@@ -27,7 +27,7 @@ const COLUMNS = [
     links: [
       ["Over ons", "/over-ons"],
       ["Voor bedrijven", "/bedrijven"],
-      ["Veelgestelde vragen", "/hulp"],
+      ["Hulp", "/hulp"],
       ["Contact", "/contact"],
     ],
   },

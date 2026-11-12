@@ -28,6 +28,7 @@ export const NAV_LINKS = [
   { href: "/inspiratie", label: "Inspiratie", icon: "spark" },
   { href: "/bedrijven", label: "Voor bedrijven", icon: "people" },
   { href: "/cadeaubon", label: "Cadeaubon", icon: "gift" },
+  { href: "/contact", label: "Contact", icon: "mail" },
 ] as const;
 
 type MeResponse = { user: { first_name?: string; email?: string; is_provider?: boolean } | null };
@@ -127,7 +128,7 @@ export function Header({ menu, account: givenAccount }: HeaderProps) {
           </Link>
         ) : (
           <>
-            <ButtonLink variant="line" size="sm" href="/word-workshopgever">Word workshopgever</ButtonLink>
+            <ButtonLink variant="line" size="sm" href="/workshops-geven">Word workshopgever</ButtonLink>
             <ButtonLink size="sm" href="/inloggen">Inloggen</ButtonLink>
           </>
         )}

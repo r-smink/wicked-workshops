@@ -1,0 +1,15 @@
+/* Aanvullingen op de ontwerp-CSS voor /ruimte-gezocht: honeypot, fout-,
+   bezig- en bedankstaat van de formulieren. Alleen bestaande variabelen. */
+
+#p-locatie .locatie-hp{position:absolute;left:-10000px;width:1px;height:1px;opacity:0;pointer-events:none}
+#p-locatie .locatie-a-form{position:relative}
+#p-locatie .locatie-fout{font-size:13px;font-weight:700;color:var(--text);border-left:3px solid var(--coral);padding-left:8px}
+#p-locatie .locatie-a-form-bied .locatie-fout{color:#fff}
+#p-locatie .locatie-fout-blok{margin:0}
+#p-locatie .locatie-a-form [aria-invalid="true"]{border-color:var(--coral)}
+#p-locatie .locatie-a-form[aria-busy="true"] .btn{opacity:.7;cursor:progress}
+#p-locatie .locatie-bedankt{align-content:start}
+#p-locatie .locatie-bedankt:focus{outline:none}
+#p-locatie .locatie-bedankt:focus-visible{outline:2px solid var(--purple);outline-offset:3px}
+#p-locatie .locatie-bedankt p{font-size:15.5px;color:var(--text-2);line-height:1.5;margin:0}
+#p-locatie .locatie-a-form-bied.locatie-bedankt p{color:var(--on-band-2)}

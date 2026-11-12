@@ -57,11 +57,11 @@ export function SessionCard({ w, i = 0 }) {
   const more = sessions.length - 1;
   return (
     <article className="ww-wcard wb-card">
-      <Link href={`/workshop/${w.slug}`} className="ww-wcard-img" tabIndex={-1} aria-hidden="true">
+      <Link href={`/workshops/${w.slug}`} className="ww-wcard-img" tabIndex={-1} aria-hidden="true">
         <BlockImage src={w.image} alt="" ratio="4/3" demo={DEMO[i % DEMO.length]} icon={w.icon} />
       </Link>
       <div className="ww-wcard-body">
-        <h3><Link href={`/workshop/${w.slug}`}>{w.title}</Link></h3>
+        <h3><Link href={`/workshops/${w.slug}`}>{w.title}</Link></h3>
         <Meta w={w} />
         {next && (
           <div className="wb-card-next">
@@ -88,11 +88,11 @@ function DateRow({ w, i }) {
   const sessions = sessionsOf(w);
   return (
     <article className="wb-row">
-      <Link href={`/workshop/${w.slug}`} className="wb-row-img" tabIndex={-1} aria-hidden="true">
+      <Link href={`/workshops/${w.slug}`} className="wb-row-img" tabIndex={-1} aria-hidden="true">
         <BlockImage src={w.image} alt="" ratio="4/3" demo={DEMO[i % DEMO.length]} icon={w.icon} />
       </Link>
       <div className="wb-row-body">
-        <h3><Link href={`/workshop/${w.slug}`}>{w.title}</Link></h3>
+        <h3><Link href={`/workshops/${w.slug}`}>{w.title}</Link></h3>
         <Meta w={w} />
         <div className="wb-row-foot">
           <Rating value={w.rating} count={w.count} />
@@ -102,7 +102,7 @@ function DateRow({ w, i }) {
       <ul className="wb-row-dates" aria-label={`Datums voor ${w.title}`}>
         {sessions.length ? sessions.map((s) => (
           <li key={s.id}>
-            <Link href={`/workshop/${w.slug}?sessie=${s.id}`} className={`wb-datebox wb-datebox--${sessionStanding(s).key}`}>
+            <Link href={`/workshops/${w.slug}?sessie=${s.id}`} className={`wb-datebox wb-datebox--${sessionStanding(s).key}`}>
               <span className="wb-datebox-day">{formatSessionDay(s.startsAt)}</span>
               <span className="wb-datebox-time">{formatSessionTime(s.startsAt)}</span>
               <StandingPill session={s} />

@@ -1,0 +1,7 @@
+/* Aanvullingen op de ontwerp-CSS voor /workshops-geven: foutmelding bij het
+   startformulier en de lege staat van de ruimtes. Alleen bestaande variabelen. */
+
+#p-maker .maker-fout{font-size:13px;font-weight:700;color:var(--text);border-left:3px solid var(--coral);padding-left:8px}
+#p-maker .maker-a-form input[aria-invalid="true"]{border-color:var(--coral)}
+#p-maker .maker-d-leeg{background:var(--surface-2);border-radius:var(--r-lg);padding:20px 22px;font-size:16px;color:var(--text)}
+#p-maker .maker-d-leeg a{color:var(--brand-ink);font-weight:700}

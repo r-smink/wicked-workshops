@@ -1,0 +1,26 @@
+/* Aanvulling op styles/voorkant.css: foutmelding, honeypot en de bevestiging
+   op de plek van het formulier. */
+#p-contact .contact-x-fout {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #a4283a; /* zelfde rood als .hulp-stand-niet, contrast AA */
+  margin: 0;
+}
+#p-contact .contact-x-hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+#p-contact .contact-d-form {
+  position: relative;
+}
+#p-contact .contact-d-hoofd .contact-x-bevestig {
+  margin-top: 26px;
+  margin-inline: 0;
+}
+#p-contact .contact-x-bevestig h2:focus {
+  outline: none;
+}

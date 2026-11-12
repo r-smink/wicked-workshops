@@ -1,3 +1,4 @@
+import { categoryImage } from "@/lib/voorkant/images";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import type { ShellData } from "@/lib/shell-data";
@@ -17,8 +18,8 @@ export function Megamenu({ id, open, menu }: MegamenuProps) {
       <div className="mm-in">
         <div className="mm-cats">
           {menu.categories.map((c) => (
-            <Link key={c.slug} className="mm-cat" href={`/categorie/${c.slug}`}>
-              <span className="mm-th">{c.image ? <img src={c.image} alt="" width={42} height={42} loading="lazy" /> : null}</span>
+            <Link key={c.slug} className="mm-cat" href={`/nederland/${c.slug}`}>
+              <span className="mm-th">{c.image ?? categoryImage(c.slug) ? <img src={(c.image ?? categoryImage(c.slug))!} alt="" width={42} height={42} loading="lazy" /> : null}</span>
               <span>
                 <b>{c.name}</b>
                 {c.count ? <span>{c.count} workshops</span> : null}
@@ -36,7 +37,7 @@ export function Megamenu({ id, open, menu }: MegamenuProps) {
           <p className="mm-kop">In welke plaats</p>
           <ul>
             {menu.places.map((p) => (
-              <li key={p.slug}><Link href={`/zoeken?plaats=${p.slug}`}>{p.name}</Link></li>
+              <li key={p.slug}><Link href={`/${p.slug}/alles`}>{p.name}</Link></li>
             ))}
             <li><Link href="/zoeken">{menu.placeCount ? `Alle ${menu.placeCount}` : "Alle plaatsen"}</Link></li>
           </ul>

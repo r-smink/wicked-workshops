@@ -1,0 +1,56 @@
+/* Aanvulling op styles/voorkant.css: meldingen, foutteksten en de
+   bevestiging na "Stuur me een link". */
+#p-inloggen .inloggen-x-fout {
+  display: block;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #a4283a; /* zelfde rood als .hulp-stand-niet, contrast AA */
+}
+#p-inloggen .inloggen-x-melding {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+#p-inloggen .inloggen-x-verstuurd {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+}
+#p-inloggen .inloggen-x-verstuurd h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+#p-inloggen .inloggen-x-verstuurd p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+#p-inloggen .inloggen-x-opnieuw {
+  justify-self: start;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+#p-inloggen .inlog-sso-knop[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+#p-inloggen .inloggen-x-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

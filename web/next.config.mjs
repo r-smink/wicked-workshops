@@ -10,6 +10,19 @@ const nextConfig = {
     ],
   },
 
+  /* Oude routes van de eerdere voorkant naar de routes uit
+     wicked-handoff/PROMPT-BOUW.md. */
+  async redirects() {
+    return [
+      { source: "/workshop/:slug", destination: "/workshops/:slug", permanent: true },
+      { source: "/aanbieder/:slug", destination: "/aanbieders/:slug", permanent: true },
+      { source: "/word-workshopgever", destination: "/workshops-geven", permanent: true },
+      { source: "/locatie-gezocht", destination: "/ruimte-gezocht", permanent: true },
+      { source: "/categorie/:category/:city", destination: "/:city/:category", permanent: true },
+      { source: "/categorie/:category", destination: "/nederland/:category", permanent: true },
+    ];
+  },
+
   async headers() {
     /* frame-ancestors bepaalt wie de site in een iframe mag laden. Het
        Directus-domein staat erbij voor de Visual Editor, die de site in

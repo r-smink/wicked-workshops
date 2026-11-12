@@ -1,0 +1,10 @@
+/* Aanvulling op styles/voorkant.css: verborgen onderdelen tijdens het zoeken
+   blijven verborgen, ook waar de ontwerp-CSS een display zet. */
+#p-hulp .hulp-d-index[hidden],
+#p-hulp .hulp-d-groep[hidden],
+#p-hulp .hulp-d-blok[hidden],
+#p-hulp .faq details[hidden],
+#p-hulp .hulp-d-status[hidden],
+#p-hulp .hulp-d-geen[hidden] {
+  display: none;
+}

@@ -27,7 +27,7 @@ export default function CategoryGrid({ block }) {
         <ul className="wb-catlist">
           {categories.map((c) => (
             <li key={c.slug}>
-              <Link href={`/categorie/${c.slug}`}>
+              <Link href={`/nederland/${c.slug}`}>
                 <span className="wb-catlist-th"><Photo src={image(c)} icon={c.icon} ratio="1/1" size={20} /></span>
                 <span><b>{c.name}</b><span>{count(c)}</span></span>
                 <Icon name="right" size={18} />
@@ -38,7 +38,7 @@ export default function CategoryGrid({ block }) {
       ) : (
         <div className={variant === "rail" ? "wb-rail wb-rail--cats" : "ww-catgrid wb-catgrid"}>
           {categories.map((c) => (
-            <Link key={c.slug} href={`/categorie/${c.slug}`} className="ww-catcard">
+            <Link key={c.slug} href={`/nederland/${c.slug}`} className="ww-catcard">
               <Photo src={image(c)} icon={c.icon} />
               <strong>{c.name}</strong>
               <span>{count(c)}</span>

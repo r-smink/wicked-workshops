@@ -99,10 +99,14 @@ body {
   line-height: 1.55;
 }
 
-img, svg, video { display: block; max-width: 100%; }
-button { font: inherit; color: inherit; border: 0; cursor: pointer; background: transparent; }
-a { color: inherit; text-decoration: none; cursor: pointer; }
-ul { margin: 0; padding: 0; list-style: none; }
+/* Binnen de voorkant uit wicked-handoff (.page[data-concept]) geldt de
+   ontwerp-CSS (styles/voorkant.css), dus daar slaan deze resets over.
+   :not(:where(...)) telt niet mee in de specificiteit, zodat de overige
+   pagina's precies hetzelfde blijven. */
+img, svg:not(:where(.page[data-concept] *)), video { display: block; max-width: 100%; }
+button:not(:where(.page[data-concept] *)) { font: inherit; color: inherit; border: 0; cursor: pointer; background: transparent; }
+a:not(:where(.page[data-concept] *)) { color: inherit; text-decoration: none; cursor: pointer; }
+ul:not(:where(.page[data-concept] *)) { margin: 0; padding: 0; list-style: none; }
 p { margin: 0; }
 
 :focus-visible { outline: 2.5px solid var(--ww-brand); outline-offset: 2px; border-radius: 6px; }
@@ -111,7 +115,8 @@ p { margin: 0; }
 .ww { background: var(--ww-bg); color: var(--ww-text-primary); line-height: 1.55; }
 .ww *, .ww *::before, .ww *::after { box-sizing: border-box; }
 
-.ww h1, .ww h2, .ww h3, .ww h4 {
+.ww h1:not(:where(.page[data-concept] *)), .ww h2:not(:where(.page[data-concept] *)),
+.ww h3:not(:where(.page[data-concept] *)), .ww h4:not(:where(.page[data-concept] *)) {
   font-family: var(--font-head);
   letter-spacing: -0.02em;
   line-height: 1.12;

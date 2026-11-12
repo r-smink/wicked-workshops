@@ -1,202 +1,72 @@
 # Wicked Workshops
 
-Monorepo met de site en de achterkant. Lees voor de bouw van de achterkant eerst `CLAUDE.md` en `docs/`; de fasering staat in `docs/13-bouwvolgorde.md`, de voortgang in `docs/CHANGELOG.md`.
+Monorepo met de site (voorkant en ingelogde kant) en de Directus-achterkant.
 
 | Map | Wat |
 |---|---|
-| `web/` | Next.js (App Router). Vercel: zet **Root Directory** op `web`. |
-| `directus/` | Lokale Directus 11.17.4 met ingebouwde PostgreSQL en Mailpit (geen Docker), plus schema, migraties, seeds, extensie en rechtentest als code. Zie `directus/README.md`. |
-| `reference/` | Het gekozen ontwerp, read-only. |
-| `docs/` | Specificaties per onderdeel. |
+| `web/` | Next.js 15 (App Router, TypeScript). Vercel: zet **Root Directory** op `web`. |
+| `directus/` | Lokale Directus 11.17.4 met ingebouwde PostgreSQL en Mailpit (geen Docker), plus schema, migraties, seeds, extensie en rechtentest als code. Zie `directus/README.md`. Dit is het schema dat de site gebruikt. |
+| `wicked-handoff/` | Het definitieve ontwerp van de voorkant (`design/index.html`, foto's, docs) en de bouwprompt. Read-only: de visuele waarheid. |
 
 ```bash
-# site
-cd web && npm install && npm run dev        # http://localhost:3000
-npm run lint && npm run typecheck && npm test && npm run test:e2e
-
 # achterkant (geen Docker nodig)
 cd directus && npm ci && npm run setup      # eenmalig
 npm run dev                                 # Directus :8055, Mailpit :8025
 npm run schema:apply && npm run seed:demo   # eerste keer, in een tweede terminal
-npm run test:permissions                    # rechtenmatrix uit docs/03
+
+# site
+cd web && npm install
+cp .env.example .env.local                  # DIRECTUS_URL=http://127.0.0.1:8055, token: zie hieronder
+npm run dev                                 # http://localhost:3000
+npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-De rest van dit bestand beschrijft de eerdere voorkant-ronde. Paden daarin zijn nu relatief aan `web/`.
+## Voorkant
 
----
+Het ontwerp in `wicked-handoff/design/index.html` is 1 op 1 nagebouwd. De CSS staat ongewijzigd in `web/styles/voorkant.css` (alleen `@container stage` is `@media` geworden); elke pagina zit in dezelfde wrapper als in het ontwerp (`<div class="page" id="p-...">`, zie `components/voorkant/PageFrame.tsx`), zodat de selectors uit het ontwerp blijven gelden. Kop, megamenu en voet zijn de gedeelde componenten in `components/shell/`.
 
-# Voorkant (eerdere ronde)
-
-Next.js 15 project met het volledige prototype: tien schermen op een gedeelde basis, klaar om te deployen naar Vercel.
-
-Dit is nog een prototype op vaste voorbeelddata. Er is nog geen Directus-koppeling, geen betaling en geen echte authenticatie. Het doel is om het geheel te kunnen tonen, doorklikken en testen op echte apparaten.
-
-## Wat er in zit
-
-| Scherm | Wat je ziet |
-|---|---|
-| Homepage | Hero met zoekveld, categorieen, zo werkt het, uitgelicht aanbod, teamuitjes, reviews |
-| Aanbod | Filterpaneel met zestien groepen, kaartweergave, SEO-tekst, interne links |
-| Workshop | Galerij, feitenrij, beschrijving, reviews met subscores, FAQ, boekblok |
-| Aanbiederprofiel | Statistieken, sfeerimpressie, workshops, reviews, contactkaart |
-| Blogarchief | Uitgelicht artikel, filters per onderwerp, meer laden |
-| Blogartikel | Kort antwoord, inhoudsopgave, FAQ, gerelateerde workshops |
-| Inloggen en registreren | Twee tabs: bezoeker en workshopgever, met driestapsflow |
-| Profiel workshopgever | Zeven secties met NAW, KvK, btw, profiel, locatie, uitbetaling |
-| Nieuwe workshop | Wizard in zes stappen met live voorbeeldkaart |
-| Dashboard | Overzicht, workshops, agenda, boekingen, reviews, uitbetalingen, profiel |
-
-Bovenaan staat een donkere balk om tussen de schermen te springen. Die hoort niet bij het product en haal je weg zodra de echte routes bestaan (zie hieronder).
-
-## Deployen naar Vercel
-
-Er zijn twee manieren. De eerste is de gebruikelijke, de tweede is sneller als je alleen even wilt kijken.
-
-### Optie 1: via GitHub (aanbevolen)
-
-Zo krijg je automatisch een nieuwe preview bij elke wijziging.
-
-```bash
-# 1. In de map van dit project
-git init
-git add .
-git commit -m "Wicked Workshops prototype"
-
-# 2. Maak een lege repository aan op github.com en koppel hem
-git remote add origin https://github.com/<jouw-account>/wicked-workshops.git
-git branch -M main
-git push -u origin main
-```
-
-Ga daarna naar [vercel.com/new](https://vercel.com/new), kies **Import Git Repository** en selecteer de repository. Vercel herkent Next.js zelf, dus je hoeft niets in te stellen:
-
-| Instelling | Waarde | Actie |
+| Route | Pagina in het ontwerp | Code |
 |---|---|---|
-| Framework Preset | Next.js | Wordt automatisch herkend |
-| Root Directory | `./` | Laat staan |
-| Build Command | `next build` | Laat staan |
-| Output Directory | standaard | Laat staan |
-| Install Command | `npm install` | Laat staan |
-| Node.js Version | 20.x of hoger | Alleen wijzigen als er een oudere staat |
+| `/` | Home | `app/(voorkant)/page.tsx`, `components/voorkant/home/` |
+| `/[plaats]/[categorie]`, bijv. `/utrecht/koken-en-bakken` | Categorie | `app/[slug]/[categorie]/page.tsx`, `components/voorkant/cat/` |
+| `/workshops/[slug]` | Workshop, met boeken | `app/(voorkant)/workshops/[slug]/`, `components/voorkant/detail/` |
+| `/aanbieders/[slug]` | Aanbieder | `app/(voorkant)/aanbieders/[slug]/`, `components/voorkant/aanbieder/` |
+| `/workshops-geven` | Workshopgever | `app/(voorkant)/workshops-geven/`, `components/voorkant/maker/` |
+| `/ruimte-gezocht` | Locatie gezocht | `app/(voorkant)/ruimte-gezocht/`, `components/voorkant/locatie/` |
+| `/hulp`, `/contact`, `/inloggen` | Hulp, Contact, Inloggen | `app/(voorkant)/...`, `components/voorkant/{hulp,contact,inloggen}/` |
 
-Klik op **Deploy**. Na ongeveer een minuut staat het live op een `.vercel.app` adres.
-
-### Optie 2: rechtstreeks vanaf je laptop
-
-```bash
-npm i -g vercel
-vercel          # preview-omgeving
-vercel --prod   # productie
-```
-
-De eerste keer stelt de CLI een paar vragen. Antwoord met de standaardwaarden, behalve de projectnaam.
-
-## Lokaal draaien
-
-Node 20 of hoger.
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-Test het mobiele gedrag met de apparaatweergave in de browser (Chrome: F12, dan het telefoonicoon) op 390 of 430 pixels breed. Onder 768 pixels schakelen de carrousels, de zijlade, de kaartweergave en de "Lees meer" blokken aan.
+- `nederland` als plaats betekent alle plaatsen (`/nederland/keramiek-en-klei`); `alles` als categorie alle categorieen (`/utrecht/alles`). Links maak je met `lib/routes.ts`.
+- Oude routes (`/workshop/...`, `/aanbieder/...`, `/categorie/...`, `/word-workshopgever`, `/locatie-gezocht`) sturen permanent door (`next.config.mjs`).
+- Data komt uit Directus in server components via de SDK (`lib/voorkant/data.ts`, publieke rol, alleen gepubliceerde items en publieke velden). Standen van een datum (open, gaat door, gaat niet door, vol) rekent `lib/voorkant/format.ts` uit, overal hetzelfde.
+- Formulieren lopen via route handlers die server-side naar Directus schrijven: boeken via `/api/checkout`, contact, ruimte zoeken/bieden en volgen via `/api/forms` (naar `form_submissions`, met honeypot), inloggen via `/api/auth/*`. De browser praat nooit rechtstreeks met Directus.
+- Cache: pagina's revalideren elke 5 minuten. Direct verversen: laat een Directus-flow na create/update/delete op publieke collections `POST https://www.wickedworkshops.nl/api/revalidate` aanroepen met header `x-revalidate-secret: <REVALIDATE_SECRET>`.
+- SEO en GEO: unieke title, description en canonical per pagina (`lib/voorkant/seo.ts`), Open Graph, `sitemap.xml`, `robots.txt`, `llms.txt`, JSON-LD (Organization, Course met CourseInstance en Event per datum, AggregateRating, FAQPage, BreadcrumbList).
+- Foto's: `public/img/` is tijdelijk stockbeeld uit het ontwerp (Pexels), alleen als terugval zolang een workshop, categorie of aanbieder in Directus geen eigen foto heeft (`lib/voorkant/images.ts`). Voor livegang vervangen.
+- Teksten die in het ontwerp als "Werktekst" of voorbeeld gemarkeerd zijn, houden die markering tot er definitieve tekst is.
 
 ## Omgevingsvariabelen
 
-Er is er nog niet één nodig om te deployen: het prototype draait volledig op vaste data. `.env.example` staat er alvast voor de volgende fase.
-
-Zodra je Directus koppelt, zet je ze in Vercel onder **Settings > Environment Variables**:
+Lokaal in `web/.env.local`, op Vercel onder **Settings > Environment Variables** (zie `web/.env.example` voor de volledige lijst):
 
 | Variabele | Waarvoor | Scope |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | Canonicals en metadata | Alle omgevingen |
-| `DIRECTUS_URL` | Waar de API staat | Alle omgevingen |
-| `DIRECTUS_STATIC_TOKEN` | Server-side lezen | Alleen server, nooit `NEXT_PUBLIC_` |
-| `REVALIDATE_SECRET` | Beveiligt de revalidatie-webhook | Alleen server |
-| `OPP_SANDBOX_API_KEY` | OPP-testbetalingen (pilot, `payment_mode` = `sandbox`) | Alleen server |
-| `OPP_SANDBOX_NOTIFY_SECRET` | Controleert de handtekening van OPP-webhooks in de sandbox | Alleen server |
-| `OPP_LIVE_API_KEY` / `OPP_LIVE_NOTIFY_SECRET` | Echte betalingen, op zijn vroegst januari 2027. Zonder deze sleutel kan `live` niet | Alleen server |
-| `CRON_SECRET` | Beveiligt `/api/cron/escrow`. Zonder deze waarde draait de cron niet. Zelfde waarde als het GitHub-secret `CRON_SECRET` | Alleen server |
-| `MOLLIE_API_KEY` | Oude betaalkoppeling, alleen als `payment_provider` = `mollie` | Alleen server |
+| `NEXT_PUBLIC_SITE_URL` | Canonicals, sitemap, links in mails | Alle omgevingen |
+| `DIRECTUS_URL` | Waar de API staat (`https://directus.wickedworkshops.nl`) | Alleen server |
+| `DIRECTUS_STATIC_TOKEN` | Server-side token met beperkte rechten | Alleen server, nooit `NEXT_PUBLIC_` |
+| `REVALIDATE_SECRET` | Beveiligt `/api/revalidate` | Alleen server |
+| `SITE_INDEXABLE` | `1` = zoekmachines toegelaten; leeg = `noindex` overal | Alle omgevingen |
+| `OPP_*`, `CRON_SECRET`, `BOOKING_LINK_SECRET`, `FIELD_ENCRYPTION_KEY`, `SMTP_URL` | Betalen (pilot: alleen sandbox), cron, beheerlinks, versleuteling, mail | Alleen server |
 
-Betalen zet je aan en uit in Directus onder **Platform settings > payment_mode**: `off` (geen betaling, boeking direct bevestigd), `sandbox` (OPP-testgeld) of `live`. Omzetten werkt direct, zonder deploy. OPP stuurt webhooks naar `https://www.wickedworkshops.nl/api/webhooks/opp`; localhost werkt niet bij OPP.
-| `FIELD_ENCRYPTION_KEY` | Versleutelt het IBAN van workshopgevers (32 bytes, base64). Lokaal en op Vercel dezelfde waarde, anders zijn opgeslagen IBAN's niet meer te lezen | Alleen server |
+Lokaal is het token het `ADMIN_TOKEN` uit `directus/.env`. Gebruik op Vercel nooit een admin-token.
 
-Alles wat met `NEXT_PUBLIC_` begint komt in de browser terecht. Zet daar dus nooit een token in.
+## Uitrollen op Vercel
 
-## Belangrijk voordat dit echt live gaat
+1. Importeer de repository in Vercel en zet **Root Directory** op `web`. Framework (Next.js), build command en output herkent Vercel zelf; Node 20 of hoger.
+2. Zet de omgevingsvariabelen hierboven voor Production en Preview.
+3. Laat de site op `noindex` (geen `SITE_INDEXABLE`) zolang er voorbeelddata staat. Zet een wachtwoord op previews via **Settings > Deployment Protection**.
+4. Maak in Directus een flow voor de revalidatie-webhook (zie hierboven).
+5. Betalen staat in Directus onder **Platform settings > payment_mode**: `off`, `sandbox` (pilot, OPP-testgeld) of `live` (op zijn vroegst januari 2027; nooit vanzelf).
 
-**De site staat nu op `noindex`.** In `app/layout.jsx` staat `robots: { index: false, follow: false }`. Dat is bewust: een prototype met verzonnen aanbod en verzonnen reviews wil je niet in Google hebben. Zet dit pas op `true` als er echte data staat, anders duurt het weken voordat de nepversie weer uit de index is.
+## Contentpagina's (page builder)
 
-**Zet een wachtwoord op de preview.** In Vercel onder **Settings > Deployment Protection** kun je Vercel Authentication of een wachtwoord aanzetten. Handig zolang je dit met klanten of investeerders deelt.
-
-**De reviews en aanbieders zijn verzonnen.** Marco Rossi bestaat niet. Zolang de site afgeschermd is, is dat prima. Zodra hij openbaar wordt, moeten verzonnen reviews eruit, ook als dat het scherm leger maakt.
-
-## Van prototype naar echte site
-
-Het prototype gebruikt een statusrouter in `components/WickedApp.jsx`. Dat werkt om te tonen, maar levert één URL op, en dus geen indexeerbare pagina's, geen deelbare links en geen werkende terugknop.
-
-De volgende stap is die router vervangen door echte routes uit hoofdstuk 5 van de projectblauwdruk:
-
-```
-app/
-├── page.jsx                                  HomePage
-├── zoeken/page.jsx                           ListingPage
-├── categorie/[category]/page.jsx             ListingPage
-├── categorie/[category]/[city]/page.jsx      ListingPage (money page)
-├── workshop/[slug]/page.jsx                  WorkshopPage
-├── aanbieder/[slug]/page.jsx                 ProviderPage
-├── inspiratie/page.jsx                       BlogIndexPage
-├── inspiratie/[slug]/page.jsx                ArticlePage
-├── inloggen/page.jsx                         AuthPage
-└── dashboard/
-    ├── layout.jsx                            zijnavigatie
-    ├── page.jsx                              overzicht
-    ├── workshops/nieuw/page.jsx              WorkshopWizard
-    └── profiel/page.jsx                      ProviderProfileForm
-```
-
-De praktische volgorde:
-
-1. Knip `components/WickedApp.jsx` op in losse bestanden. De componentnamen komen al overeen met hoofdstuk 9.2 van de blauwdruk, dus dit is verplaatsen, niet herschrijven.
-2. Zet de stylesheet in `app/globals.css` of zet hem om naar Tailwind met de tokens als bron.
-3. Vervang `go({ name: ... })` door `next/link` en `useRouter`.
-4. Haal de prototypebalk uit `WickedApp` weg.
-5. Vervang de vaste arrays (`FEATURED`, `LISTING`, `MARCO_WORKSHOPS`) door Directus-queries in server components.
-6. Zet `robots` weer op indexeerbaar en voeg de sitemap, `llms.txt` en de schema.org-blokken toe uit hoofdstuk 8.
-
-Pas na stap 5 heeft server rendering echt zin. Zolang alles vaste data is, maakt het voor SEO geen verschil.
-
-## Visual page builder
-
-De bouwblokken uit `wicked-workshops-export.json` (8 paginatypes, 3 concepten, 69 bloktypes) zijn ontdubbeld tot 18 generieke blokken in `components/blocks/`. Welk exporttype bij welk blok hoort, staat in `lib/block-types.json`.
-
-| Onderdeel | Waar |
-|---|---|
-| Schema in Directus (velden, M2M, `form_submissions`) | `node scripts/setup-page-builder.js` (idempotent, `--no-seed` voor alleen schema) |
-| Startinhoud per paginatype | `lib/page-templates.json` |
-| Laden, terugval en data per blok | `lib/page-builder.js` |
-| Renderer | `components/blocks/BlockRenderer.jsx` |
-| Stand van een datum (doorgaan-drempel) | `lib/session-standing.js` |
-
-- `/hulp`, `/word-workshopgever` en `/locatie-gezocht` tonen de gepubliceerde pagina uit Directus, of anders de startinhoud.
-- Home, categorie, workshop, aanbieder en inloggen gebruiken een sjabloon (`page_type`) zodra dat in Directus gepubliceerd is. Het vaste scherm (boeken, filters, kaart) staat daarin als blok "Pagina-inhoud". Zonder gepubliceerd sjabloon verandert er niets.
-- Het script zet alle sjablonen als **concept** neer. Publiceren gaat direct live, want lokaal en Vercel lezen dezelfde Directus.
-- Foto's voor de sjablonen staan in `public/pages/` (zie `BRONNEN.md` daar). Na een wijziging in de sjablonen bouwt `node scripts/setup-page-builder.js --sync-drafts` de pagina's die nog concept zijn opnieuw op; gepubliceerde pagina's blijven staan.
-
-## Vragen die vaak terugkomen
-
-**Waarom staat alles in één bestand?**
-Zodat het prototype zelfstandig werkt en je het in één keer kunt bekijken of ergens anders kunt inplakken. Voor de echte bouw gaat het uit elkaar, zie hierboven.
-
-**Waarom `"use client"` bovenaan?**
-De schermen gebruiken `useState` voor filters, tabs en formulieren. In de echte bouw worden de publieke pagina's server components en blijven alleen de interactieve delen client components.
-
-**Kan ik hier een eigen domein aan hangen?**
-Ja, in Vercel onder **Settings > Domains**. Zolang dit een prototype is, zou ik daar `preview.` of `demo.` voor gebruiken en niet je hoofddomein, want die wil je schoon houden voor de echte site.
-
-**Waar zijn de foto's?**
-Bewust placeholders. De brand guide vraagt om echte mensen en echte momenten, en dat is precies wat een prototype niet kan faken. De plekken, verhoudingen en het gedrag kloppen wel, dus foto's toevoegen is straks een vervanging en geen verbouwing.
+Losse contentpagina's (`/[slug]`, bijv. `/over-ons`) komen uit de Directus-collectie `pages` met de blokken in `components/blocks/`. Zie `lib/page-builder.js`. De pagina's uit het ontwerp hierboven zijn vaste schermen en gebruiken de page builder niet.
